@@ -1,0 +1,470 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Apr  8 12:14:00 2024
+
+@author: Sean Hibbitt
+Email: Sean.hibbitt.2019@;ive.rhul.ac.uk
+phone number: 07808665776
+
+changes log: (not using git)
+Please make new version and save old version in a folder if mangage alterations/additions are made
+please note any changes here under your name, along with contact details:
+"""
+
+
+import pyvisa  as visa
+from pyvisa import constants
+from time import sleep
+import matplotlib.pyplot as plt
+import numpy as np
+from DeviceClasses.Utilities.data_management import save_data_3 as save_data_3_temp
+
+
+#%%Define Class
+class Device():
+    
+    
+    """
+    
+    super class with default behaviours from pyvisa etc
+    
+    contains default scpi commands. 
+    These were taken from the ZNA manual: https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
+
+    SCPI wikipage: https://en.wikipedia.org/wiki/Standard_Commands_for_Programmable_Instruments
+    
+        
+    """
+    
+    
+    
+    def __init__(self, address, baud_rate = 9600, query_delay = 0, timeout = 10000  ):
+        
+        #setup visa
+        self.rm = visa.ResourceManager()  
+
+        #setup parameters
+        self.address = address
+        self.baud_rate = baud_rate
+        self.query_delay = query_delay 
+        self.timeout = timeout
+        #sets default delay to be 0.1s
+        #self._device = self.rm.open_resource(self.address)
+
+
+    def open(self):
+        """ Opens the device via visa"""
+        self._device = self.rm.open_resource(self.address)
+        #setup device parameters
+        self._device.baud_rate = self.baud_rate
+        self._device.query_delay = self.query_delay
+        self._device.timeout = self.timeout
+        #self.CLS()
+        #self.RST()
+        return self
+
+
+    def __enter__(self):
+        """
+        opens resource, works with "with" structure
+        https://realpython.com/python-with-statement/#coding-class-based-context-managers
+        """
+        return self.open()
+        
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        """
+        closes resource, works with "with" structure
+        """
+        self.close()
+        if isinstance(exc_value, IndexError):
+            # Handle IndexError here...
+            print(f"An exception occurred in your with block: {exc_type}")
+            print(f"Exception message: {exc_value}")
+            return True
+
+    @staticmethod 
+    def connected_devices():
+        """
+        return the static methods
+        """
+        temp_rm = visa.ResourceManager()  
+        temp_list = temp_rm.list_resources()
+        del temp_rm
+        return temp_list
+
+
+        
+    def query(self, cmd,):
+        return self._device.query(cmd)
+    
+    def write(self, cmd):
+        return self._device.write(cmd)
+        
+    def read_bytes(self, bits):
+        return self._device.read_bytes(bits)
+    
+    def close(self,):
+        self.rm.close()
+        print("device closed")
+    
+    
+    ####generic SCPI commands:
+        
+    ##### write commands:
+    def CLS(self,):
+        """*CLS
+        Clear status
+        Sets the status byte (STB), the standard event register (ESR) and the EVENt part of
+        the QUEStionable and the OPERation registers to zero. The command does not
+        alter the mask and transition parts of the registers. It clears the output buffer.
+        Usage: Setting only
+        """
+        return self.write("*CLS")
+    
+    def OPC(self,):
+        """
+        *OPC
+        Operation Complete
+        Sets bit 0 in the event status register when all preceding commands have been executed.
+        This bit can be used to initiate a service request. The query writes a "1" into the
+        output buffer when all preceding commands have been executed, which is useful for
+        command synchronization.
+        
+        See ESE query
+        """
+        return self.write("*OPC")
+
+    def PCB(self,Address):
+        """
+        *PCB <Address>
+        Pass control back
+        Indicates the controller address to which remote control is returned after termination of
+        the triggered action.
+        Setting parameters:
+        <Address> Range: 0 to 30
+        Usage: Setting only
+        """
+        return self.write(f"*PCB{Address}")
+    
+    def PRE(self, Value):
+        """
+        
+        *PRE <Value>
+        Parallel poll register enable
+        Sets parallel poll enable register to the indicated value. The query returns the contents
+        of the parallel poll enable register in decimal form.
+        Parameters:
+        <Value> Range: 0 to 255
+
+        """
+        return self.write(f"*PRE{Value}")
+    
+    def PSC(self, Action):
+        """
+        
+        *PSC <Action>
+        Power on status clear
+        Determines whether the contents of the ENABle registers are preserved or reset when
+        the instrument is switched on. Thus a service request can be triggered when the instrument is switched on, if the status registers ESE and SRE are suitably configured. The
+        query reads out the contents of the "power-on-status-clear" flag.
+        Parameters:
+        <Action> 0 | 1
+        0
+        The contents of the status registers are preserved.
+        1
+        Resets the status registers.
+
+        """
+        
+        return self.write(f"*PSC{Action}")
+    
+    
+    def RST(self, ):
+        """
+        
+        *RST
+        Reset
+        Sets the instrument to a defined default status. The command is equivalent to
+        SYSTem:PRESet[:DUMMy]. The *RST value of each command is reported in the reference description. See also SYSTem:PRESet:SCOPe.
+        Usage: Setting only
+
+        """
+        return self.write(f"*RST")
+    
+    def SRE(self, Contents):
+        """
+        
+        Service request enable
+        Sets the service request enable register to the value indicated. Bit 6 (MSS mask bit)
+        remains 0. This command determines under which conditions a service request is triggered. The query *SRE? returns the contents of the service request enable register in
+        decimal form. Bit 6 is always 0.
+        Parameters:
+        <Contents> Contents of the service request enable register in decimal form.
+        Bit 6 (MSS mask bit) is always 0.
+        Range: 0 to 255
+
+        """
+        return self.write(f"*SRE{Contents}")
+    
+    def TRG(self,):
+        """
+        
+        *TRG
+        Trigger
+        Triggers all actions waiting for a trigger event. In particular, *TRG generates a manual
+        trigger signal. This common command complements the TRIGger commands of the
+        analyzer.
+        Usage: Event
+
+        """
+        return self.write("*TRG")
+    
+    def WAI(self,):
+        
+        """
+        *WAI
+        Wait to continue
+        Prevents servicing of the subsequent commands until all preceding commands have
+        been executed and all signals have settled (see Command sequence and command
+        synchronization and *OPC).
+        Usage: Event
+        """
+        return self.write("*WAI")
+    
+    def ESE(self, value):
+        """
+        *ESE <Value>
+        Event status enable
+        Sets the event status enable register to the specified value. The query returns the contents of the event status enable register in decimal form.
+        Parameters:
+        <Value> Range: 0 to 255
+        """
+        return self.write(f"*ESE {value}")
+    
+    #####query commands:
+    
+    def ESE_query(self):
+        return self.query("*ESE?")
+
+    
+    def ESR_query(self):
+        """
+        *ESR?
+        Event status read
+        Returns the contents of the event status register in decimal form and then sets the register to zero.
+        Return values:
+        <Contents> Range: 0 to 255
+        Usage: Query only
+
+        This is used to check if the OPC bit is 1 or 0, the first bit of the returned number is the OPC bit.
+        1 means its ready to continue, 0 means its not.
+        """
+        return self.query("*ESR?")
+        
+    def IDN_query(self,):
+        """
+        
+        *IDN?
+        Identification
+        Returns the instrument identification string of the R&S ZNA, including the manufacturer, the instrument type, its serial number, and the software revision..
+        The identification string is editable; see "Define *IDN + *OPT..." on page 939.
+        Usage: Query only
+
+        """
+        return self.query("*IDN?")
+    
+    
+    def IST_query(self, ):
+        """
+        
+        *IST?
+        Individual status query
+        Returns the contents of the IST flag in decimal form. The IST flag is the status bit
+        which is sent during a parallel poll.
+        Return values:
+        <ISTflag> 0 | 1
+        Usage: Query only
+
+        """
+        return self.query("*IST?")
+    
+    def OPT_query(self, ):
+        """
+        
+        *OPT?
+        Option identification query
+        Returns a list of installed options. The response consists of arbitrary ASCII response
+        data according to IEEE 488.2. The options are returned at fixed positions in a commaseparated string. A zero is returned for options that are not installed.
+        For a list of all available options and their description, refer to the specifications document.
+        The OPT information is editable; see "Define *IDN + *OPT..." on page 939.
+        Usage: Query only
+        Manual operation: See relevant device manual
+
+        """
+        return self.query("*OPT?")
+    
+    def STB_query(self, ):
+        """
+        
+        *STB?
+        Status byte query
+        Reads the contents of the status byte in decimal form.
+        Usage: Query only
+
+        """
+        return self.query("*STB?")
+    
+    def TST_query(self,):
+        """
+        
+        *TST?
+        Self-test query
+        Performs a self test and returns its boolean result (0 = passed, 1 = failed)
+        Return values:
+        <ErrorCode> integer > 0 (in decimal format)
+        An error occurred.
+        0
+        No errors occurred.
+        Usage: Query only
+        Manual operation: relevant device manual
+
+        """
+        
+        return self.query(f"*TST?")
+    
+    def OPC_query(self,):
+        
+        
+        return self.write("*OPC?")
+    
+    
+    ####Extra Functions
+    
+    def check_OPC_event(self):
+        OPC_bit = bin(int(self.ESR_query()))[0]
+        return OPC_bit
+    
+    
+    
+    def wait_on_OPC(self, wait_time = 60, timeout = None, updates = True, function = None, **function_kwargs):
+        self.ESE(1)
+        print(f"ESE bits:{self.ESE_query()}")
+        self.OPC()
+        
+        while True:
+            if function != None:
+                 function(**function_kwargs)
+
+            completed = self.check_OPC_event()
+            print(f"event status: {completed}")
+            if completed == 1:
+                print(f"finished task, completed = {completed}")
+                break
+            print(f"No update, waiting {wait_time} seconds.")
+            plt.pause(wait_time)
+        return True
+    
+   
+    
+    def save_data(self, datas, freqs, file_name, file_location = "", headers = None, meta_data = "", delimiter = "\t"):
+        
+        with open(file_location+file_name, "w") as file1:
+            file1.write(meta_data+"\n")
+            if headers != None:
+                file1.write(headers+"\n")
+            for data, freq in zip(datas, freqs): 
+                file1.write(f"{data}{delimiter}{freq}\n")
+
+
+    def save_data_2(self, data, file_name, file_location = "", headers = None, meta_data = "", delimiter = "\t"):
+        data_shape = np.shape(data)
+        #print(data_shape)
+        with open(file_location+file_name, "w") as file1:
+            file1.write(meta_data+"\n")
+            if headers != None:
+                file1.write(headers+"\n")
+            
+            for  i in range(data_shape[1]):
+                for l in range(data_shape[0]):
+                    file1.write(f"{data[l,i]}\t")
+                file1.write("\n")
+
+    def save_data_3(self, data, file_name, file_location = "", headers = None, meta_data = {}, delimiter = "\t"):
+        
+        data_shape = np.shape(data)
+        print(f"datashape:{data_shape}")
+        with open(file_location+file_name, "w") as file1:
+            for key, value in meta_data.items():
+                file1.write(f"#\t{key}\t{value}\n")
+            if headers != None:
+                file1.write(headers+"\n")
+            
+            try:
+                for  i in range(data_shape[1]):
+                    for l in range(data_shape[0]):
+                        file1.write(f"{data[l,i]}\t")
+                    file1.write("\n")
+            except IndexError as e:
+                print(f"index error:\n{e}\ndata:\n{data}")
+                for  i in range(data_shape[0]):
+                    file1.write(f"{data[i]}\t")
+                    file1.write("\n")
+
+   
+
+    
+    #not sure if this works:
+    # def enable_event(self,):
+    #     """
+    #     Enables pyvisa to look for a specific event
+    #     See: https://pyvisa.readthedocs.io/en/stable/introduction/event_handling.html#waiting-on-events-using-a-queue
+    #     for more details
+    #     """
+    #     self.event_type = constants.EventType.service_request
+    #     self.event_mech = constants.EventMechanism.queue
+    #     self._device.enable_event(self.event_type, self.event_mech)
+    #     return self.event_type, self.event_mech
+    
+    
+    # def wait_for_event(self,timeout = 1000):
+    #     """
+    #     Waits for the event specified in enable_event,
+    #     then checks its the right event, before disabling the event
+    #     and return the response.
+        
+    #     useful documentation url:
+    #         https://pyvisa.readthedocs.io/en/latest/api/resources.html#pyvisa.resources.MessageBasedResource.wait_on_event
+        
+    #     Returns:
+    #         bool for if response timed out or not (True for timed out), WaitResponse object
+
+    #     """
+    #     self.OPC()
+    #     self.response = self._device.wait_on_event(self.event_type, timeout, True)
+    #     assert self.response.event.event_type == self.event_type, "seen wrong event type"
+    #     self._device.disable_event(self.event_type, self.event_mech)
+        
+    #     return self.response.timed_out, self.response
+        
+        
+        
+        
+    
+    
+if __name__ == "__main__":
+    #ZNA = Device('TCPIP::134.219.128.53::INSTR')
+    
+    
+    #ZNA.write('*IDN?')
+    #while True:
+    #    print(ZNA.read_bytes())
+    
+    #print(ZNA.query("*IDN?"))
+    
+    #the same as above but without the class, directly from pyvisa
+    #rm = visa.ResourceManager()  
+    #vna =  rm.open_resource('TCPIP::134.219.128.53::INSTR')
+    #print(vna.query("*IDN?"))
+    
+    pass
+        

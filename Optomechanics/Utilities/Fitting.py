@@ -18,7 +18,6 @@ from DeviceClasses.Utilities.unit_conversions import watts_ratio_to_dB, dB_to_wa
 
 h_bar = 1.054571817e-34
 k_b = 1.380649e-23
-k_B = k_b
 RS_default_window_NENBW = 4.082911856792962
 ##---------------------------
 
@@ -137,6 +136,24 @@ def S21_eq(freq,*p):
     S_21=abs((2*np.pi*k_ext)/(2*np.pi*k_tot+2*np.pi*2j*((freq-f_0))))+freq*att_m + att_c
     return S_21
 
+def S21_eq_complex(freq,*p):
+    """
+    S21 equation for our cavities in linear voltage ratio
+    
+    """
+    f_0=p[0]
+    k_tot=p[1]
+    k_ext=p[2]
+    r_m = p[3]
+    r_c=p[4]
+    i_m = p[5]
+    i_c = p[6]
+    
+    numerator = 2 * np.pi * k_ext
+    denominator = 2 * np.pi * k_tot + 2 * np.pi * 2j * (freq - f_0) 
+    return numerator / denominator + 1j*(i_m*freq+i_c)+ (r_m*freq+r_c)
+
+
 def S21_eq_phase(freq,*p):
     """
     S21 equation for our cavities in linear voltage ratio
@@ -227,6 +244,105 @@ def fit_S21_peak_dB(powers_dB, frequencies, guesses = False, signal_applied = Fa
     p[2] = k_ext[Hz]
     """
     return fit_S21_peak(powers_dB, frequencies, guesses, signal_applied, errors, equation = S21_eq_dB)
+
+def split_complex(complex_data):
+    complex_data = np.asarray(complex_data)
+    return np.concatenate([complex_data.real, complex_data.imag])
+
+def split_complex_wrapper(func):
+    """
+    Wrapper to split complex function into real and imaginary parts
+    for scipy optimization
+    """
+    def wrapped(*args, **kwargs):
+        c = func(*args, **kwargs)
+        # Stack real and imaginary parts
+        return np.concatenate([c.real, c.imag])
+    return wrapped
+
+
+
+def fit_S21_peak_complex(complex_data, frequencies, guesses = False, signal_applied = False, equation = S21_eq_complex ):
+    """
+    not a wrapper, code needs re-factoring into smaller blocks. fits  for fit_S21_peak to fit complex
+    Takes re and imag linear voltage ratio data and attempts to unwrap and normalise the phase offset
+    errors should be given in dB
+
+    errors = (upper_error_dB, lower_error_dB)
+
+    if account for applied signal, give:
+    [bandwidth, number_of_signals]
+    bandwidth is used to determine filter frequencies for signal
+    Uses "S21_eq_dB()"
+    p[0] = f_0
+    p[1] = k_tot[Hz]
+    p[2] = k_ext[Hz]
+    """
+    #setup input variables
+    complex_data = np.array(complex_data)
+    amplitude_linear_voltage = np.abs(complex_data)
+    
+    frequencies = np.array(frequencies)
+
+    #wrap S21 eq to concatenate the output suitable for curve_fit:
+    wrapped_equation = split_complex_wrapper(equation)
+
+
+    #remove applied signal
+    if signal_applied != False:
+        bandwidth, no_of_signals = signal_applied
+        filter = bandwidth*5
+
+        for i in range(no_of_signals):
+            freq_of_signal = frequencies[np.argmax(amplitude_linear_voltage)]
+            indicies_to_keep = np.logical_not(np.logical_and(frequencies >= freq_of_signal - filter, frequencies <= freq_of_signal + filter))
+
+            complex_data = complex_data[indicies_to_keep]
+            frequencies = frequencies[indicies_to_keep]
+
+    #make stacked version ([[r,j],[r,j],...])
+    complex_concat = split_complex(complex_data)
+
+    
+    #guesses
+    #f_0
+    if guesses == False:
+        #print(f"frequencies:{frequencies}")
+        f_0_guess = frequencies[np.argmax(amplitude_linear_voltage)]
+        k_tot_guess = np.abs(f_0_guess - frequencies[find_closest_number(amplitude_linear_voltage, np.max(amplitude_linear_voltage)/np.sqrt(5))])
+        k_ext_guess = np.max(amplitude_linear_voltage) * k_tot_guess
+        guesses = [f_0_guess, k_tot_guess, k_ext_guess, 0, 0, 0, 0]
+    
+    try:
+        popt, pcov = curve_fit(wrapped_equation, frequencies, complex_concat, guesses, maxfev = 100000)
+
+        # Calculate residuals and goodness of fit
+        fitted_data = equation(frequencies, *popt)
+        residuals = complex_data - fitted_data
+        chi_squared = np.sum(np.abs(residuals)**2)
+        
+        # Calculate R-squared for complex data
+        ss_res = np.sum(np.abs(residuals)**2)
+        ss_tot = np.sum(np.abs(complex_data - np.mean(complex_data))**2)
+        r_squared = 1 - (ss_res / ss_tot)
+
+        return popt, pcov, guesses, complex_data, frequencies, chi_squared, r_squared
+    except RuntimeError as e:
+        print("Program ended by user \nshowing plot")
+        if hasattr(e, 'message'):
+            print(e.message)
+            print(traceback.format_exc())
+        else:
+            print(e)
+            print(traceback.format_exc())
+
+    return guesses, np.zeros((len(guesses),len(guesses))), guesses, complex_data, frequencies,
+
+
+
+
+
+
 
 def fit_S21_peak(powers_dB, frequencies, guesses = False, signal_applied = False, errors = None, equation = S21_eq ):
     """
@@ -343,101 +459,24 @@ def basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
 
     return S_ww
 
+def basic_S_ww_eq_2(freqs, omega_m, G_m, A, nf):
+    """
+    Doesn't have lorentzian approx, taken from GW book
+    """
+
+    freqs = freqs*2*np.pi
+
+    omega_m = omega_m *2*np.pi
+
+    G_m = G_m *2 *np.pi
+
+    S_ww =  (A* np.abs(1/(freqs**2 - omega_m**2 + 1j*G_m*freqs )**2)) +nf
+
+    return S_ww
+
 def dBm_basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
 
     return watts_to_dBm(basic_S_ww_eq(freqs, omega_m, G_m, A, nf))
-
-
-def S_ff_thermal(freqs, m_eff, G_m, T):
-    """
-    Thermal force spectral density as defined in 
-    gw michele maggoire 8.123
-
-    Give inputs in Hz
-    """
-
-    G_m = G_m*2*np.pi
-
-    return np.full_like(freqs, 4*k_b*T*m_eff*G_m)
-
-
-def SHO_TF_sq(freqs, m_eff, f_m, G_m ):
-    """
-    Transfer derived from function from S Kumar 2023 eq 5
-    and thermal force power spectral density as in func S_ff_thermal
-    """
-    w_freqs = freqs*2*np.pi
-    w_m, G_m = np.array([f_m, G_m])*2*np.pi
-
-    return 1/(m_eff**2 * w_m**2 * (G_m**2 + 4 * (w_freqs - w_m)**2))
-
-
-def S_xx_thermal(freqs, m_eff, T, f_m, G_m ):
-    
-    return SHO_TF_sq(freqs, m_eff, f_m, G_m ) * S_ff_thermal(freqs, m_eff, G_m, T)
-
-
-def S_hh_24_25_exp_14_4(S_xx_freqs,  f_m, G_m, S_xx, q_yy = None, q_xx = None, mu = None):
-    """
-    thin-film re-entrant cavity S_hh transfer function 
-    
-    """
-    #default values moved here so the def line doesn't get too long
-    if q_yy is None:
-        q_yy = -1.5174802642178184e-06
-    if q_xx is None:
-        q_xx =  7.587286243641971e-07
-    if mu is None:
-        mu = 0.0002293073538383159
-
-
-    w_m = 2*np.pi*f_m
-    w = 2*np.pi*S_xx_freqs
-    G_m_rad = G_m*2*np.pi
-
-    H = w*w*((q_xx - q_yy)/(4*mu))
-    muChi = (1/((w**2)- (w_m**2) + 1j*G_m_rad*w)) 
-
-    T_func_nn = H* muChi
-
-    S_hh = S_xx/ np.abs(T_func_nn)**2
-
-
-    return S_hh
-
-
-def S_xx_impre(freqs, f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity, G):
-    """eq 69 Aspelmeyer 2014 review
-    All inputs should be in Hz, not radHz
-    """
-    n_cav = photon_number(f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity)
-    G = G * 2*np.pi
-    freqs_rad = freqs*2*np.pi
-    k_tot_rad = k_tot * 2 * np.pi
-
-    S_xx_imp = (k_tot/(16*n_cav * G **2)) * (1 + 4*(freqs_rad/k_tot_rad)**2)
-    return S_xx_imp
-
-def S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
-    """
-    Eq 70 Aspelmeyer 2014 review
-    All freq inputs in Hz
-    """
-    n_cav = photon_number(f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity)
-    G_rad = G * 2*np.pi
-    k_tot_rad = k_tot*2*np.pi
-    freqs_rad = freqs
-
-    S_FF_bac = n_cav * (4*h_bar**2 * G_rad**2 / k_tot_rad) / (1 + 4 * (freqs_rad/k_tot_rad)**2)
-    return S_FF_bac
-
-def S_xx_back(freqs, m_eff, f_m, G_m, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
-
-    S_FF_bac = S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,)
-    TF_Sq = SHO_TF_sq(freqs, m_eff, f_m, G_m )
-    
-    return TF_Sq * S_FF_bac
-
 
 
 def S_ww_constant_calculator(f_m, G_m, A, f_c, k_tot, k_ext, incident_pump_power, T, m_eff, drive_freq ):

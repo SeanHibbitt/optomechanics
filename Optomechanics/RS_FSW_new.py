@@ -1,9 +1,9 @@
-from DeviceClasses.Device_Visa_Super_rs import Device
+from Optomechanics.Device_Visa_Super_rs import Device
 import pyvisa
 import numpy as np
 import time
 import matplotlib.pyplot as plt
-from DeviceClasses.Utilities.Fitting import dBm_to_watts, watts_to_dBm, RMS_to_dBm
+from Optomechanics.Utilities.Fitting import dBm_to_watts, watts_to_dBm, RMS_to_dBm
 import pandas
 
 class FSW(Device):

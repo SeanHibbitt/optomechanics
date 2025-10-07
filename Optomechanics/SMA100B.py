@@ -6,7 +6,7 @@ Created on Tue Aug  6 12:06:39 2024
 Created from sumits 'class 1.py' code
 """
 
-from DeviceClasses import Device
+from Optomechanics import Device
 
 
 

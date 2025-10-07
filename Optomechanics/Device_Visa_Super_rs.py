@@ -18,7 +18,7 @@ from pyvisa import constants
 from time import sleep
 import matplotlib.pyplot as plt
 import numpy as np
-from DeviceClasses.Utilities.data_management import save_data_3 as save_data_3_temp
+from Optomechanics.Utilities.data_management import save_data_3 as save_data_3_temp
 
 
 #%%Define Class

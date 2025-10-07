@@ -4,8 +4,8 @@ from scipy.optimize import curve_fit
 import traceback
 import plotly.graph_objects as go
 import pandas as pd
-from DeviceClasses.Utilities.data_management import attenuation_object
-from DeviceClasses.Utilities.unit_conversions import watts_ratio_to_dB, dB_to_watts_ratio, dB_to_linear_voltage,\
+from Optomechanics.Utilities.data_management import attenuation_object
+from Optomechanics.Utilities.unit_conversions import watts_ratio_to_dB, dB_to_watts_ratio, dB_to_linear_voltage,\
                                                      linear_voltage_to_dB, Vpp_to_Vrms, Vp_to_Vrms,\
                                                      Vrms_to_Vpp, Vrms_to_Vp, Vrms_to_watts,\
                                                      watts_to_dBw, RMS_to_dBw, RMS_to_dBm,\
@@ -477,6 +477,98 @@ def basic_S_ww_eq_2(freqs, omega_m, G_m, A, nf):
 def dBm_basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
 
     return watts_to_dBm(basic_S_ww_eq(freqs, omega_m, G_m, A, nf))
+
+
+def S_ff_thermal(freqs, m_eff, G_m, T):
+    """
+    Thermal force spectral density as defined in 
+    gw michele maggoire 8.123
+
+    Give inputs in Hz
+    """
+
+    G_m = G_m*2*np.pi
+
+    return np.full_like(freqs, 4*k_b*T*m_eff*G_m)
+
+
+def SHO_TF_sq(freqs, m_eff, f_m, G_m ):
+    """
+    Transfer derived from function from S Kumar 2023 eq 5
+    and thermal force power spectral density as in func S_ff_thermal
+    """
+    w_freqs = freqs*2*np.pi
+    w_m, G_m = np.array([f_m, G_m])*2*np.pi
+
+    return 1/(m_eff**2 * w_m**2 * (G_m**2 + 4 * (w_freqs - w_m)**2))
+
+
+def S_xx_thermal(freqs, m_eff, T, f_m, G_m ):
+    
+    return SHO_TF_sq(freqs, m_eff, f_m, G_m ) * S_ff_thermal(freqs, m_eff, G_m, T)
+
+
+def S_hh_24_25_exp_14_4(S_xx_freqs,  f_m, G_m, S_xx, q_yy = None, q_xx = None, mu = None):
+    """
+    thin-film re-entrant cavity S_hh transfer function 
+    
+    """
+    #default values moved here so the def line doesn't get too long
+    if q_yy is None:
+        q_yy = -1.5174802642178184e-06
+    if q_xx is None:
+        q_xx =  7.587286243641971e-07
+    if mu is None:
+        mu = 0.0002293073538383159
+
+
+    w_m = 2*np.pi*f_m
+    w = 2*np.pi*S_xx_freqs
+    G_m_rad = G_m*2*np.pi
+
+    H = w*w*((q_xx - q_yy)/(4*mu))
+    muChi = (1/((w**2)- (w_m**2) + 1j*G_m_rad*w)) 
+
+    T_func_nn = H* muChi
+
+    S_hh = S_xx/ np.abs(T_func_nn)**2
+
+
+    return S_hh
+
+
+def S_xx_impre(freqs, f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity, G):
+    """eq 69 Aspelmeyer 2014 review
+    All inputs should be in Hz, not radHz
+    """
+    n_cav = photon_number(f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity)
+    G = G * 2*np.pi
+    freqs_rad = freqs*2*np.pi
+    k_tot_rad = k_tot * 2 * np.pi
+
+    S_xx_imp = (k_tot/(16*n_cav * G **2)) * (1 + 4*(freqs_rad/k_tot_rad)**2)
+    return S_xx_imp
+
+def S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
+    """
+    Eq 70 Aspelmeyer 2014 review
+    All freq inputs in Hz
+    """
+    n_cav = photon_number(f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity)
+    G_rad = G * 2*np.pi
+    k_tot_rad = k_tot*2*np.pi
+    freqs_rad = freqs
+
+    S_FF_bac = n_cav * (4*h_bar**2 * G_rad**2 / k_tot_rad) / (1 + 4 * (freqs_rad/k_tot_rad)**2)
+    return S_FF_bac
+
+def S_xx_back(freqs, m_eff, f_m, G_m, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
+
+    S_FF_bac = S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,)
+    TF_Sq = SHO_TF_sq(freqs, m_eff, f_m, G_m )
+    
+    return TF_Sq * S_FF_bac
+
 
 
 def S_ww_constant_calculator(f_m, G_m, A, f_c, k_tot, k_ext, incident_pump_power, T, m_eff, drive_freq ):

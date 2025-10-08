@@ -117,6 +117,7 @@ def update_plotly_layout(fig, xaxis_title, yaxis_title, xaxis_range=None, yaxis_
 def find_closest_number(array, value):    
     """find closes value in array
     find_closest_number(array, value)
+    I made an edit
     """
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()

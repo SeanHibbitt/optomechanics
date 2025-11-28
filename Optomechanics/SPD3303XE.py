@@ -1,4 +1,4 @@
-from DeviceClasses import Device
+from Optomechanics import Device
 import pyvisa
 
 

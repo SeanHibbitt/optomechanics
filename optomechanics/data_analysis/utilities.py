@@ -10,7 +10,7 @@ from optomechanics.data_analysis.unit_conversions import watts_ratio_to_dB, dB_t
                                                      watts_to_dBw, RMS_to_dBw, RMS_to_dBm,\
                                                      dBw_to_watts, dBm_to_dBw, dBm_to_RMS,\
                                                      watts_to_dBm, dBm_to_watts, Vrms_squared_to_watts
-                                                     
+                                                    
 
 
 
@@ -86,5 +86,16 @@ def split_complex_wrapper(func):
         return np.concatenate([c.real, c.imag])
     return wrapped
 
+
+def complex_to_mag_phase(c: complex):
+    """
+    changes complex to mag and phase
+    
+    :param complex: complex
+    """
+
+    phase = np.angle(c)
+    mag = np.abs(c)
+    return mag, phase
 
 

@@ -17,7 +17,7 @@ import numpy as np
 #import pyvisa  as visa
 #from pyvisa import constants
 from .Device_Visa_Super import Device
-from DeviceClasses.Utilities.Fitting import re_and_im_to_dB_and_phase
+from optomechanics.Fitting import re_and_im_to_dB_and_phase
 import pandas
 
 

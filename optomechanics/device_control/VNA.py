@@ -8,7 +8,7 @@ By Sean Hibbitt
 """
 import numpy as np
 from ..data_management import save_data_3
-from .fitting._fitting import dBm_to_watts, watts_to_dBm, watts_ratio_to_dB
+from ..data_analysis.fitting._fitting import dBm_to_watts, watts_to_dBm, watts_ratio_to_dB
 
 class Vector_Network_Analyser():
     

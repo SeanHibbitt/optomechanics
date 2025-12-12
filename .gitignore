@@ -73,4 +73,5 @@ Optomechanics.egg-info/dependency_links.txt
 Optomechanics.egg-info/PKG-INFO
 Optomechanics.egg-info/SOURCES.txt
 Optomechanics.egg-info/top_level.txt
-optomechanics/.vscode
+optomechanics/.vscode/
+.vscode/settings.json

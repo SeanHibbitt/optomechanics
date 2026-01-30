@@ -1,6 +1,6 @@
 import numpy as np
 import pandas
-from optomechanics.data_analysis.unit_conversions import *
+from Optomechanics.data_analysis.unit_conversions import *
 
 def read_file(file_loc, sep = r"\s+" ):
     """

@@ -29,9 +29,9 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from Optomechanics.KeithleyDMM6500 import DMM6500
-from Optomechanics.SPD3303XE import SPD
-from Optomechanics.Utilities.Data_Logger import dated_logger
+from Optomechanics.device_control.KeithleyDMM6500 import DMM6500
+from Optomechanics.device_control.SPD3303XE import SPD
+from Optomechanics.data_management.data_logger import dated_logger
 
 from PyQt5.QtWidgets import (
     QFormLayout, QGroupBox, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, 

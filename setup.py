@@ -6,7 +6,7 @@ Created on Tue Apr  9 11:37:10 2024
 """
 from setuptools import setup
 setup(
-  name='Optomechanics',
+  name='optomechanics',
   version='1.0',
-  py_modules=['Optomechanics'],
+  py_modules=['optomechanics'],
 )

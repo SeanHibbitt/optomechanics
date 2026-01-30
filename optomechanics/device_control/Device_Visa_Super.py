@@ -13,12 +13,11 @@ please note any changes here under your name, along with contact details:
 
 
 import pyvisa  as visa
-from RsInstrument import RsInstrument
 from pyvisa import constants
 from time import sleep
 import matplotlib.pyplot as plt
 import numpy as np
-from Optomechanics.Utilities.data_management import save_data_3 as save_data_3_temp
+from optomechanics.data_management.data_management import save_data_3 as save_data_3_temp
 
 
 #%%Define Class
@@ -42,7 +41,7 @@ class Device():
     def __init__(self, address, baud_rate = 9600, query_delay = 0, timeout = 10000  ):
         
         #setup visa
-        #self.rm = visa.ResourceManager()  
+        self.rm = visa.ResourceManager()  
 
         #setup parameters
         self.address = address
@@ -55,11 +54,11 @@ class Device():
 
     def open(self):
         """ Opens the device via visa"""
-        self._device = RsInstrument(self.address, True, True)
+        self._device = self.rm.open_resource(self.address)
         #setup device parameters
-        #self._device.baud_rate = self.baud_rate
-        #self._device.query_delay = self.query_delay
-        #self._device.visa_timeout = self.timeout
+        self._device.baud_rate = self.baud_rate
+        self._device.query_delay = self.query_delay
+        self._device.timeout = self.timeout
         #self.CLS()
         #self.RST()
         return self
@@ -86,10 +85,12 @@ class Device():
     @staticmethod 
     def connected_devices():
         """
-        return a list of connected resources via RsInstrument
+        return the static methods
         """
-        instr_list = RsInstrument.list_resources("?*")
-        return instr_list
+        temp_rm = visa.ResourceManager()  
+        temp_list = temp_rm.list_resources()
+        del temp_rm
+        return temp_list
 
 
         
@@ -103,7 +104,7 @@ class Device():
         return self._device.read_bytes(bits)
     
     def close(self,):
-        self._device.close()
+        self.rm.close()
         print("device closed")
     
     

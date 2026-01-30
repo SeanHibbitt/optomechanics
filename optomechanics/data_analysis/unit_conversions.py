@@ -1,9 +1,27 @@
+"""
+Unit conversions reference. This is so we know the unit conversions are right!
+"""
+
+
+
+
+
 import numpy as np
 
-def watts_ratio_to_dB(watts_ratio):
+def watts_ratio_to_dB(watts_ratio: float):
+    """
+    Watts ratio to dB
+
+    :watts_ratio: float
+    """
     return 10*np.log10(watts_ratio)
 
 def dB_to_watts_ratio(dB):
+    """
+    Docstring for dB_to_watts_ratio
+    
+    :param dB: float
+    """
     return 10**(dB/10)
 
 def dB_to_linear_voltage(powers_dB):

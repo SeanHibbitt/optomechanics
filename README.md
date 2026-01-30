@@ -28,3 +28,11 @@ Host RoomTempGithub
 
 
 CMD: git clone "git@OptomechanicsGithub:SeanHibbitt/Optomechanics.git"
+
+
+## updating the exp module yml file from your own:
+
+  Before updating, rebuild from the latest yml file! PLEASE!
+
+  Then run the following command to generate, make sure you're in the correct folder:
+    conda env export > ExperimentsEnvironment.yml

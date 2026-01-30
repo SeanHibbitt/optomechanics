@@ -1,4 +1,4 @@
-from .file_management import make_path, dated_file_maker
+from ..data_analysis import make_path, dated_file_maker
 import pandas
 from datetime import datetime
 

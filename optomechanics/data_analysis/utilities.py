@@ -1,0 +1,101 @@
+import numpy as np
+from scipy.optimize import curve_fit
+import traceback
+import plotly.graph_objects as go
+import pandas as pd
+from optomechanics.data_management import attenuation_object
+from optomechanics.data_analysis.unit_conversions import watts_ratio_to_dB, dB_to_watts_ratio, dB_to_linear_voltage,\
+                                                     linear_voltage_to_dB, Vpp_to_Vrms, Vp_to_Vrms,\
+                                                     Vrms_to_Vpp, Vrms_to_Vp, Vrms_to_watts,\
+                                                     watts_to_dBw, RMS_to_dBw, RMS_to_dBm,\
+                                                     dBw_to_watts, dBm_to_dBw, dBm_to_RMS,\
+                                                     watts_to_dBm, dBm_to_watts, Vrms_squared_to_watts
+                                                    
+
+
+
+def find_closest_number(array, value):    
+    """find closes value in array
+    find_closest_number(array, value)
+    I made an edit
+    """
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+
+
+
+
+def convert_error_dB_to_linear(value, upper_error, lower_error,):
+    """
+    errors should be a magnitude, e.g both positive values
+    magnitude etc should be given in dB
+    """
+
+    upper_value = value + upper_error
+    lower_value = value - lower_error
+    upper_value_linear = dB_to_linear_voltage(upper_value)
+    lower_value_linear = dB_to_linear_voltage(lower_value)
+    value_linear = dB_to_linear_voltage(value)
+    upper_error_linear = upper_value_linear - value_linear
+    lower_error_linear = lower_value_linear - value_linear
+
+    return value_linear, upper_error_linear, lower_error_linear
+
+def convert_error_linear_to_dB(value_linear, upper_error, lower_error,):
+    """
+    errors should be magnitudes not signs
+    magnitude etc should be given in linear voltage ratio
+    """
+
+    upper_value_linear = value_linear + upper_error
+    lower_value_linear = value_linear - lower_error
+    if lower_value_linear < 0:
+        lower_value_linear
+    upper_value_dB = linear_voltage_to_dB(upper_value_linear)
+    lower_value_dB = linear_voltage_to_dB(lower_value_linear)
+    value_dB = linear_voltage_to_dB(value_linear)
+    upper_error_dB = upper_value_dB - value_dB
+    lower_error_dB = np.abs(lower_value_dB - value_dB)
+
+    return value_dB, upper_error_dB, lower_error_dB
+
+def convert_anti_sym_linear_mag_voltage_error_to_sym(value, upper_error, lower_error):
+
+    if np.any(value <=0):
+        raise ValueError("negative magnitude value")
+
+    error = np.mean([np.abs(upper_error), np.abs(lower_error)], axis = 0)
+    error = value[value - error <0]
+
+    return error
+
+
+def split_complex(complex_data):
+    complex_data = np.asarray(complex_data)
+    return np.concatenate([complex_data.real, complex_data.imag])
+
+def split_complex_wrapper(func):
+    """
+    Wrapper to split complex function into real and imaginary parts
+    for scipy optimization
+    """
+    def wrapped(*args, **kwargs):
+        c = func(*args, **kwargs)
+        # Stack real and imaginary parts
+        return np.concatenate([c.real, c.imag])
+    return wrapped
+
+
+def complex_to_mag_phase(c: complex):
+    """
+    changes complex to mag and phase
+    
+    :param complex: complex
+    """
+
+    phase = np.angle(c)
+    mag = np.abs(c)
+    return mag, phase
+
+

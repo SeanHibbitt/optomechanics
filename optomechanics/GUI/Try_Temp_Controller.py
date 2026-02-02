@@ -4,12 +4,35 @@ import time
 import datetime
 import os
 import traceback
+import numpy as np
 
 # Configuration
 address = 'GPIB0::12::INSTR'
 channel_1k = 3      # Channel for 1K pot thermometer
 channel_mc = 4      # Channel for Mixing Chamber thermometer
 sample_interval = 1.0  # Time between readings in seconds
+
+def save_data_3(data, file_name, file_location = "D:\Python\Optomechanics\Optomechanics\GUI\test_data", headers = None, meta_data = {}, delimiter = "\t"):
+    data = np.array(data)
+    data_shape = np.shape(data)
+    print(f"datashape:{data_shape}")
+    with open(file_location+file_name, "w") as file1:
+        for key, value in meta_data.items():
+            file1.write(f"#\t{key}\t{value}\n")
+        if headers != None:
+            file1.write(headers+"\n")
+        
+        try:
+            for  i in range(data_shape[1]):
+                for l in range(data_shape[0]):
+                    file1.write(f"{data[l,i]}\t")
+                file1.write("\n")
+        except IndexError as e:
+            print(f"index error:\n{e}\ndata:\n{data}")
+            for  i in range(data_shape[0]):
+                file1.write(f"{data[i]}\t")
+                file1.write("\n")
+
 
 def create_filename():
     """Creates a filename with current date and time and full path"""
@@ -129,3 +152,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

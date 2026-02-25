@@ -1,12 +1,88 @@
 site_name: Optomechanics
+site_description: Python tools for optomechanics experiments — data analysis, device control, and data management.
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
 nav:
-  - Home: index.md
-  - About: about.md
-  - API reference: APIReference.md
-theme: 
-  name: mkdocs
-  user_color_mode_toggle: true
+  - Getting Started:
+    - index.md
+    - Installation: getting_started/installation.md
+    - Quick Start: getting_started/quickstart.md
+  - User Guide:
+    - user_guide/index.md
+    - Data Analysis: user_guide/data_analysis.md
+    - Device Control: user_guide/device_control.md
+    - Data Management: user_guide/data_management.md
+  - API Reference:
+    - api_reference/index.md
+    - data_analysis:
+      - Overview: api_reference/data_analysis/index.md
+      - unit_conversions: api_reference/data_analysis/unit_conversions.md
+      - misc_equations: api_reference/data_analysis/misc_equations.md
+      - utilities: api_reference/data_analysis/utilities.md
+      - square_membrane: api_reference/data_analysis/square_membrane.md
+      - fitting:
+        - Overview: api_reference/data_analysis/fitting/index.md
+        - S21: api_reference/data_analysis/fitting/S21.md
+        - Sww: api_reference/data_analysis/fitting/Sww.md
+    - device_control:
+      - Overview: api_reference/device_control/index.md
+      - Device_Visa_Super: api_reference/device_control/Device_Visa_Super.md
+      - VNA: api_reference/device_control/VNA.md
+    - data_management:
+      - Overview: api_reference/data_management/index.md
+      - data_management: api_reference/data_management/data_management.md
+      - file_management: api_reference/data_management/file_management.md
+  - Release Notes: release_notes.md
 
 plugins:
-- search
-- mkdocstrings
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: true
+            members_order: source
+            show_signature_annotations: true
+            separate_signature: true
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+  - admonition
+  - pymdownx.details
+  - toc:
+      permalink: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js

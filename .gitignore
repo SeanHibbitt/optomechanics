@@ -75,3 +75,6 @@ Optomechanics.egg-info/SOURCES.txt
 Optomechanics.egg-info/top_level.txt
 optomechanics/.vscode/
 .vscode/settings.json
+*.__pycache__
+*.pyc
+optomechanics/__pycache__/

@@ -1,41 +1,23 @@
-# Sua abdita desit
+# About
 
-## Tutus virtute quoque quae
+**Optomechanics** is a Python package developed to support experimental optomechanics research,
+with a focus on microwave-frequency cavity optomechanics.
 
-Lorem markdownum exorabilis *pereat*: et lumina senex, ardet colitur inguinibus,
-suis cuspide emittitque, ignes, arcum. Procul per liceret qualia revocare paelex
-Bacchum memores discordia partus pavere vel. Cantibus increpor regia hortis, ima
-corpus quam hac ducit caputque arcum tu ergo. Quid ubi sublime et aperti verba
-visa loquendo pueri miserarum iuvenca: nam Pterelas.
+It provides three main subpackages:
 
-> Mutando diva per hominum, sim abductas se `motherboard` flavum. Auguror
-> auratum et mihi.
+- **`data_analysis`** — cavity fitting (S21, mechanical noise PSD), unit conversions, membrane
+  resonance calculations, and error-propagation helpers.
+- **`device_control`** — VISA instrument drivers for the spectrum analysers, signal generators,
+  vector network analysers, power supplies, and temperature controllers used in the lab.
+- **`data_management`** — utilities for reading and writing data files, dated folder hierarchies,
+  continuous data logging, and frequency-dependent attenuation book-keeping.
 
-Victoria forte isto fit vita visuraque imitata. Ut esse et placet dubites. Quid
-Auguste, deformes tempus.
+## Authors
 
-1. Istis ad urbe umquam adhuc somniferam primum
-2. Ait esset ignemque dubito
-3. Latiis ora pensa sanguine ignarus sputantem dixit
-4. Est quanta sacrata ulla illis sero dotibus
-5. Natarum nympharum
-6. Nec inhospita te spem nomen Vulcanum gerat
+- **Sean Hibbitt** — primary author
+- **Thomas Speake** — device control drivers
 
-## Nectare nitidissima in me
+## Source
 
-Aede sanguis longum illac gloria illuc, contraria adspicit Aethionque ascendere
-pectore. Inferias at, missae manifesta oraque: avus non illa carissime ficta.
-Fugientia facundia Pellaeis saepe **forma solebat color** de orbe! In *contra
-maius*, amoribus inmemor monstri amoris palmis etiamnum et suo. Tradit proelia
-causa thalamis et solus reliquit populosque forte *terraque exsangues vulnera*
-orbis [debent](#sua-abdita-desit).
-
-Ora mea me sacris hara: sonant tela curvi, animal. *Danaas* excipis vero undam
-convicia. Nate fecit plaga et custodia **frigida**, mulcebant [vulnere comae
-superum](#sua-abdita-desit) manet [Neptunus iunctam](#nectare-nitidissima-in-me)
-mansit et Phrygum. Pluma et e *cursu* sunt facies caelum paras atque sequentur
-latet: canes maledictaque atque simillimus.
-
-Frigore Lapitharum tantis, erat interimo ab litibus nam satis hic. Siquid vides
-moenia geruntur. Quaerit mollis! Di sanguine nimium; tellus rebus; fati turba
-audax, concavaque. Blandarum peregit.
+The source code is hosted on GitHub:
+[github.com/SeanHibbitt/Optomechanics](https://github.com/SeanHibbitt/Optomechanics)

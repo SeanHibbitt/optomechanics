@@ -21,7 +21,7 @@ from optomechanics.data_analysis.unit_conversions import watts_ratio_to_dB, dB_t
 def photon_number(f_d, f_c, k_extHz, k_totHz, P_in ):
     """
     From "A  Novel Architecture for room temperaturemicrowave optomechanical experiments" eq3. Should be
-    redervived for new architecture
+    re-derived for new architecture
 
     expects variables in Hz not angular frequency
     """

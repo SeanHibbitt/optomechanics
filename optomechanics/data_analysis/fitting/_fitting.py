@@ -4,6 +4,7 @@ import traceback
 import plotly.graph_objects as go
 import pandas as pd
 from optomechanics.data_management.data_management import attenuation_object
+from optomechanics.data_analysis.utilities import find_closest_number
 from optomechanics.data_analysis.unit_conversions import watts_ratio_to_dB, dB_to_watts_ratio, dB_to_linear_voltage,\
                                                      linear_voltage_to_dB, Vpp_to_Vrms, Vp_to_Vrms,\
                                                      Vrms_to_Vpp, Vrms_to_Vp, Vrms_to_watts,\

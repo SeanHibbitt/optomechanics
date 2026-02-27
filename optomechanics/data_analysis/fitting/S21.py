@@ -105,19 +105,23 @@ def fit_S21_peak_dB(powers_dB, frequencies, guesses = False, signal_applied = Fa
 
 def fit_S21_peak_complex(complex_data, frequencies, guesses = False, signal_applied = False, equation = S21_eq_complex ):
     """
-    not a wrapper, code needs re-factoring into smaller blocks. fits  for fit_S21_peak to fit complex
-    Takes re and imag linear voltage ratio data and attempts to unwrap and normalise the phase offset
-    errors should be given in dB
+    Fit S21 cavity model to complex (real + imaginary) linear voltage ratio data.
 
-    errors = (upper_error_dB, lower_error_dB)
+    Takes complex-valued linear voltage ratio data and fits using S21_eq_complex.
+    Real and imaginary parts are concatenated and fitted simultaneously via
+    split_complex_wrapper.
 
     if account for applied signal, give:
     [bandwidth, number_of_signals]
     bandwidth is used to determine filter frequencies for signal
-    Uses "S21_eq_dB()"
+    Uses "S21_eq_complex()"
     p[0] = f_0
     p[1] = k_tot[Hz]
     p[2] = k_ext[Hz]
+    p[3] = r_m (real background slope)
+    p[4] = r_c (real background offset)
+    p[5] = i_m (imaginary background slope)
+    p[6] = i_c (imaginary background offset)
     """
     #setup input variables
     complex_data = np.array(complex_data)

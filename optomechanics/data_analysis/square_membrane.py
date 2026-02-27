@@ -1,6 +1,25 @@
 import numpy as np
 
 class membrane:
+    """Resonance frequency calculator for a pre-stressed square membrane resonator
+    with an optional thin-film deposition.
+
+    Attributes:
+        length_x (float): Membrane length along x (m).
+        length_y (float): Membrane length along y (m).
+        height_of_sin (float): Silicon nitride thickness (m).
+        depth_deposition (float): Thin-film deposition thickness (m).
+        density_of_deposition (float): Deposition material density (kg/m^3).
+        density_of_membrane_material (float): SiN density (kg/m^3); default 2820.
+        stress_of_membrane (float): Membrane stress (Pa); default 1e9.
+        area_of_membrane (float): length_x * length_y (m^2).
+        mass_of_membrane (float): Mass of the bare SiN membrane (kg).
+        mass_of_deposition (float): Mass of the deposited thin film (kg).
+        effective_mass_of_membrane (float): Effective mass for the fundamental square
+            mode = mass_of_membrane / 4, following the general calibration procedure
+            of "A general procedure for thermomechanical calibration of nano/micro-
+            mechanical resonators".
+    """
 
     def __init__(self, length_x, length_y, height_of_sin, depth_deposition, density_of_deposition, density_of_membrane_material = 2820, stress_of_membrane = 1e9 ):
 
@@ -35,7 +54,17 @@ class membrane:
     
 
     def fm(self, m_x, n_y):
+        """Calculate the resonance frequency for mode (m_x, n_y).
 
+        Computes the bare membrane frequency f_m and the reduced frequency
+        reduced_f_m that accounts for the additional mass of the thin-film
+        deposition.
+
+        :param m_x: Mode number along x.
+        :param n_y: Mode number along y.
+        :returns: Tuple (reduced_f_m, f_m) in Hz, where reduced_f_m includes
+            the deposition mass loading and f_m is the bare membrane frequency.
+        """
 
         sqrt_ = (self.stress_of_membrane/self.density_of_membrane_material) *((m_x/self.length_x )**2 + (n_y/self.length_y)**2)
         f_m = 0.5 * np.sqrt(sqrt_)

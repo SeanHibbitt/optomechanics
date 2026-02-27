@@ -79,3 +79,6 @@ optomechanics/.vscode/
 *.__pycache__
 *.pyc
 optomechanics/__pycache__/
+optomechanics/data_analysis/__pycache__/unit_conversions.cpython-312.pyc
+optomechanics/data_management/__pycache__/data_management.cpython-312.pyc
+*/__pycache__/

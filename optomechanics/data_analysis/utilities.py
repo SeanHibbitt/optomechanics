@@ -14,10 +14,12 @@ from optomechanics.data_analysis.unit_conversions import watts_ratio_to_dB, dB_t
 
 
 
-def find_closest_number(array, value):    
-    """find closes value in array
-    find_closest_number(array, value)
-    I made an edit
+def find_closest_number(array, value):
+    """Find the closest value in array.
+
+    :param array: array to search
+    :param value: value to find the closest match to
+    :returns: index of the closest element
     """
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()

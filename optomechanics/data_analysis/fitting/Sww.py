@@ -754,8 +754,43 @@ def S_xx_back(freqs, m_eff, f_m, G_m, f_d, G, f_c, k_ext, k_tot, linear_drive_po
 
 
 def S_ww_constant_calculator(f_m, G_m, A, f_c, k_tot, k_ext, incident_pump_power, T, m_eff, drive_freq ):
+    """
+    Made by Claude. Calculate g_0, G, and photon number from spectral density fit parameters.
 
-    """equation from X rojas et al 28/11/2022, eq 3-> 5"""
+    Equation from X. Rojas et al. (2022-11-28), eqs. 3–5.
+
+    Parameters
+    ----------
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    A : float
+        Amplitude coefficient from `basic_S_ww_eq` fit.
+    f_c : float
+        Cavity resonance frequency (Hz).
+    k_tot : float
+        Total cavity linewidth (Hz).
+    k_ext : float
+        External coupling rate (Hz).
+    incident_pump_power : float
+        Incident pump power at the cavity (W).
+    T : float
+        Temperature (K).
+    m_eff : float
+        Effective mass of the mechanical resonator (kg).
+    drive_freq : float
+        Drive (pump) frequency (Hz).
+
+    Returns
+    -------
+    g_0 : float
+        Vacuum optomechanical coupling rate (Hz, not rad/Hz).
+    G : float
+        Optomechanical coupling rate (Hz/m, not rad).
+    n_d : float
+        Intracavity photon number.
+    """
     #constants
     h = 6.62607015e-34
     h_bar = h/(2*np.pi)

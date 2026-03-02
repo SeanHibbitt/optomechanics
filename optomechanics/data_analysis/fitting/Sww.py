@@ -843,16 +843,35 @@ def fit_basic_S_ww_eq_linear_power(freqs_minus_pump_freq:np.array, linear_power:
 
     return fit_basic_S_ww_eq(freqs_minus_pump_freq, watts_to_dBm(linear_power), guesses, sig)
 
-def fit_basic_S_ww_eq(freqs_minus_pump_freq:np.array, dBm_mag:np.array, guesses:list, sig = None):  
+def fit_basic_S_ww_eq(freqs_minus_pump_freq:np.array, dBm_mag:np.array, guesses:list, sig = None):
     """
-    fits the basic S_ww equation
+    Made by Claude. Fit the basic S_ww Lorentzian equation to a power spectrum in dBm.
 
-    freqs_minus_pump_freq: np.array containing frequencies relative to the pump frequency
+    Converts `dBm_mag` to watts and fits `basic_S_ww_eq` using
+    ``scipy.optimize.curve_fit``.  If the fit fails with a ``RuntimeError``,
+    the initial guesses are returned as ``popt`` and a ``NaN`` covariance
+    matrix is returned.
 
-    dBm_mag: np.array containing magnitudes in dBm
+    Parameters
+    ----------
+    freqs_minus_pump_freq : numpy.ndarray
+        Frequencies relative to the pump frequency (Hz).
+    dBm_mag : numpy.ndarray
+        Power spectral density values in dBm.
+    guesses : list
+        Initial parameter guesses in the order ``[f_m, G_m, A, nf]``.
+        Frequencies should not be in reduced (angular) units.
+    sig : array-like or None, optional
+        Uncertainties on the data passed as ``sigma`` to
+        ``scipy.optimize.curve_fit``.  Default is None (equal weights).
 
-    list: list of guesses in order: [f_m, G_m, A, nf], shouldn't be reduced frequencies
-    
+    Returns
+    -------
+    popt : numpy.ndarray
+        Absolute values of the fitted parameters ``[f_m, G_m, A, nf]``.
+    pcov : numpy.ndarray
+        Estimated covariance of ``popt``.  Diagonal elements give the
+        variance of each parameter.  All ``np.nan`` if the fit failed.
     """
 
     watts = dBm_to_watts(dBm_mag)

@@ -25,9 +25,17 @@ def watts_ratio_to_dB(watts_ratio: float):
 
 def dB_to_watts_ratio(dB):
     """
-    Docstring for dB_to_watts_ratio
+    Made by Claude. Convert a power value in decibels to a linear watts ratio.
 
-    :param dB: float
+    Parameters
+    ----------
+    dB : float
+        Power value in dB.
+
+    Returns
+    -------
+    float
+        Linear power ratio (10 ** (dB / 10)).
     """
     return 10**(dB/10)
 

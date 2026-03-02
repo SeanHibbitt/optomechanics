@@ -185,6 +185,20 @@ class Device():
         return self._device.query(cmd)
     
     def write(self, cmd):
+        """
+        Made by Claude. Send a SCPI write command with no response expected.
+
+        Parameters
+        ----------
+        cmd : str
+            SCPI command string to send.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call
+            (number of bytes written, status code).
+        """
         return self._device.write(cmd)
         
     def read_bytes(self, bits):

@@ -22,18 +22,43 @@ from optomechanics.data_management.data_management import save_data_3 as save_da
 
 #%%Define Class
 class Device():
-    
-    
     """
-    
-    super class with default behaviours from pyvisa etc
-    
-    contains default scpi commands. 
-    These were taken from the ZNA manual: https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
+    Made by Claude. VISA super-class providing IEEE 488.2 / SCPI commands and device management.
 
-    SCPI wikipage: https://en.wikipedia.org/wiki/Standard_Commands_for_Programmable_Instruments
-    
-        
+    Wraps pyvisa to provide SCPI commands common to all Rohde & Schwarz (and
+    compatible) instruments.  Subclass this to add instrument-specific methods.
+    Supports use as a context manager (``with`` statement).
+
+    SCPI command reference: ZNA User Manual
+    https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
+
+    SCPI standard: https://en.wikipedia.org/wiki/Standard_Commands_for_Programmable_Instruments
+
+    Parameters
+    ----------
+    address : str
+        VISA resource address string (e.g. ``'TCPIP::192.168.0.1::INSTR'``).
+    baud_rate : int, optional
+        Baud rate for serial connections. Default is 9600.
+    query_delay : float, optional
+        Delay in seconds between write and read in a query. Default is 0.
+    timeout : int, optional
+        Communication timeout in milliseconds. Default is 10000.
+
+    Attributes
+    ----------
+    rm : pyvisa.ResourceManager
+        The pyvisa resource manager instance.
+    address : str
+        VISA resource address string.
+    baud_rate : int
+        Baud rate.
+    query_delay : float
+        Query delay in seconds.
+    timeout : int
+        Communication timeout in milliseconds.
+    _device : pyvisa.Resource
+        The open pyvisa resource; available after calling `open`.
     """
     
     

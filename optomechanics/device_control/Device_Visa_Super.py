@@ -495,8 +495,17 @@ class Device():
         return self.query(f"*TST?")
     
     def OPC_query(self,):
-        
-        
+        """
+        Made by Claude. Send the ``*OPC?`` (Operation Complete Query) command.
+
+        Writes ``*OPC?`` to the instrument; the instrument places ``'1'`` in the
+        output buffer when all preceding operations are complete.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
+        """
         return self.write("*OPC?")
     
     

@@ -224,7 +224,23 @@ class attenuation_object:
         pass
 
     def __add__(self, second_atten):
+        """
+        Made by Claude. Add two attenuation objects, propagating errors in quadrature.
 
+        Interpolates `second_atten` onto ``self.frequencies``, adds the
+        magnitudes, and propagates errors in quadrature.  Addition is **not**
+        commutative: ``self`` determines the output frequency grid.
+
+        Parameters
+        ----------
+        second_atten : attenuation_object
+            Attenuation to add.
+
+        Returns
+        -------
+        attenuation_object
+            New instance with the combined magnitude and propagated errors.
+        """
         interpolated_mag = np.interp(self.frequencies, second_atten.frequencies, second_atten.magnitude)
         result_mag = self.magnitude + interpolated_mag
         result_freqs = self.frequencies

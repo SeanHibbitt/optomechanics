@@ -69,16 +69,26 @@ class membrane:
     
 
     def fm(self, m_x, n_y):
-        """Calculate the resonance frequency for mode (m_x, n_y).
+        """
+        Made by Claude. Calculate the resonance frequency for mode (m_x, n_y).
 
-        Computes the bare membrane frequency f_m and the reduced frequency
+        Computes the bare membrane frequency f_m and the mass-loaded frequency
         reduced_f_m that accounts for the additional mass of the thin-film
         deposition.
 
-        :param m_x: Mode number along x.
-        :param n_y: Mode number along y.
-        :returns: Tuple (reduced_f_m, f_m) in Hz, where reduced_f_m includes
-            the deposition mass loading and f_m is the bare membrane frequency.
+        Parameters
+        ----------
+        m_x : int
+            Mode number along x.
+        n_y : int
+            Mode number along y.
+
+        Returns
+        -------
+        reduced_f_m : float
+            Resonance frequency in Hz including deposition mass loading.
+        f_m : float
+            Bare membrane resonance frequency in Hz (no deposition mass loading).
         """
 
         sqrt_ = (self.stress_of_membrane/self.density_of_membrane_material) *((m_x/self.length_x )**2 + (n_y/self.length_y)**2)

@@ -39,8 +39,28 @@ def find_closest_number(array, value):
 
 def convert_error_dB_to_linear(value, upper_error, lower_error,):
     """
-    errors should be a magnitude, e.g both positive values
-    magnitude etc should be given in dB
+    Made by Claude. Convert an asymmetric error from dB to linear voltage ratio scale.
+
+    Errors must be magnitudes (both positive values). The value and errors are
+    given in dB.
+
+    Parameters
+    ----------
+    value : float
+        Central value in dB.
+    upper_error : float
+        Upper error magnitude in dB (positive).
+    lower_error : float
+        Lower error magnitude in dB (positive).
+
+    Returns
+    -------
+    value_linear : float
+        Central value as a linear voltage ratio.
+    upper_error_linear : float
+        Upper error as a linear voltage ratio.
+    lower_error_linear : float
+        Lower error as a linear voltage ratio.
     """
 
     upper_value = value + upper_error

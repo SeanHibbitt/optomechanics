@@ -148,10 +148,18 @@ class Device():
             print(f"Exception message: {exc_value}")
             return True
 
-    @staticmethod 
+    @staticmethod
     def connected_devices():
         """
-        return the static methods
+        Made by Claude. List all VISA resources currently visible to the system.
+
+        Creates a temporary resource manager, enumerates all resources, and
+        returns the result.
+
+        Returns
+        -------
+        tuple of str
+            VISA resource address strings for all connected devices.
         """
         temp_rm = visa.ResourceManager()  
         temp_list = temp_rm.list_resources()

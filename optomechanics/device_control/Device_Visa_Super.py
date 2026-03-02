@@ -64,7 +64,12 @@ class Device():
     
     
     def __init__(self, address, baud_rate = 9600, query_delay = 0, timeout = 10000  ):
-        
+        """
+        Made by Claude. Initialise the resource manager and store connection parameters.
+
+        The connection is not opened here; call `open` (or use the ``with``
+        statement) to establish communication with the instrument.
+        """
         #setup visa
         self.rm = visa.ResourceManager()  
 

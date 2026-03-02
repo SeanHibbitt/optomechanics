@@ -483,18 +483,13 @@ class Device():
     
     def TST_query(self,):
         """
-        
-        *TST?
-        Self-test query
-        Performs a self test and returns its boolean result (0 = passed, 1 = failed)
-        Return values:
-        <ErrorCode> integer > 0 (in decimal format)
-        An error occurred.
-        0
-        No errors occurred.
-        Usage: Query only
-        Manual operation: relevant device manual
+        Made by Claude. Perform a self-test and return the result (``*TST?``).
 
+        Returns
+        -------
+        str
+            ``'0'`` if no errors occurred; a positive integer string if a
+            self-test error occurred.
         """
         
         return self.query(f"*TST?")

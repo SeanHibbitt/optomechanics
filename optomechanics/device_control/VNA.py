@@ -11,8 +11,33 @@ from ..data_management import save_data_3
 from ..data_analysis.fitting._fitting import dBm_to_watts, watts_to_dBm, watts_ratio_to_dB
 
 class Vector_Network_Analyser():
-    
-    
+    """
+    Made by Claude. Software pseudo-VNA built from a signal generator and spectrum analyser.
+
+    Combines an arbitrary signal-generation function and a spectrum-analysis
+    function to emulate a one-port VNA S21 sweep.  Only one S-parameter can
+    be swept at a time.
+
+    Parameters
+    ----------
+    signal_generator : callable
+        Function with signature ``SG(frequency, power, OnOff)`` that controls
+        the signal generator.
+    signal_analyser : callable
+        Function with signature ``SA(freq, band_width) -> (amplitude_dBm, frequencies)``
+        that acquires a spectrum around `freq`.  Minimise span and sweep
+        points on the SA to reduce measurement time.
+
+    Attributes
+    ----------
+    SG : callable
+        The signal-generator function.
+    SA : callable
+        The spectrum-analyser function.
+    data : list
+        Output of the last `sweep` call: ``[frequencies, amplitudes_dB, amplitudes_sig_dB]``.
+    """
+
     def __init__(self, signal_generator, signal_analyser,):
         
         """

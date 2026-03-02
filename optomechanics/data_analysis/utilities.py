@@ -165,8 +165,23 @@ def split_complex(complex_data):
 
 def split_complex_wrapper(func):
     """
-    Wrapper to split complex function into real and imaginary parts
-    for scipy optimization
+    Made by Claude. Wrap a complex-valued function to return real-concatenated output for scipy optimisation.
+
+    Returns a new function that calls `func` and then concatenates the real
+    and imaginary parts of the result into a single real array.  This makes
+    complex-valued model functions compatible with ``scipy.optimize`` routines
+    that require real-valued residuals.
+
+    Parameters
+    ----------
+    func : callable
+        A function that returns a complex array.
+
+    Returns
+    -------
+    callable
+        Wrapped function with the same signature as `func`, returning a real
+        array of twice the length: ``[real_part, imag_part]``.
     """
     def wrapped(*args, **kwargs):
         c = func(*args, **kwargs)

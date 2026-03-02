@@ -103,8 +103,19 @@ class Device():
 
     def __enter__(self):
         """
-        opens resource, works with "with" structure
-        https://realpython.com/python-with-statement/#coding-class-based-context-managers
+        Made by Claude. Enter the context manager by opening the VISA resource.
+
+        Calls `open` and returns ``self``, enabling use in ``with`` blocks::
+
+            with Device('TCPIP::192.168.0.1::INSTR') as dev:
+                dev.IDN_query()
+
+        See also: https://realpython.com/python-with-statement/#coding-class-based-context-managers
+
+        Returns
+        -------
+        Device
+            The opened device instance.
         """
         return self.open()
         

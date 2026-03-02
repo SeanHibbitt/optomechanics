@@ -526,8 +526,26 @@ def S_ff_thermal(freqs, m_eff, G_m, T):
 
 def SHO_TF_sq(freqs, m_eff, f_m, G_m ):
     """
-    Transfer derived from function from S Kumar 2023 eq 5
-    and thermal force power spectral density as in func S_ff_thermal
+    Made by Claude. Squared magnitude of the simple harmonic oscillator transfer function.
+
+    Derived from S. Kumar (2023) eq. 5 and consistent with the thermal force
+    spectral density in `S_ff_thermal`.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    m_eff : float
+        Effective mass of the mechanical resonator (kg).
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+
+    Returns
+    -------
+    numpy.ndarray
+        Squared SHO transfer function |χ(ω)|² (m²/N²).
     """
     w_freqs = freqs*2*np.pi
     w_m, G_m = np.array([f_m, G_m])*2*np.pi

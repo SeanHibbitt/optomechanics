@@ -4,12 +4,26 @@ from optomechanics.data_analysis.unit_conversions import *
 
 def read_file(file_loc, sep = r"\s+" ):
     """
-    file_loc is file location, given in string or other format pandas.read_csv accepts.
-    sep is also based on pandas.read_csv. 
+    Made by Claude. Read a delimited data file into a DataFrame and parse its metadata.
 
-    Notes:
-    A specific separator is faster than the default white space seperator. e.g sep=r"\t"
-    
+    Wraps ``pandas.read_csv``, skipping lines starting with ``#``, and also
+    returns the metadata parsed from those comment lines via `read_meta_data`.
+    A specific separator (e.g. ``sep=r"\\t"``) is faster than the default
+    whitespace regexp.
+
+    Parameters
+    ----------
+    file_loc : str or path-like
+        Path to the data file (any format accepted by ``pandas.read_csv``).
+    sep : str, optional
+        Column separator regexp. Default is ``r"\\s+"`` (any whitespace).
+
+    Returns
+    -------
+    data_pandas : pandas.DataFrame
+        Data rows parsed from the file (comment lines excluded).
+    meta_data : dict
+        Key-value pairs read from comment lines (format ``#\\tkey\\tvalue``).
     """
     data_pandas = pandas.read_csv(file_loc, sep = sep, comment = "#", index_col = False)
     meta_data = read_meta_data(file_loc)

@@ -414,15 +414,16 @@ class Device():
     
     def ESR_query(self):
         """
-        *ESR?
-        Event status read
-        Returns the contents of the event status register in decimal form and then sets the register to zero.
-        Return values:
-        <Contents> Range: 0 to 255
-        Usage: Query only
+        Made by Claude. Query and clear the event status register (``*ESR?``).
 
-        This is used to check if the OPC bit is 1 or 0, the first bit of the returned number is the OPC bit.
-        1 means its ready to continue, 0 means its not.
+        Returns the contents of the event status register in decimal form and
+        then sets the register to zero.  Bit 0 (OPC bit) indicates whether
+        all preceding operations have completed: ``1`` = ready, ``0`` = busy.
+
+        Returns
+        -------
+        str
+            Contents of the event status register in decimal form (0–255).
         """
         return self.query("*ESR?")
         

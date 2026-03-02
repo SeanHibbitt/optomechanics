@@ -382,11 +382,19 @@ class Device():
     
     def ESE(self, value):
         """
-        *ESE <Value>
-        Event status enable
-        Sets the event status enable register to the specified value. The query returns the contents of the event status enable register in decimal form.
-        Parameters:
-        <Value> Range: 0 to 255
+        Made by Claude. Send the ``*ESE`` (Event Status Enable) SCPI command.
+
+        Sets the event status enable register to the specified value.
+
+        Parameters
+        ----------
+        value : int
+            Value for the event status enable register (0–255).
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write(f"*ESE {value}")
     

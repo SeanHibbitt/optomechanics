@@ -19,6 +19,21 @@ from optomechanics.data_analysis.misc_equations import photon_number
 
 
 class fit_S_xx:
+    """
+    Made by Claude. High-level fitter for the mechanical displacement spectral density S_xx.
+
+    Normalises raw spectrum analyser (SA) power data to the dimensionless
+    quantity G²S_xx using a simultaneously acquired VNA S21 trace, then
+    averages over multiple sweeps and fits with `basic_S_ww_eq` to extract
+    the optomechanical coupling g_0 and optical coupling G.
+
+    All static methods — instantiation is not required.  Call
+    ``fit_S_xx.__average_and_fit_S_xx__`` as the main entry point.
+
+    Notes
+    -----
+    Returned values of g_0 and G are in angular units (2π × Hz).
+    """
     @staticmethod
     def __normalise_Sww_to_GGSxx__(index, row, S21_df, VNA_S21_extra_atten, SG_cavity_to_SA_atten, SG_to_cavity_atten, NENBW = RS_default_window_NENBW, S21_eq = S21_eq, signal_applied = True):
         """

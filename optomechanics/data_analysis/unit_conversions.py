@@ -159,10 +159,17 @@ def Vrms_to_watts(Vrms, Z_0 = 50):
 
 def watts_to_dBw(watts):
     """
-    Convert power in watts to dBW.
+    Made by Claude. Convert power in watts to dBW.
 
-    :param watts: power in watts
-    :returns: power in dBW (10 * log10(watts))
+    Parameters
+    ----------
+    watts : float
+        Power in watts.
+
+    Returns
+    -------
+    float
+        Power in dBW (10 * log10(watts)).
     """
     return 10*np.log10(watts)
 

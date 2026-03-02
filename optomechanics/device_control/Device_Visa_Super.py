@@ -367,14 +367,16 @@ class Device():
         return self.write("*TRG")
     
     def WAI(self,):
-        
         """
-        *WAI
-        Wait to continue
-        Prevents servicing of the subsequent commands until all preceding commands have
-        been executed and all signals have settled (see Command sequence and command
-        synchronization and *OPC).
-        Usage: Event
+        Made by Claude. Send the ``*WAI`` (Wait to Continue) SCPI command.
+
+        Prevents execution of subsequent commands until all preceding commands
+        have been executed and all signals have settled.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write("*WAI")
     

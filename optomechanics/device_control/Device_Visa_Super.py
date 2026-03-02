@@ -218,6 +218,9 @@ class Device():
         return self._device.read_bytes(bits)
     
     def close(self,):
+        """
+        Made by Claude. Close the VISA resource manager and print a confirmation message.
+        """
         self.rm.close()
         print("device closed")
     

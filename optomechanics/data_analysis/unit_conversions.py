@@ -9,9 +9,17 @@ import numpy as np
 
 def watts_ratio_to_dB(watts_ratio: float):
     """
-    Watts ratio to dB
+    Made by Claude. Convert a linear power ratio to decibels.
 
-    :watts_ratio: float
+    Parameters
+    ----------
+    watts_ratio : float
+        Linear power ratio (output power / input power).
+
+    Returns
+    -------
+    float
+        Power ratio in dB (10 * log10(watts_ratio)).
     """
     return 10*np.log10(watts_ratio)
 

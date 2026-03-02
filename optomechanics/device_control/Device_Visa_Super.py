@@ -609,6 +609,28 @@ class Device():
 
 
     def save_data_2(self, data, file_name, file_location = "", headers = None, meta_data = "", delimiter = "\t"):
+        """
+        Made by Claude. Save a 2-D array to a delimited text file, written column-major.
+
+        Writes the array column by column: each output row contains one element
+        from each row of `data` at the same column index.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            2-D data array with shape ``(n_channels, n_points)``.
+        file_name : str
+            Output filename (including extension).
+        file_location : str, optional
+            Directory path for the output file. Default is ``""`` (current
+            directory).
+        headers : str or None, optional
+            Column header line. Default is None.
+        meta_data : str, optional
+            Metadata string written as the first line. Default is ``""``.
+        delimiter : str, optional
+            Field delimiter. Default is ``'\\t'`` (tab).
+        """
         data_shape = np.shape(data)
         #print(data_shape)
         with open(file_location+file_name, "w") as file1:

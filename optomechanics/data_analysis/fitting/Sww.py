@@ -37,12 +37,47 @@ class fit_S_xx:
     @staticmethod
     def __normalise_Sww_to_GGSxx__(index, row, S21_df, VNA_S21_extra_atten, SG_cavity_to_SA_atten, SG_to_cavity_atten, NENBW = RS_default_window_NENBW, S21_eq = S21_eq, signal_applied = True):
         """
-        Expects to have row and index from a pandas df.
-        
-        2025_06_15:
-            Added check for if VNA_S21_extra_atten is None, if it is then it it doesn't apply
-            attenuation to S21 power.
-        
+        Made by Claude. Normalise a single SA sweep to G²S_xx using the nearest S21 measurement.
+
+        Expects a row and index from a pandas DataFrame. Applies attenuation
+        corrections, fits S21 to extract cavity parameters, and normalises the
+        SA power spectrum to G²S_xx.
+
+        2025-06-15: Added check for ``VNA_S21_extra_atten is None`` — if it is
+        None the S21 attenuation correction is skipped.
+
+        Parameters
+        ----------
+        index : int
+            Row index in `SA_df` (used for bookkeeping).
+        row : pandas.Series
+            A single row from the SA DataFrame containing fields:
+            ``drive_freq``, ``res_band_width``, ``temperature_mc[k]``,
+            ``drive_power``, ``data``, ``timestamp[s]``.
+        S21_df : pandas.DataFrame
+            DataFrame of VNA S21 sweeps with a ``timestamp[s]`` column.
+        VNA_S21_extra_atten : attenuation_object or None
+            Extra attenuation applied to the VNA signal path.  Pass ``None``
+            to skip S21 attenuation correction.
+        SG_cavity_to_SA_atten : attenuation_object
+            Attenuation from the cavity output to the spectrum analyser.
+        SG_to_cavity_atten : attenuation_object
+            Attenuation from the signal generator to the cavity input.
+        NENBW : float, optional
+            Noise-equivalent noise bandwidth factor. Default is
+            ``RS_default_window_NENBW``.
+        S21_eq : callable, optional
+            S21 model equation. Default is `S21_eq`.
+        signal_applied : bool, optional
+            If True, one applied tone is notched before S21 fitting. Default
+            is True.
+
+        Returns
+        -------
+        dict
+            Dictionary containing S21 fit results, normalised SA spectrum
+            (``GGS_xx``), mechanical frequencies, photon number, and related
+            variables.
         """
         ##get relevant meta variables and process
         f_d = float(row["drive_freq"])

@@ -512,6 +512,18 @@ class Device():
     ####Extra Functions
     
     def check_OPC_event(self):
+        """
+        Made by Claude. Read the event status register and extract the first binary digit.
+
+        Reads the event status register via `ESR_query`, converts the decimal
+        string to an integer, and returns the first character of the resulting
+        binary string representation.
+
+        Returns
+        -------
+        str
+            First character of the binary representation of the ESR value.
+        """
         OPC_bit = bin(int(self.ESR_query()))[0]
         return OPC_bit
     

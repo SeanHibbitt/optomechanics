@@ -300,11 +300,19 @@ def dBm_to_watts(dBm):
 
 def Vrms_squared_to_watts(Vrms_squared,Z_0 = 50):
     """
-    Convert Vrms^2 to power in watts.
+    Made by Claude. Convert Vrms squared to power in watts.
 
-    :param Vrms_squared: RMS voltage squared (V^2)
-    :param Z_0: impedance in ohms (default 50)
-    :returns: power in watts (Vrms_squared / Z_0)
+    Parameters
+    ----------
+    Vrms_squared : float
+        RMS voltage squared (V^2).
+    Z_0 : float, optional
+        Impedance in ohms. Default is 50.
+
+    Returns
+    -------
+    float
+        Power in watts (Vrms_squared / Z_0).
     """
     watts = Vrms_squared/Z_0
     return watts

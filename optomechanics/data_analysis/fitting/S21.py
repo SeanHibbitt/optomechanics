@@ -91,8 +91,24 @@ def S21_eq_complex(freq,*p):
 
 def S21_eq_phase(freq,*p):
     """
-    S21 equation for our cavities in linear voltage ratio
-    
+    Made by Claude. Phase of the S21 cavity transmission model.
+
+    Parameters
+    ----------
+    freq : array-like
+        Frequency array (Hz).
+    *p : float
+        Model parameters in order:
+        p[0] f_0   — cavity resonance frequency (Hz),
+        p[1] k_tot — total linewidth (Hz),
+        p[2] k_ext — external coupling rate (Hz),
+        p[3] att_m — (unused) linear background slope,
+        p[4] att_c — (unused) linear background offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        Phase of the S21 in radians.
     """
     f_0=p[0]
     k_tot=p[1]

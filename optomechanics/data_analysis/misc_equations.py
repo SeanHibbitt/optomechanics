@@ -20,10 +20,29 @@ from optomechanics.data_analysis.unit_conversions import watts_ratio_to_dB, dB_t
 
 def photon_number(f_d, f_c, k_extHz, k_totHz, P_in ):
     """
-    From "A  Novel Architecture for room temperaturemicrowave optomechanical experiments" eq3. Should be
-    re-derived for new architecture
+    Made by Claude. Calculate the intracavity photon number for a driven microwave cavity.
 
-    expects variables in Hz not angular frequency
+    From "A Novel Architecture for room temperature microwave optomechanical experiments"
+    eq. 3. Should be re-derived for new architecture.
+    All frequency inputs must be in Hz (not angular frequency).
+
+    Parameters
+    ----------
+    f_d : float
+        Drive frequency in Hz.
+    f_c : float
+        Cavity resonance frequency in Hz.
+    k_extHz : float
+        External (coupling) linewidth in Hz.
+    k_totHz : float
+        Total linewidth in Hz.
+    P_in : float
+        Input power in watts.
+
+    Returns
+    -------
+    float
+        Intracavity photon number.
     """
     h_bar = 1.054571817e-34
     w_d, w_c, k_ext, k_tot = np.array([f_d, f_c, k_extHz, k_totHz,]) * 2*np.pi

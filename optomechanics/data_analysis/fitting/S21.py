@@ -196,23 +196,43 @@ def fit_S21_peak_dB(powers_dB, frequencies, guesses = False, signal_applied = Fa
 
 def fit_S21_peak_complex(complex_data, frequencies, guesses = False, signal_applied = False, equation = S21_eq_complex ):
     """
-    Fit S21 cavity model to complex (real + imaginary) linear voltage ratio data.
+    Made by Claude. Fit the S21 cavity model to complex linear voltage ratio data.
 
-    Takes complex-valued linear voltage ratio data and fits using S21_eq_complex.
-    Real and imaginary parts are concatenated and fitted simultaneously via
-    split_complex_wrapper.
+    Fits real and imaginary parts simultaneously using ``split_complex_wrapper``
+    with ``S21_eq_complex``.
 
-    if account for applied signal, give:
-    [bandwidth, number_of_signals]
-    bandwidth is used to determine filter frequencies for signal
-    Uses "S21_eq_complex()"
-    p[0] = f_0
-    p[1] = k_tot[Hz]
-    p[2] = k_ext[Hz]
-    p[3] = r_m (real background slope)
-    p[4] = r_c (real background offset)
-    p[5] = i_m (imaginary background slope)
-    p[6] = i_c (imaginary background offset)
+    Parameters
+    ----------
+    complex_data : array-like of complex
+        Measured S21 as complex linear voltage ratios.
+    frequencies : array-like
+        Corresponding frequency array (Hz).
+    guesses : list or False, optional
+        Initial parameter guesses
+        ``[f_0, k_tot, k_ext, r_m, r_c, i_m, i_c]``.
+        If False, guesses are estimated automatically.
+    signal_applied : list or False, optional
+        ``[bandwidth, number_of_signals]`` to notch out applied tones before
+        fitting.  If False, no notching is applied.
+    equation : callable, optional
+        Complex equation to fit. Default is `S21_eq_complex`.
+
+    Returns
+    -------
+    popt : numpy.ndarray
+        Optimised parameters ``[f_0, k_tot, k_ext, r_m, r_c, i_m, i_c]``.
+    pcov : numpy.ndarray
+        Covariance matrix of `popt`.
+    guesses : list
+        Initial guesses used.
+    complex_data : numpy.ndarray of complex
+        Data used for fitting (after optional signal removal).
+    frequencies : numpy.ndarray
+        Frequencies used for fitting (after optional signal removal).
+    chi_squared : float
+        Sum of squared residuals.
+    r_squared : float
+        R-squared goodness-of-fit.
     """
     #setup input variables
     complex_data = np.array(complex_data)

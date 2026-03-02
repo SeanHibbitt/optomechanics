@@ -229,12 +229,17 @@ class Device():
         
     ##### write commands:
     def CLS(self,):
-        """*CLS
-        Clear status
-        Sets the status byte (STB), the standard event register (ESR) and the EVENt part of
-        the QUEStionable and the OPERation registers to zero. The command does not
-        alter the mask and transition parts of the registers. It clears the output buffer.
-        Usage: Setting only
+        """
+        Made by Claude. Send the ``*CLS`` (Clear Status) SCPI command.
+
+        Clears the status byte (STB), the standard event register (ESR), and the
+        EVENt part of the QUEStionable and OPERation registers to zero.  Does not
+        alter mask or transition register parts.  Clears the output buffer.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write("*CLS")
     

@@ -279,14 +279,19 @@ class Device():
     
     def PRE(self, Value):
         """
-        
-        *PRE <Value>
-        Parallel poll register enable
-        Sets parallel poll enable register to the indicated value. The query returns the contents
-        of the parallel poll enable register in decimal form.
-        Parameters:
-        <Value> Range: 0 to 255
+        Made by Claude. Send the ``*PRE`` (Parallel Poll Register Enable) SCPI command.
 
+        Sets the parallel poll enable register to the indicated value.
+
+        Parameters
+        ----------
+        Value : int
+            Value to write to the parallel poll enable register (0–255).
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write(f"*PRE{Value}")
     

@@ -260,13 +260,20 @@ class Device():
 
     def PCB(self,Address):
         """
-        *PCB <Address>
-        Pass control back
-        Indicates the controller address to which remote control is returned after termination of
-        the triggered action.
-        Setting parameters:
-        <Address> Range: 0 to 30
-        Usage: Setting only
+        Made by Claude. Send the ``*PCB`` (Pass Control Back) SCPI command.
+
+        Indicates the controller address to which remote control is returned
+        after termination of the triggered action.
+
+        Parameters
+        ----------
+        Address : int
+            Controller address in the range 0–30.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write(f"*PCB{Address}")
     

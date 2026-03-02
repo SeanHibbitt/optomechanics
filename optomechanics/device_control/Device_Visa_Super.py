@@ -458,16 +458,15 @@ class Device():
     
     def OPT_query(self, ):
         """
-        
-        *OPT?
-        Option identification query
-        Returns a list of installed options. The response consists of arbitrary ASCII response
-        data according to IEEE 488.2. The options are returned at fixed positions in a commaseparated string. A zero is returned for options that are not installed.
-        For a list of all available options and their description, refer to the specifications document.
-        The OPT information is editable; see "Define *IDN + *OPT..." on page 939.
-        Usage: Query only
-        Manual operation: See relevant device manual
+        Made by Claude. Query the list of installed options (``*OPT?``).
 
+        Returns a comma-separated string of installed options at fixed positions;
+        a zero is returned for options that are not installed.
+
+        Returns
+        -------
+        str
+            Comma-separated options string.
         """
         return self.query("*OPT?")
     

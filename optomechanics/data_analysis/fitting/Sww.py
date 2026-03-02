@@ -469,7 +469,29 @@ def basic_S_ww_eq_2(freqs, omega_m, G_m, A, nf):
     return S_ww
 
 def dBm_basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
+    """
+    Made by Claude. Lorentzian mechanical spectral density in dBm.
 
+    Wrapper around `basic_S_ww_eq` that converts the output to dBm.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    omega_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    A : float
+        Amplitude scaling factor.
+    nf : float
+        Noise floor offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        Spectral density in dBm.
+    """
     return watts_to_dBm(basic_S_ww_eq(freqs, omega_m, G_m, A, nf))
 
 

@@ -112,7 +112,31 @@ def convert_error_linear_to_dB(value_linear, upper_error, lower_error,):
     return value_dB, upper_error_dB, lower_error_dB
 
 def convert_anti_sym_linear_mag_voltage_error_to_sym(value, upper_error, lower_error):
+    """
+    Made by Claude. Convert asymmetric linear magnitude voltage errors to a symmetric error.
 
+    Computes a single symmetric error by averaging the absolute upper and lower
+    error magnitudes. Raises a ValueError if any `value` is non-positive.
+
+    Parameters
+    ----------
+    value : array-like
+        Central values as linear voltage magnitudes (must all be positive).
+    upper_error : array-like
+        Upper error magnitudes (positive).
+    lower_error : array-like
+        Lower error magnitudes (positive).
+
+    Returns
+    -------
+    numpy.ndarray
+        Symmetric error array.
+
+    Raises
+    ------
+    ValueError
+        If any element of `value` is zero or negative.
+    """
     if np.any(value <=0):
         raise ValueError("negative magnitude value")
 

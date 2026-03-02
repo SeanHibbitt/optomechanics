@@ -5,7 +5,9 @@
 - **Commit after every unit task** (e.g. one function docstring, one API page).
 - For tasks larger than a unit, use **multiple commits** — one per sub-unit.
 - Commit message format: `[AI][Claude] <description>` — e.g. `[AI][Claude] Add NumPy docstring for watts_ratio_to_dB`.
-- Always use **separate** `git add` and `git commit` Bash calls. Never chain with `&&`.
+- **Each git command must be its own individual Bash tool call** — never chain with `&&`, `;`, or newlines in a single call. This is required by the bash permission system.
+  - Correct: Bash call 1 → `git add <file>`, Bash call 2 → `git commit -m "..."`
+  - Wrong: `git add <file> && git commit -m "..."` in one Bash call
 
 ## Docstrings
 

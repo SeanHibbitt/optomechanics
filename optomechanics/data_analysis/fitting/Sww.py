@@ -813,16 +813,32 @@ def S_ww_constant_calculator(f_m, G_m, A, f_c, k_tot, k_ext, incident_pump_power
     return g_0, G, n_d
 
 
-def fit_basic_S_ww_eq_linear_power(freqs_minus_pump_freq:np.array, linear_power:np.array, guesses:list, sig = None):  
+def fit_basic_S_ww_eq_linear_power(freqs_minus_pump_freq:np.array, linear_power:np.array, guesses:list, sig = None):
     """
-    fits the basic S_ww equation
+    Made by Claude. Fit the basic S_ww equation to data given in linear (watts) power.
 
-    freqs_minus_pump_freq: np.array containing frequencies relative to the pump frequency
+    Converts `linear_power` to dBm and delegates to `fit_basic_S_ww_eq`.
 
-    dBm_mag: np.array containing magnitudes in dBm
+    Parameters
+    ----------
+    freqs_minus_pump_freq : numpy.ndarray
+        Frequencies relative to the pump frequency (Hz).
+    linear_power : numpy.ndarray
+        Power spectral density values in linear units (W/Hz).
+    guesses : list
+        Initial parameter guesses in the order ``[f_m, G_m, A, nf]``.
+        Frequencies should not be in reduced (angular) units.
+    sig : array-like or None, optional
+        Uncertainties on `linear_power` (in dBm) passed as ``sigma`` to
+        ``scipy.optimize.curve_fit``.  Default is None (equal weights).
 
-    list: list of guesses in order: [f_m, G_m, A, nf], shouldn't be reduced frequencies
-    
+    Returns
+    -------
+    popt : numpy.ndarray
+        Absolute values of the fitted parameters ``[f_m, G_m, A, nf]``.
+    pcov : numpy.ndarray
+        Estimated covariance of ``popt``.  Diagonal elements give the
+        variance of each parameter.  ``np.nan`` if the fit failed.
     """
 
     return fit_basic_S_ww_eq(freqs_minus_pump_freq, watts_to_dBm(linear_power), guesses, sig)

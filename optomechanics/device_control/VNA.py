@@ -41,25 +41,7 @@ class Vector_Network_Analyser():
     def __init__(self, signal_generator, signal_analyser,):
         
         """
-        returns an instance of the Vector_Network_Analyser class
-        after being passed a signal_generator and signal_analyser
-        function.
-        
-        The functions must fit:
-            
-        def SG(frequency, power, OnOff )
-        
-        def SA(freq, band_width):
-            return amplitude[dBm], frequency
-        
-        
-        span and sweep_points should be minimised in SA
-        
-        (to be updated with phase)
-        
-        Setup to only sweep one S parameter at a time as not
-        a proper VNA
-        
+        Made by Claude. Store the signal-generator and spectrum-analyser callables.
         """
         
         self.SG = signal_generator

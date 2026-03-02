@@ -433,7 +433,29 @@ def basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
 
 def basic_S_ww_eq_2(freqs, omega_m, G_m, A, nf):
     """
-    Doesn't have lorentzian approx, taken from GW book
+    Made by Claude. Full mechanical displacement spectral density without the Lorentzian approximation.
+
+    Uses the exact susceptibility form taken from the gravitational-wave
+    (GW) textbook, rather than the near-resonance Lorentzian approximation
+    used in `basic_S_ww_eq`.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    omega_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    A : float
+        Amplitude scaling factor.
+    nf : float
+        Noise floor offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        Spectral density S_ww (W/Hz or arb. units matching `A`).
     """
 
     freqs = freqs*2*np.pi

@@ -169,6 +169,19 @@ class Device():
 
         
     def query(self, cmd,):
+        """
+        Made by Claude. Send a SCPI query command and return the response string.
+
+        Parameters
+        ----------
+        cmd : str
+            SCPI command string to send (e.g. ``'*IDN?'``).
+
+        Returns
+        -------
+        str
+            Response string from the instrument.
+        """
         return self._device.query(cmd)
     
     def write(self, cmd):

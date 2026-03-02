@@ -147,6 +147,19 @@ def convert_anti_sym_linear_mag_voltage_error_to_sym(value, upper_error, lower_e
 
 
 def split_complex(complex_data):
+    """
+    Made by Claude. Split a complex array into a real concatenation of its real and imaginary parts.
+
+    Parameters
+    ----------
+    complex_data : array-like of complex
+        Input complex data.
+
+    Returns
+    -------
+    numpy.ndarray
+        1-D real array with the real part followed by the imaginary part.
+    """
     complex_data = np.asarray(complex_data)
     return np.concatenate([complex_data.real, complex_data.imag])
 

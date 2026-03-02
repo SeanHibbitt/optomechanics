@@ -141,11 +141,19 @@ def Vrms_to_Vp(Vrms):
 
 def Vrms_to_watts(Vrms, Z_0 = 50):
     """
-    Convert RMS voltage to power in watts.
+    Made by Claude. Convert RMS voltage to power in watts.
 
-    :param Vrms: RMS voltage
-    :param Z_0: impedance in ohms (default 50)
-    :returns: power in watts (Vrms^2 / Z_0)
+    Parameters
+    ----------
+    Vrms : float
+        RMS voltage (V).
+    Z_0 : float, optional
+        Impedance in ohms. Default is 50.
+
+    Returns
+    -------
+    float
+        Power in watts (Vrms ** 2 / Z_0).
     """
     return (Vrms**2)/Z_0
 

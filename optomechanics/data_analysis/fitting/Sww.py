@@ -888,10 +888,38 @@ def fit_basic_S_ww_eq(freqs_minus_pump_freq:np.array, dBm_mag:np.array, guesses:
 
 
 def FWHM_guesser(freqs, magnitude, resonance_guess):
-
     """
-    wrapper to fit the basic S_ww equation 
-    
+    Made by Claude. Estimate S_ww fit parameters from FWHM and fit the spectrum.
+
+    Walks away from the resonance position to find the half-power point,
+    computes initial guesses for ``[f_m, G_m, A, nf]``, then calls
+    `fit_basic_S_ww_eq` with those guesses.
+
+    Parameters
+    ----------
+    freqs : numpy.ndarray
+        Frequency array (Hz).
+    magnitude : numpy.ndarray
+        Power spectral density in dBm.
+    resonance_guess : float
+        Approximate resonance frequency (Hz) used as the search start.
+
+    Returns
+    -------
+    popt : numpy.ndarray
+        Absolute values of the fitted parameters ``[f_m, G_m, A, nf]``
+        from `fit_basic_S_ww_eq`.
+    pcov : numpy.ndarray
+        Estimated covariance of ``popt``.
+    guesses : list
+        Auto-generated initial guesses ``[f_m, G_m, A, nf]`` used for the
+        fit.
+
+    Raises
+    ------
+    Exception
+        If the half-power point is not found within ``freqs.size / 10``
+        iterations.
     """
     
     max_iter = int(freqs.size/10)

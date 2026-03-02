@@ -52,8 +52,29 @@ def S21_eq(freq,*p):
 
 def S21_eq_complex(freq,*p):
     """
-    S21 equation for our cavities in linear voltage ratio
-    
+    Made by Claude. Complex S21 transmission model for a cavity with linear background.
+
+    Returns the complex-valued S21 as a linear voltage ratio, including both real and
+    imaginary linear background terms.
+
+    Parameters
+    ----------
+    freq : array-like
+        Frequency array (Hz).
+    *p : float
+        Model parameters in order:
+        p[0] f_0   — cavity resonance frequency (Hz),
+        p[1] k_tot — total linewidth (Hz),
+        p[2] k_ext — external coupling rate (Hz),
+        p[3] r_m   — real background slope,
+        p[4] r_c   — real background offset,
+        p[5] i_m   — imaginary background slope,
+        p[6] i_c   — imaginary background offset.
+
+    Returns
+    -------
+    numpy.ndarray of complex
+        Complex S21 as a linear voltage ratio.
     """
     f_0=p[0]
     k_tot=p[1]

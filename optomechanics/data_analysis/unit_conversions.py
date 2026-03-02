@@ -90,10 +90,17 @@ def Vpp_to_Vrms(V_pp):
 
 def Vp_to_Vrms(V_pp):
     """
-    Convert peak voltage to RMS voltage.
+    Made by Claude. Convert peak voltage to RMS voltage.
 
-    :param V_pp: peak voltage
-    :returns: RMS voltage (V_p / sqrt(2))
+    Parameters
+    ----------
+    V_pp : float
+        Peak voltage (V).
+
+    Returns
+    -------
+    float
+        RMS voltage (V_p / sqrt(2)).
     """
     Vrms = V_pp/(np.sqrt(2))
     return Vrms

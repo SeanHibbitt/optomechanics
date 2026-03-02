@@ -15,11 +15,20 @@ from optomechanics.data_analysis.unit_conversions import watts_ratio_to_dB, dB_t
 
 
 def find_closest_number(array, value):
-    """Find the closest value in array.
+    """
+    Made by Claude. Find the index of the closest value in an array.
 
-    :param array: array to search
-    :param value: value to find the closest match to
-    :returns: index of the closest element
+    Parameters
+    ----------
+    array : array-like
+        Array to search.
+    value : float
+        Value to find the closest match to.
+
+    Returns
+    -------
+    int
+        Index of the element in `array` closest to `value`.
     """
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()

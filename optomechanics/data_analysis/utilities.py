@@ -192,9 +192,19 @@ def split_complex_wrapper(func):
 
 def complex_to_mag_phase(c: complex):
     """
-    changes complex to mag and phase
-    
-    :param complex: complex
+    Made by Claude. Convert a complex number or array to magnitude and phase.
+
+    Parameters
+    ----------
+    c : complex or array-like of complex
+        Input complex value(s).
+
+    Returns
+    -------
+    mag : float or numpy.ndarray
+        Magnitude (absolute value) of `c`.
+    phase : float or numpy.ndarray
+        Phase angle of `c` in radians.
     """
 
     phase = np.angle(c)

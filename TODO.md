@@ -126,16 +126,16 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [ ] Module docstring — NO
 
 **`data_management/data_management.py`** *(in nav)*
-- [ ] `read_file()` — PARTIAL (`:param` style)
-- [ ] `read_meta_data()` — NO
-- [ ] `save_data_3()` — NO
-- [ ] `attenuation_object` class — PARTIAL
-- [ ] `attenuation_object.__init__()` — NO
-- [ ] `attenuation_object.load_from_tsv()` — PARTIAL
-- [ ] `attenuation_object.save_to_tsv()` — NO
-- [ ] `attenuation_object.__add__()` — NO
-- [ ] `attenuation_object.__sub__()` — NO
-- [ ] `attenuation_object.__call__()` — NO
+- [x] `read_file()` — rewritten to NumPy format (3fb6a7d)
+- [x] `read_meta_data()` — added NumPy docstring (a048e0f)
+- [x] `save_data_3()` — added NumPy docstring (024a427)
+- [x] `attenuation_object` class — rewritten to NumPy format (90c7c3e)
+- [x] `attenuation_object.__init__()` — added NumPy docstring (27e9b14)
+- [x] `attenuation_object.load_from_tsv()` — rewritten to NumPy format (f714bba)
+- [x] `attenuation_object.save_to_tsv()` — added NumPy docstring (1e482af)
+- [x] `attenuation_object.__add__()` — added NumPy docstring (dada46a)
+- [x] `attenuation_object.__sub__()` — added NumPy docstring (51d4477)
+- [x] `attenuation_object.__call__()` — added NumPy docstring (7f93363)
 
 **`data_management/file_management.py`** *(in nav)*
 - [ ] `make_path()` — PARTIAL

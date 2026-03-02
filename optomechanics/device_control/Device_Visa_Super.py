@@ -576,7 +576,30 @@ class Device():
    
     
     def save_data(self, datas, freqs, file_name, file_location = "", headers = None, meta_data = "", delimiter = "\t"):
-        
+        """
+        Made by Claude. Save paired data and frequency arrays to a delimited text file.
+
+        Writes one row per data-frequency pair.  An optional metadata line and
+        header line are written before the data rows.
+
+        Parameters
+        ----------
+        datas : iterable
+            Data values to save.
+        freqs : iterable
+            Frequency values corresponding to each element of `datas`.
+        file_name : str
+            Output filename (including extension).
+        file_location : str, optional
+            Directory path for the output file. Default is ``""`` (current
+            directory).
+        headers : str or None, optional
+            Column header line. Default is None (no header written).
+        meta_data : str, optional
+            Metadata string written as the first line. Default is ``""``.
+        delimiter : str, optional
+            Field delimiter. Default is ``'\\t'`` (tab).
+        """
         with open(file_location+file_name, "w") as file1:
             file1.write(meta_data+"\n")
             if headers != None:

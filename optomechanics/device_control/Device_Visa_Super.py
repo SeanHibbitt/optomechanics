@@ -354,14 +354,15 @@ class Device():
     
     def TRG(self,):
         """
-        
-        *TRG
-        Trigger
-        Triggers all actions waiting for a trigger event. In particular, *TRG generates a manual
-        trigger signal. This common command complements the TRIGger commands of the
-        analyzer.
-        Usage: Event
+        Made by Claude. Send the ``*TRG`` (Trigger) SCPI command.
 
+        Triggers all actions waiting for a trigger event and generates a manual
+        trigger signal.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write("*TRG")
     

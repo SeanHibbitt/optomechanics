@@ -138,8 +138,8 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] `attenuation_object.__call__()` — added NumPy docstring (7f93363)
 
 **`data_management/file_management.py`** *(in nav)*
-- [ ] `make_path()` — PARTIAL
-- [ ] `dated_file_maker()` — PARTIAL
+- [x] `make_path()` — rewritten to NumPy format (3c0d1d0)
+- [x] `dated_file_maker()` — rewritten to NumPy format (019b013)
 
 **`data_management/data_logger.py`**
 - [ ] `logger.__init__()` — NO

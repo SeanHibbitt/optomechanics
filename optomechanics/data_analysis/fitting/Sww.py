@@ -554,7 +554,30 @@ def SHO_TF_sq(freqs, m_eff, f_m, G_m ):
 
 
 def S_xx_thermal(freqs, m_eff, T, f_m, G_m ):
-    
+    """
+    Made by Claude. Thermal displacement spectral density of a mechanical resonator.
+
+    Product of the squared SHO transfer function and the thermal force
+    spectral density.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    m_eff : float
+        Effective mass of the mechanical resonator (kg).
+    T : float
+        Temperature (K).
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+
+    Returns
+    -------
+    numpy.ndarray
+        Thermal displacement spectral density S_xx (m²/Hz).
+    """
     return SHO_TF_sq(freqs, m_eff, f_m, G_m ) * S_ff_thermal(freqs, m_eff, G_m, T)
 
 

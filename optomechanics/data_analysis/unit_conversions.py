@@ -194,11 +194,19 @@ def RMS_to_dBw(Vrms, Z_0 = 50):
 
 def RMS_to_dBm(Vrms, Z_0 = 50):
     """
-    Convert RMS voltage to power in dBm.
+    Made by Claude. Convert RMS voltage to power in dBm.
 
-    :param Vrms: RMS voltage
-    :param Z_0: impedance in ohms (default 50)
-    :returns: power in dBm
+    Parameters
+    ----------
+    Vrms : float
+        RMS voltage (V).
+    Z_0 : float, optional
+        Impedance in ohms. Default is 50.
+
+    Returns
+    -------
+    float
+        Power in dBm.
     """
     return RMS_to_dBw(Vrms, Z_0) + 30
 

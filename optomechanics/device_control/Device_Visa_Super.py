@@ -530,6 +530,32 @@ class Device():
     
     
     def wait_on_OPC(self, wait_time = 60, timeout = None, updates = True, function = None, **function_kwargs):
+        """
+        Made by Claude. Poll the instrument until the OPC (Operation Complete) bit is set.
+
+        Enables the ESE register for OPC events, sends ``*OPC``, then loops
+        until `check_OPC_event` indicates completion.  Optionally calls
+        `function` on each iteration (e.g. to update a live plot).
+
+        Parameters
+        ----------
+        wait_time : float, optional
+            Time in seconds to pause between polling iterations. Default is 60.
+        timeout : float or None, optional
+            Not currently implemented. Default is None.
+        updates : bool, optional
+            Not currently used. Default is True.
+        function : callable or None, optional
+            Optional function to call on each polling iteration. Default is
+            None.
+        **function_kwargs : dict
+            Keyword arguments passed to `function` if provided.
+
+        Returns
+        -------
+        bool
+            ``True`` when the OPC bit is detected as set.
+        """
         self.ESE(1)
         print(f"ESE bits:{self.ESE_query()}")
         self.OPC()

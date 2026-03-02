@@ -190,7 +190,23 @@ class attenuation_object:
         else: self.freq_len = 1
 
     def load_from_tsv( file_location):
-        """Frequency[Hz]\tattenuation[dB]\tatten_upper_std[dB]\tatten_lower_std[dB]"""
+        """
+        Made by Claude. Load an attenuation_object from a TSV file.
+
+        The file must have the following tab-separated columns (with optional
+        ``#``-prefixed metadata lines): ``Frequency[Hz]``, ``attenuation[dB]``,
+        ``atten_upper_std[dB]``, ``atten_lower_std[dB]``.
+
+        Parameters
+        ----------
+        file_location : str or path-like
+            Path to the TSV file.
+
+        Returns
+        -------
+        attenuation_object
+            New instance loaded from the file.
+        """
 
         data_pandas_temp, meta_data_temp = read_file(file_location)
         return attenuation_object(data_pandas_temp["attenuation[dB]"],data_pandas_temp["Frequency[Hz]"], data_pandas_temp["atten_upper_std[dB]"], data_pandas_temp["atten_lower_std[dB]"])

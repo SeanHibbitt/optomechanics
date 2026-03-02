@@ -472,12 +472,12 @@ class Device():
     
     def STB_query(self, ):
         """
-        
-        *STB?
-        Status byte query
-        Reads the contents of the status byte in decimal form.
-        Usage: Query only
+        Made by Claude. Query the status byte register (``*STB?``).
 
+        Returns
+        -------
+        str
+            Contents of the status byte in decimal form.
         """
         return self.query("*STB?")
     

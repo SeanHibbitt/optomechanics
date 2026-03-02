@@ -444,15 +444,15 @@ class Device():
     
     def IST_query(self, ):
         """
-        
-        *IST?
-        Individual status query
-        Returns the contents of the IST flag in decimal form. The IST flag is the status bit
-        which is sent during a parallel poll.
-        Return values:
-        <ISTflag> 0 | 1
-        Usage: Query only
+        Made by Claude. Query the individual status flag (``*IST?``).
 
+        Returns the contents of the IST flag, which is the status bit sent
+        during a parallel poll.
+
+        Returns
+        -------
+        str
+            ``'0'`` or ``'1'``.
         """
         return self.query("*IST?")
     

@@ -334,16 +334,21 @@ class Device():
     
     def SRE(self, Contents):
         """
-        
-        Service request enable
-        Sets the service request enable register to the value indicated. Bit 6 (MSS mask bit)
-        remains 0. This command determines under which conditions a service request is triggered. The query *SRE? returns the contents of the service request enable register in
-        decimal form. Bit 6 is always 0.
-        Parameters:
-        <Contents> Contents of the service request enable register in decimal form.
-        Bit 6 (MSS mask bit) is always 0.
-        Range: 0 to 255
+        Made by Claude. Send the ``*SRE`` (Service Request Enable) SCPI command.
 
+        Sets the service request enable register to the specified value.
+        Bit 6 (MSS mask bit) always remains 0.
+
+        Parameters
+        ----------
+        Contents : int
+            Contents of the service request enable register in decimal form
+            (0–255); bit 6 is always 0.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write(f"*SRE{Contents}")
     

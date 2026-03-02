@@ -497,10 +497,26 @@ def dBm_basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
 
 def S_ff_thermal(freqs, m_eff, G_m, T):
     """
-    Thermal force spectral density as defined in 
-    gw michele maggoire 8.123
+    Made by Claude. Thermal force spectral density.
 
-    Give inputs in Hz
+    As defined in Maggiore (GW textbook) eq. 8.123. All frequency inputs
+    must be in Hz.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz) — used only to determine output shape.
+    m_eff : float
+        Effective mass of the mechanical resonator (kg).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    T : float
+        Temperature (K).
+
+    Returns
+    -------
+    numpy.ndarray
+        Thermal force spectral density S_ff (N^2/Hz), flat across `freqs`.
     """
 
     G_m = G_m*2*np.pi

@@ -202,6 +202,19 @@ class Device():
         return self._device.write(cmd)
         
     def read_bytes(self, bits):
+        """
+        Made by Claude. Read a fixed number of bytes from the instrument.
+
+        Parameters
+        ----------
+        bits : int
+            Number of bytes to read.
+
+        Returns
+        -------
+        bytes
+            Raw bytes read from the instrument.
+        """
         return self._device.read_bytes(bits)
     
     def close(self,):

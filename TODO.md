@@ -158,11 +158,39 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [ ] Module docstring — NO
 
 **`device_control/Device_Visa_Super.py`** *(in nav)*
-- [ ] `Device.__init__()` — NO
-- [ ] `Device.open()` — PARTIAL
-- [ ] `Device.__enter__()` — PARTIAL
-- [ ] `Device.__exit__()` — PARTIAL
-- [ ] `Device.connected_devices()` — PARTIAL
+- [x] `Device` class — added NumPy class docstring (d57106d)
+- [x] `Device.__init__()` — added NumPy docstring (faf27a9)
+- [x] `Device.open()` — rewritten to NumPy format (7b920d3)
+- [x] `Device.__enter__()` — rewritten to NumPy format (3c4d4c9)
+- [x] `Device.__exit__()` — rewritten to NumPy format (ed184a0)
+- [x] `Device.connected_devices()` — rewritten to NumPy format (64233e4)
+- [x] `Device.query()` — added NumPy docstring (fad1f52)
+- [x] `Device.write()` — added NumPy docstring (a0f3342)
+- [x] `Device.read_bytes()` — added NumPy docstring (7027ad7)
+- [x] `Device.close()` — added NumPy docstring (3e0a218)
+- [x] `Device.CLS()` — rewritten to NumPy format (5ab7ad8)
+- [x] `Device.OPC()` — rewritten to NumPy format (45dbaa3)
+- [x] `Device.PCB()` — rewritten to NumPy format (e7d3213)
+- [x] `Device.PRE()` — rewritten to NumPy format (bf7dd5d)
+- [x] `Device.PSC()` — rewritten to NumPy format (86cb780)
+- [x] `Device.RST()` — rewritten to NumPy format (259ada9)
+- [x] `Device.SRE()` — rewritten to NumPy format (d3bd0b5)
+- [x] `Device.TRG()` — rewritten to NumPy format (bca5de0)
+- [x] `Device.WAI()` — rewritten to NumPy format (e0aaa62)
+- [x] `Device.ESE()` — rewritten to NumPy format (e918ddd)
+- [x] `Device.ESE_query()` — added NumPy docstring (26bc4b1)
+- [x] `Device.ESR_query()` — rewritten to NumPy format (54bd404)
+- [x] `Device.IDN_query()` — rewritten to NumPy format (67148ec)
+- [x] `Device.IST_query()` — rewritten to NumPy format (89eea31)
+- [x] `Device.OPT_query()` — rewritten to NumPy format (65cd8c8)
+- [x] `Device.STB_query()` — rewritten to NumPy format (5a36cb1)
+- [x] `Device.TST_query()` — rewritten to NumPy format (58e2f77)
+- [x] `Device.OPC_query()` — added NumPy docstring (7f6188d)
+- [x] `Device.check_OPC_event()` — added NumPy docstring (38645ab)
+- [x] `Device.wait_on_OPC()` — added NumPy docstring (f4944c3)
+- [x] `Device.save_data()` — added NumPy docstring (9a17248)
+- [x] `Device.save_data_2()` — added NumPy docstring (fc5f5db)
+- [x] `Device.save_data_3()` — added NumPy docstring (b7fd2bf)
 
 **`device_control/VNA.py`** *(in nav)*
 - [ ] `Vector_Network_Analyser` class — NO

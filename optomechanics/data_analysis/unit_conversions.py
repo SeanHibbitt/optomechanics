@@ -57,10 +57,17 @@ def dB_to_linear_voltage(powers_dB):
 
 def linear_voltage_to_dB(voltage_ratio):
     """
-    Convert linear voltage ratio to dB.
+    Made by Claude. Convert a linear voltage ratio to decibels.
 
-    :param voltage_ratio: linear voltage ratio
-    :returns: value in dB (20 * log10(voltage_ratio))
+    Parameters
+    ----------
+    voltage_ratio : float
+        Linear voltage ratio.
+
+    Returns
+    -------
+    float
+        Value in dB (20 * log10(voltage_ratio)).
     """
     return 20*np.log10(voltage_ratio)
 

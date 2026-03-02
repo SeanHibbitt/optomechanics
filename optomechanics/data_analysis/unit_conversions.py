@@ -228,10 +228,17 @@ def dBw_to_watts(dBw):
 
 def dBm_to_dBw(dBm):
     """
-    Convert power in dBm to dBW.
+    Made by Claude. Convert power in dBm to dBW.
 
-    :param dBm: power in dBm
-    :returns: power in dBW (dBm - 30)
+    Parameters
+    ----------
+    dBm : float
+        Power in dBm.
+
+    Returns
+    -------
+    float
+        Power in dBW (dBm - 30).
     """
     return dBm - 30
 

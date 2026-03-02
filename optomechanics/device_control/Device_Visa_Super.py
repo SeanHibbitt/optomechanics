@@ -320,13 +320,15 @@ class Device():
     
     def RST(self, ):
         """
-        
-        *RST
-        Reset
-        Sets the instrument to a defined default status. The command is equivalent to
-        SYSTem:PRESet[:DUMMy]. The *RST value of each command is reported in the reference description. See also SYSTem:PRESet:SCOPe.
-        Usage: Setting only
+        Made by Claude. Send the ``*RST`` (Reset) SCPI command.
 
+        Sets the instrument to its defined default state.  Equivalent to
+        ``SYSTem:PRESet[:DUMMy]``.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write(f"*RST")
     

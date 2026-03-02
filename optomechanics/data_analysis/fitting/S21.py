@@ -121,8 +121,24 @@ def S21_eq_phase(freq,*p):
 
 def S21_eq_dB(freq,*p):
     """
-    S21 equation for our cavities in dB
-    
+    Made by Claude. S21 transmission model for a cavity in dB.
+
+    Parameters
+    ----------
+    freq : array-like
+        Frequency array (Hz).
+    *p : float
+        Model parameters in order:
+        p[0] f_0   — cavity resonance frequency (Hz),
+        p[1] k_tot — total linewidth (Hz),
+        p[2] k_ext — external coupling rate (Hz),
+        p[3] att_m — linear background slope,
+        p[4] att_c — linear background offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        S21 amplitude in dB.
     """
     f_0=p[0]
     k_tot=p[1]

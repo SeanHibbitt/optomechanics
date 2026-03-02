@@ -245,14 +245,16 @@ class Device():
     
     def OPC(self,):
         """
-        *OPC
-        Operation Complete
-        Sets bit 0 in the event status register when all preceding commands have been executed.
-        This bit can be used to initiate a service request. The query writes a "1" into the
-        output buffer when all preceding commands have been executed, which is useful for
-        command synchronization.
-        
-        See ESE query
+        Made by Claude. Send the ``*OPC`` (Operation Complete) SCPI command.
+
+        Sets bit 0 in the event status register when all preceding commands have
+        been executed.  This bit can be used to initiate a service request.
+        See `ESE` and `ESR_query` for event-status register management.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write("*OPC")
 

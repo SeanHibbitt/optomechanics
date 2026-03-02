@@ -31,6 +31,22 @@ def read_file(file_loc, sep = r"\s+" ):
     return data_pandas, meta_data
     
 def read_meta_data(file_loc):
+    """
+    Made by Claude. Parse key-value metadata from comment lines in a data file.
+
+    Reads the file line by line until a non-comment, non-blank line is
+    encountered.  Comment lines must have the format ``#\\tkey\\tvalue``.
+
+    Parameters
+    ----------
+    file_loc : str or path-like
+        Path to the data file.
+
+    Returns
+    -------
+    dict
+        Dictionary of ``{key: value}`` pairs extracted from comment lines.
+    """
     meta_data = {}
     with open(file_loc, "r") as file:
         for line in file:

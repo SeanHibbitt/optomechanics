@@ -401,6 +401,14 @@ class Device():
     #####query commands:
     
     def ESE_query(self):
+        """
+        Made by Claude. Query the event status enable register (``*ESE?``).
+
+        Returns
+        -------
+        str
+            Contents of the event status enable register in decimal form.
+        """
         return self.query("*ESE?")
 
     

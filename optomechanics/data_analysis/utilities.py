@@ -75,8 +75,28 @@ def convert_error_dB_to_linear(value, upper_error, lower_error,):
 
 def convert_error_linear_to_dB(value_linear, upper_error, lower_error,):
     """
-    errors should be magnitudes not signs
-    magnitude etc should be given in linear voltage ratio
+    Made by Claude. Convert an asymmetric error from linear voltage ratio scale to dB.
+
+    Errors must be magnitudes (not signed). The value and errors are given as
+    linear voltage ratios.
+
+    Parameters
+    ----------
+    value_linear : float
+        Central value as a linear voltage ratio.
+    upper_error : float
+        Upper error magnitude as a linear voltage ratio (positive).
+    lower_error : float
+        Lower error magnitude as a linear voltage ratio (positive).
+
+    Returns
+    -------
+    value_dB : float
+        Central value in dB.
+    upper_error_dB : float
+        Upper error in dB.
+    lower_error_dB : float
+        Lower error in dB (absolute value).
     """
 
     upper_value_linear = value_linear + upper_error

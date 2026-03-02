@@ -429,13 +429,15 @@ class Device():
         
     def IDN_query(self,):
         """
-        
-        *IDN?
-        Identification
-        Returns the instrument identification string of the R&S ZNA, including the manufacturer, the instrument type, its serial number, and the software revision..
-        The identification string is editable; see "Define *IDN + *OPT..." on page 939.
-        Usage: Query only
+        Made by Claude. Query the instrument identification string (``*IDN?``).
 
+        Returns the manufacturer, instrument type, serial number, and software
+        revision.
+
+        Returns
+        -------
+        str
+            Instrument identification string.
         """
         return self.query("*IDN?")
     

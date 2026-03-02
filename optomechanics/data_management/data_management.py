@@ -421,6 +421,16 @@ class attenuation_object:
 
     
     def __call__(self, *args, **kwds):
+        """
+        Made by Claude. Return the magnitude and frequency arrays.
+
+        Returns
+        -------
+        magnitude : numpy.ndarray
+            Attenuation magnitudes (dB).
+        frequencies : numpy.ndarray
+            Frequency array (Hz).
+        """
         return self.magnitude, self.frequencies
 
 # class attenuation_object:

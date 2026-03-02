@@ -639,8 +639,33 @@ def S_hh_24_25_exp_14_4(S_xx_freqs,  f_m, G_m, S_xx, q_yy = None, q_xx = None, m
 
 
 def S_xx_impre(freqs, f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity, G):
-    """eq 69 Aspelmeyer 2014 review
-    All inputs should be in Hz, not radHz
+    """
+    Made by Claude. Imprecision noise spectral density of the displacement measurement.
+
+    Eq. 69 of Aspelmeyer (2014) review. All frequency inputs must be in Hz,
+    not rad/Hz.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    f_d : float
+        Drive frequency (Hz).
+    f_c : float
+        Cavity resonance frequency (Hz).
+    k_ext : float
+        External coupling rate (Hz).
+    k_tot : float
+        Total linewidth (Hz).
+    linear_drive_power_at_cavity : float
+        Drive power at the cavity input (W).
+    G : float
+        Optomechanical coupling rate (Hz/m).
+
+    Returns
+    -------
+    numpy.ndarray
+        Imprecision spectral density S_xx_imp (m²/Hz).
     """
     n_cav = photon_number(f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity)
     G = G * 2*np.pi

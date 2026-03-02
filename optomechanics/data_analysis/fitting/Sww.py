@@ -177,23 +177,49 @@ class fit_S_xx:
 
     @staticmethod
     def __average_and_fit_S_xx__(SA_df, select, m_eff, S21_df, VNA_S21_extra_atten, SG_cavity_to_SA_atten, SG_to_cavity_atten, basic_S_ww_eq = basic_S_ww_eq, NENBW = RS_default_window_NENBW, S21_eq = S21_eq, ):
-
         """
-        SA_df:
-            Expects to have a pandas data frame
+        Made by Claude. Average multiple SA sweeps and fit for g_0 and G.
 
-        selects:
-            Expects a dictionary which selects data based on the wanted meta_data
-            Selects example:
-                select = {
-                        "drive_power": ["0"],
-                        "domain":["freq"]
-                    }
-                This selects only drive powers of "0", and domains of "freq"
+        Iterates over `SA_df`, selects rows matching `select`, normalises each
+        to G²S_xx via `__normalise_Sww_to_GGSxx__`, averages, and fits
+        `basic_S_ww_eq` to extract optomechanical parameters.
 
-        Only give this one data set, e.g not multiple powers that you want plotted seperately
+        Only pass one data set (e.g. a single drive power); do not mix
+        conditions that should be plotted separately.
 
-        returned g_0 and G are in angular units (2pi*Hz)
+        Returned g_0 and G are in angular units (2π × Hz).
+
+        Parameters
+        ----------
+        SA_df : pandas.DataFrame
+            DataFrame of SA sweeps.
+        select : dict
+            Column filters, e.g.
+            ``{"drive_power": ["0"], "domain": ["freq"]}``.
+        m_eff : float
+            Effective mass of the mechanical resonator (kg).
+        S21_df : pandas.DataFrame
+            DataFrame of VNA S21 sweeps.
+        VNA_S21_extra_atten : attenuation_object or None
+            Extra attenuation on the VNA signal path.
+        SG_cavity_to_SA_atten : attenuation_object
+            Attenuation from cavity to spectrum analyser.
+        SG_to_cavity_atten : attenuation_object
+            Attenuation from signal generator to cavity.
+        basic_S_ww_eq : callable, optional
+            Mechanical spectral density model to fit. Default is
+            `basic_S_ww_eq`.
+        NENBW : float, optional
+            Noise-equivalent noise bandwidth factor. Default is
+            ``RS_default_window_NENBW``.
+        S21_eq : callable, optional
+            S21 model equation. Default is `S21_eq`.
+
+        Returns
+        -------
+        dict
+            Dictionary containing averaged G²S_xx, fit parameters, g_0, G,
+            x_zpf, raw lists of S21 and SA data, and all intermediate results.
         """
         S_ww_raw_list = []
         S_ww_raw_freqs_list = []

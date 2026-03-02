@@ -193,8 +193,9 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] `Device.save_data_3()` — added NumPy docstring (b7fd2bf)
 
 **`device_control/VNA.py`** *(in nav)*
-- [ ] `Vector_Network_Analyser` class — NO
-- [ ] `Vector_Network_Analyser.sweep()` — NO
+- [x] `Vector_Network_Analyser` class — added NumPy class docstring (7d3b340)
+- [x] `Vector_Network_Analyser.__init__()` — rewritten to NumPy format (835cfb6)
+- [x] `Vector_Network_Analyser.sweep()` — added NumPy docstring (cb80725)
 
 **`device_control/Device_Visa_Super_rs.py`**
 - [ ] `Device` class — PARTIAL

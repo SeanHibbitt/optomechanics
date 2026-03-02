@@ -644,7 +644,32 @@ class Device():
                 file1.write("\n")
 
     def save_data_3(self, data, file_name, file_location = "", headers = None, meta_data = {}, delimiter = "\t"):
-        
+        """
+        Made by Claude. Save an array to a delimited text file with key-value metadata lines.
+
+        Writes metadata as ``#\\tkey\\tvalue`` comment lines, then an optional
+        header line, then the data.  For 2-D arrays the output is column-major
+        (same layout as `save_data_2`); for 1-D arrays each element is written
+        on its own line.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Data array (1-D or 2-D).  For 2-D arrays, shape should be
+            ``(n_channels, n_points)``.
+        file_name : str
+            Output filename (including extension).
+        file_location : str, optional
+            Directory path for the output file. Default is ``""`` (current
+            directory).
+        headers : str or None, optional
+            Column header line. Default is None.
+        meta_data : dict, optional
+            Dictionary of metadata key-value pairs written as comment lines.
+            Default is ``{}``.
+        delimiter : str, optional
+            Field delimiter. Default is ``'\\t'`` (tab).
+        """
         data_shape = np.shape(data)
         print(f"datashape:{data_shape}")
         with open(file_location+file_name, "w") as file1:

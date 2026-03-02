@@ -400,7 +400,27 @@ class fit_S_xx:
 
 
 def basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
+    """
+    Made by Claude. Lorentzian approximation of the mechanical displacement spectral density.
 
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    omega_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    A : float
+        Amplitude scaling factor.
+    nf : float
+        Noise floor offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        Spectral density S_ww (W/Hz or arb. units matching `A`).
+    """
     freqs = freqs*2*np.pi
 
     omega_m = omega_m *2*np.pi

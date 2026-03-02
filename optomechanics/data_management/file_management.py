@@ -6,7 +6,18 @@ from datetime import datetime
 
 def make_path(folders):
     """
-    makes a path from a given ordered list of folders
+    Made by Claude. Build a backslash-separated path string from an ordered list of folder names.
+
+    Parameters
+    ----------
+    folders : iterable of str
+        Folder names in hierarchical order (outermost first).
+
+    Returns
+    -------
+    str
+        Path string with a trailing backslash, e.g.
+        ``'C:\\\\Data\\\\2024\\\\'``.
     """
     
     path = ""

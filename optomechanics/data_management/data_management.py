@@ -123,10 +123,43 @@ def save_data_3(data, file_name, file_location = "", headers = None, meta_data =
 
 
 class attenuation_object:
-
     """
-    warning, built in addition and subtraction is not commutable.
-    The first object is primary and everything else is interpolated to those frequencies 
+    Made by Claude. Frequency-dependent attenuation with optional asymmetric errors.
+
+    Stores a magnitude array (in dB) and a corresponding frequency array.
+    Arithmetic operations (``+`` and ``-``) interpolate the second operand
+    onto the frequencies of the first, then combine magnitudes and propagate
+    errors in quadrature.
+
+    .. warning::
+        Addition and subtraction are **not** commutative: the first operand
+        determines the output frequency grid.
+
+    Parameters
+    ----------
+    magnitude : array-like
+        Attenuation magnitudes (dB).
+    frequencies : array-like
+        Frequency values corresponding to each element of `magnitude` (Hz).
+    upper_error : array-like or None, optional
+        Upper error magnitudes (dB). Default is None (zeros used).
+    lower_error : array-like or None, optional
+        Lower error magnitudes (dB). Default is None (zeros used).
+
+    Attributes
+    ----------
+    magnitude : numpy.ndarray
+        Attenuation magnitudes (dB).
+    frequencies : numpy.ndarray
+        Frequency array (Hz).
+    upper_error : numpy.ndarray
+        Upper error magnitudes (dB).
+    lower_error : numpy.ndarray
+        Lower error magnitudes (dB).
+    has_error : bool
+        ``True`` if error arrays were provided; ``False`` otherwise.
+    freq_len : float
+        Frequency span (|last − first|) in Hz, or 1 if a single frequency.
     """
 
     def __init__(self, magnitude, frequencies, upper_error = None, lower_error = None ):

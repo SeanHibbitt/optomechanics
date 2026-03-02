@@ -712,7 +712,40 @@ def S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
     return S_FF_bac
 
 def S_xx_back(freqs, m_eff, f_m, G_m, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
+    """
+    Made by Claude. Backaction displacement spectral density.
 
+    Product of the squared SHO transfer function and the backaction force
+    spectral density.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    m_eff : float
+        Effective mass of the mechanical resonator (kg).
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    f_d : float
+        Drive frequency (Hz).
+    G : float
+        Optomechanical coupling rate (Hz/m).
+    f_c : float
+        Cavity resonance frequency (Hz).
+    k_ext : float
+        External coupling rate (Hz).
+    k_tot : float
+        Total linewidth (Hz).
+    linear_drive_power_at_cavity : float
+        Drive power at the cavity input (W).
+
+    Returns
+    -------
+    numpy.ndarray
+        Backaction displacement spectral density S_xx_back (m²/Hz).
+    """
     S_FF_bac = S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,)
     TF_Sq = SHO_TF_sq(freqs, m_eff, f_m, G_m )
     

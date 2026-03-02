@@ -677,8 +677,31 @@ def S_xx_impre(freqs, f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity, G):
 
 def S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
     """
-    Eq 70 Aspelmeyer 2014 review
-    All freq inputs in Hz
+    Made by Claude. Radiation-pressure backaction force spectral density.
+
+    Eq. 70 of Aspelmeyer (2014) review. All frequency inputs must be in Hz.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    f_d : float
+        Drive frequency (Hz).
+    G : float
+        Optomechanical coupling rate (Hz/m).
+    f_c : float
+        Cavity resonance frequency (Hz).
+    k_ext : float
+        External coupling rate (Hz).
+    k_tot : float
+        Total linewidth (Hz).
+    linear_drive_power_at_cavity : float
+        Drive power at the cavity input (W).
+
+    Returns
+    -------
+    numpy.ndarray
+        Backaction force spectral density S_FF_back (N²/Hz).
     """
     n_cav = photon_number(f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity)
     G_rad = G * 2*np.pi

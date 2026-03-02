@@ -265,10 +265,17 @@ def dBm_to_RMS(dBm, Z_0 = 50):
 
 def watts_to_dBm(watts):
     """
-    Convert power in watts to dBm.
+    Made by Claude. Convert power in watts to dBm.
 
-    :param watts: power in watts
-    :returns: power in dBm
+    Parameters
+    ----------
+    watts : float
+        Power in watts.
+
+    Returns
+    -------
+    float
+        Power in dBm.
     """
     dBw = watts_to_dBw(watts)
     return dBw + 30

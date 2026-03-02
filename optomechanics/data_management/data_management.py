@@ -270,7 +270,23 @@ class attenuation_object:
         return attenuation_object(result_mag, result_freqs, result_upper_error, result_lower_error)
     
     def __sub__(self, second_atten):
+        """
+        Made by Claude. Subtract an attenuation object, propagating errors in quadrature.
 
+        Interpolates `second_atten` onto ``self.frequencies``, subtracts the
+        magnitudes, and propagates errors in quadrature.  Subtraction is **not**
+        commutative: ``self`` determines the output frequency grid.
+
+        Parameters
+        ----------
+        second_atten : attenuation_object
+            Attenuation to subtract.
+
+        Returns
+        -------
+        attenuation_object
+            New instance with the result magnitude and propagated errors.
+        """
         interpolated_mag = np.interp(self.frequencies, second_atten.frequencies, second_atten.magnitude)
         result_mag = self.magnitude - interpolated_mag
         result_freqs = self.frequencies

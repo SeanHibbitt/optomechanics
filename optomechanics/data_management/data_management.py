@@ -163,6 +163,11 @@ class attenuation_object:
     """
 
     def __init__(self, magnitude, frequencies, upper_error = None, lower_error = None ):
+        """
+        Made by Claude. Initialise the attenuation object and validate error arrays.
+
+        Prints a warning if no errors are provided or if any error values are NaN.
+        """
         self.magnitude = np.array(magnitude)
         self.frequencies = np.array(frequencies)
 

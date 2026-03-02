@@ -83,7 +83,14 @@ class Device():
 
 
     def open(self):
-        """ Opens the device via visa"""
+        """
+        Made by Claude. Open the VISA resource and configure communication parameters.
+
+        Returns
+        -------
+        Device
+            Returns ``self`` to allow chaining and use in ``with`` blocks.
+        """
         self._device = self.rm.open_resource(self.address)
         #setup device parameters
         self._device.baud_rate = self.baud_rate

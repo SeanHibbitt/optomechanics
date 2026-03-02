@@ -212,6 +212,14 @@ class attenuation_object:
         return attenuation_object(data_pandas_temp["attenuation[dB]"],data_pandas_temp["Frequency[Hz]"], data_pandas_temp["atten_upper_std[dB]"], data_pandas_temp["atten_lower_std[dB]"])
 
     def save_to_tsv():
+        """
+        Made by Claude. Save the attenuation_object to a TSV file.
+
+        Raises
+        ------
+        Exception
+            Always raised — method is not yet implemented.
+        """
         raise Exception("not finished")
         pass
 

@@ -583,8 +583,36 @@ def S_xx_thermal(freqs, m_eff, T, f_m, G_m ):
 
 def S_hh_24_25_exp_14_4(S_xx_freqs,  f_m, G_m, S_xx, q_yy = None, q_xx = None, mu = None):
     """
-    thin-film re-entrant cavity S_hh transfer function 
-    
+    Made by Claude. Thin-film re-entrant cavity S_hh transfer function.
+
+    Computes the cavity gap spectral density S_hh from the mechanical
+    displacement spectral density S_xx using the transfer function of a
+    thin-film re-entrant cavity (eqs. 24–25 of experiment 14.4).
+
+    Parameters
+    ----------
+    S_xx_freqs : array-like
+        Frequency array (Hz).
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    S_xx : array-like
+        Mechanical displacement spectral density (m²/Hz).
+    q_yy : float, optional
+        Electromechanical coupling coefficient q_yy. Default is
+        -1.5174802642178184e-06.
+    q_xx : float, optional
+        Electromechanical coupling coefficient q_xx. Default is
+        7.587286243641971e-07.
+    mu : float, optional
+        Electromechanical coupling parameter mu. Default is
+        0.0002293073538383159.
+
+    Returns
+    -------
+    numpy.ndarray
+        Cavity gap spectral density S_hh (m²/Hz).
     """
     #default values moved here so the def line doesn't get too long
     if q_yy is None:

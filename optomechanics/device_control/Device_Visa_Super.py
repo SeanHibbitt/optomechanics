@@ -121,7 +121,25 @@ class Device():
         
     def __exit__(self, exc_type, exc_value, exc_tb):
         """
-        closes resource, works with "with" structure
+        Made by Claude. Exit the context manager by closing the VISA resource.
+
+        Calls `close` on exit.  If an ``IndexError`` was raised inside the
+        ``with`` block it is caught, printed, and suppressed.
+
+        Parameters
+        ----------
+        exc_type : type or None
+            Exception type, or ``None`` if no exception occurred.
+        exc_value : Exception or None
+            Exception instance, or ``None``.
+        exc_tb : traceback or None
+            Traceback object, or ``None``.
+
+        Returns
+        -------
+        bool or None
+            ``True`` if an ``IndexError`` was caught (suppressing propagation);
+            ``None`` otherwise.
         """
         self.close()
         if isinstance(exc_value, IndexError):

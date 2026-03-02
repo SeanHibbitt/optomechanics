@@ -302,19 +302,42 @@ def fit_S21_peak_complex(complex_data, frequencies, guesses = False, signal_appl
 
 def fit_S21_peak(powers_dB, frequencies, guesses = False, signal_applied = False, errors = None, equation = S21_eq ):
     """
-    Takes powers in dB and frequencies, then fits and returns popt and pcov
-    errors should be given in dB
+    Made by Claude. Fit the S21 cavity model to power data in linear voltage ratio.
 
-    errors = (upper_error_dB, lower_error_dB)
+    Accepts powers in dB, converts to linear voltage ratio internally, then
+    fits with `S21_eq` (or a supplied `equation`).
 
-    if account for applied signal, give:
-    [bandwidth, number_of_signals]
-    bandwidth is used to determine filter frequencies for signal
-    Uses "S21_eq()"
-    p[0] = f_0
-    p[1] = k_tot[Hz]
-    p[2] = k_ext[Hz]
+    Parameters
+    ----------
+    powers_dB : array-like
+        Measured S21 amplitudes in dB.
+    frequencies : array-like
+        Corresponding frequency array (Hz).
+    guesses : list or False, optional
+        Initial parameter guesses ``[f_0, k_tot, k_ext, att_m, att_c]``.
+        If False, guesses are estimated automatically.
+    signal_applied : list or False, optional
+        ``[bandwidth, number_of_signals]`` to notch out applied tones before
+        fitting.  If False, no notching is applied.
+    errors : tuple or None, optional
+        ``(upper_error_dB, lower_error_dB)`` — asymmetric errors in dB.
+    equation : callable, optional
+        Equation to fit. Default is `S21_eq`.
 
+    Returns
+    -------
+    popt : list
+        Optimised parameters ``[f_0, k_tot, k_ext, att_m, att_c]``.
+    pcov : numpy.ndarray
+        Covariance matrix of `popt`.
+    guesses : list
+        Initial guesses used.
+    amplitude_linear_voltage : numpy.ndarray
+        Data as linear voltage ratio used for fitting.
+    frequencies : numpy.ndarray
+        Frequencies used for fitting (after optional signal removal).
+    errors : array-like or None
+        Errors used for fitting.
     """
 
     #setup input variables

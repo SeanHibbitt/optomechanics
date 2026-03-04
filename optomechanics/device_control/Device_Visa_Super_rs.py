@@ -22,15 +22,31 @@ from optomechanics.device_control.Device_Visa_Super import Device as mainDevice
 
 #%%Define Class
 class Device(mainDevice):
-    
-    
-    """
-    super which edits Device_Visa_Super.Device with the RsInstruments version of PyVisa
-    
-    contains default scpi commands. 
-    These were taken from the ZNA manual: https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
 
-    SCPI wikipage: https://en.wikipedia.org/wiki/Standard_Commands_for_Programmable_Instruments
+
+    """
+    Made by Claude. VISA device base class using the RsInstrument backend.
+
+    Extends :class:`~optomechanics.device_control.Device_Visa_Super.Device`
+    by replacing the PyVISA resource manager with the Rohde & Schwarz
+    ``RsInstrument`` library for connection and resource listing.
+    All SCPI commands inherited from the parent class remain available.
+
+    SCPI reference: https://en.wikipedia.org/wiki/Standard_Commands_for_Programmable_Instruments
+
+    ZNA manual:
+    https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
+
+    Parameters
+    ----------
+    address : str
+        VISA resource address string (e.g. ``'TCPIP::192.168.x.x::INSTR'``).
+    baud_rate : int, optional
+        Serial baud rate.  Default is ``9600``.
+    query_delay : float, optional
+        Delay between write and read in a query (s).  Default is ``0``.
+    timeout : float, optional
+        VISA communication timeout (ms).  Default is ``10000``.
     """
     
     def __init__(self, address, baud_rate = 9600, query_delay = 0, timeout = 10000  ):

@@ -29,17 +29,35 @@ import pandas
 
 class VNA(Device):
     """
-    class for VNA E5063A, based on the ZNA script, check using commands before hand
-    
-    
-    
-    ZNA
-    manual:  https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
-    website: https://www.rohde-schwarz.com/uk/manual/r-s-zna-user-manual-manuals_78701-601863.html
-    
-    
-    
-    
+    Made by Claude. VISA driver for the Keysight E5063A vector network analyser.
+
+    Extends :class:`~optomechanics.device_control.Device_Visa_Super.Device`
+    with SCPI commands specific to the E5063A.  The command set is
+    structurally similar to the Rohde & Schwarz ZNA; verify commands against
+    the E5063A documentation before use.
+
+    Parameters
+    ----------
+    address : str
+        VISA resource address string (e.g. ``'TCPIP::134.219.128.53::INSTR'``).
+    baud_rate : int, optional
+        Serial baud rate.  Default is ``9600``.
+
+    Attributes
+    ----------
+    freq_list : numpy.ndarray
+        Frequency array populated by :meth:`sweep`.
+    data_1 : numpy.ndarray
+        Log-magnitude (dB) data populated by :meth:`sweep`.
+    data_2 : numpy.ndarray
+        Phase (degrees) data populated by :meth:`sweep`.
+    freq_data : numpy.ndarray
+        Stimulus frequency data populated by :meth:`sweep`.
+
+    References
+    ----------
+    ZNA user manual:
+    https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
     """
     
     def __init__(self, address, baud_rate = 9600):

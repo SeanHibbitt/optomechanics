@@ -73,7 +73,18 @@ class Device(mainDevice):
         Device.__init__(self, address, baud_rate, timeout = 25000)
 
     def open(self):
-        """ Opens the device via visa"""
+        """
+        Made by Claude. Open the instrument connection using the RsInstrument backend.
+
+        Creates an :class:`RsInstrument` connection to ``self.address`` with
+        ID query and reset both enabled (``True, True``).  Stores the
+        instrument handle in ``self._device``.
+
+        Returns
+        -------
+        Device
+            Returns ``self`` to support the context-manager protocol.
+        """
         self._device = RsInstrument(self.address, True, True)
         #setup device parameters
         #self._device.baud_rate = self.baud_rate

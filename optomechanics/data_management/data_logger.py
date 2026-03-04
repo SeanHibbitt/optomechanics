@@ -45,6 +45,24 @@ class logger():
     """
 
     def __init__(self, file_name, file_path = "", headings = [""], deliminator = ",", read_file = True):
+        """
+        Made by Claude. Initialise the logger and create the log file if it does not exist.
+
+        Parameters
+        ----------
+        file_name : str
+            Name of the log file (including extension).
+        file_path : str, optional
+            Directory path for the log file.  Default is ``""`` (current
+            directory).
+        headings : list of str, optional
+            Column headings written as the first row if the file is newly
+            created.  Default is ``[""]``.
+        deliminator : str, optional
+            Field delimiter character.  Default is ``","``
+        read_file : bool, optional
+            Reserved for future use.  Default is ``True``.
+        """
         self.file_path = file_path
         self.headings = headings
         self.deliminator = deliminator

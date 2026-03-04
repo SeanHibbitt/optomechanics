@@ -413,8 +413,26 @@ class VNA(Device):
     
     def calculate_data_format(self, channel, TraceName, data_format):
         """
-        sets format of data on trace
-        see "Internal data arrays" in manual for important infomation
+        Made by Claude. Set the data format for a trace (``CALCulate<Ch>:TRACe<Tr>:FORMat``).
+
+        See "Internal data arrays" in the instrument manual for details on
+        how the format affects retrieved data.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        TraceName : int or str
+            Trace identifier.
+        data_format : str
+            Data format string, e.g. ``'MLOGarithmic'`` (log magnitude),
+            ``'PHASe'`` (phase in degrees), ``'REAL'``, ``'IMAGinary'``,
+            etc.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f':Calculate{channel}:TRACe{TraceName}:FORMat {data_format}')
                 

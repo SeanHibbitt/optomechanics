@@ -202,12 +202,23 @@ class VNA(Device):
     
     def sense_average_count(self, channel, average_factor):
         """
-        Defines the number of consecutive sweeps to be 
-        combined for the sweep average ("Factor").
-        This appears to be consecutive averaged sweeps instead of averages at a single point.
-        See many before use
-        1-999
-        default of 16
+        Made by Claude. Set the number of sweeps to average (``SENSe<Ch>:AVERage:COUNt``).
+
+        This sets the averaging factor for consecutive sweeps (not
+        point-by-point averaging).  Verify behaviour before use.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        average_factor : int
+            Number of sweeps to average.  Valid range is 1–999;
+            default on the instrument is 16.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:AVERage:COUNt {average_factor}")
 

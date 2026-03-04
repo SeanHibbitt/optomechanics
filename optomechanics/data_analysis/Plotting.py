@@ -2,14 +2,31 @@
 
 def lighten_color(color, amount=0.5):
     """
-    Lightens the given color by multiplying (1-luminosity) by the given amount.
-    Input can be matplotlib color string, hex string, or RGB tuple.
-    From stack exchange
+    Made by Claude. Lighten a colour by a given fraction.
 
-    Examples:
-    >> lighten_color('g', 0.3)
-    >> lighten_color('#F034A3', 0.6)
-    >> lighten_color((.3,.55,.1), 0.5)
+    Converts the colour to HLS space, scales the luminosity towards 1, then
+    converts back to RGB.  Adapted from a Stack Exchange snippet.
+
+    Parameters
+    ----------
+    color : str or tuple
+        Matplotlib colour string (e.g. ``'g'``), hex string
+        (e.g. ``'#F034A3'``), or an RGB tuple (e.g. ``(.3, .55, .1)``).
+    amount : float, optional
+        Lightening factor in the range ``[0, 1]``.  ``0`` returns the
+        original colour; ``1`` returns white. Default is ``0.5``.
+
+    Returns
+    -------
+    tuple
+        Lightened colour as an ``(R, G, B)`` tuple with values in
+        ``[0, 1]``.
+
+    Examples
+    --------
+    >>> lighten_color('g', 0.3)
+    >>> lighten_color('#F034A3', 0.6)
+    >>> lighten_color((.3, .55, .1), 0.5)
     """
     import matplotlib.colors as mc
     import colorsys

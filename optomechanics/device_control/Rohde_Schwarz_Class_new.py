@@ -235,9 +235,19 @@ class ZNA(Device):
     
     def sense_average_count(self, channel, average_factor):
         """
-        Defines the number of consecutive sweeps to be combined for the sweep average ("Factor").
-        Suffix: . Channel number Parameters: Sweep average factor Range: 1 to 1000 
-        *RST: 10 Example: See [SENSe:]AVERage:CLEar Manual operation: See "Factor / On / Reset" on page 554
+        Made by Claude. Set the sweep averaging factor (``SENSe<Ch>:AVERage:COUNt``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        average_factor : int
+            Number of sweeps to average.  Range: 1–1000; reset value: 10.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:AVERage:COUNt {average_factor}")
      

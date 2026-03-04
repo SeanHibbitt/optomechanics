@@ -558,28 +558,25 @@ class ZNA(Device):
     
     def sense_sweep_time_auto_query(self, channel):
         """
-        [SENSe<Ch>:]SWEep:TIME:AUTO <Boolean>
-        When enabled, the (minimum) sweep time is calculated internally using
-        the other channel settings and zero delay ([SENSe<Ch>:]SWEep:DWELl).
-        Note: The automatically calculated sweep duration is ignored for
-        the sweep types
-        "Time" and "CW Mode" ([SENSe<Ch>:]SWEep:TYPE).
-        Suffix:
-        <Ch>
-        .
-        Channel number
-        Parameters:
-        <Boolean> ON | OFF - turn the automatic calculation of the sweep time on
-        or off.
-        OFF is also set if the sweep duration or delay is set explicitly
-        using [SENSe<Ch>:]SWEep:TIME or [SENSe<Ch>:]SWEep:
-        DWELl.
-        *RST: ON
-        Example: SWE:TIME 1
-        Set a total sweep time of 1 s.
-        SWE:TIME:AUTO?
-        A query returns the value 1.
-        Manual operation: See "Sweep Time / Auto" on page 557 """
+        Made by Claude. Query whether automatic sweep time is enabled (``SENSe<Ch>:SWEep:TIME:AUTO?``).
+
+        When enabled, the minimum sweep time is calculated internally from
+        the channel settings and the dwell time (``SENSe<Ch>:SWEep:DWELl``).
+        The auto-calculated duration is ignored for ``"Time"`` and
+        ``"CW Mode"`` sweep types.  Auto is also disabled when sweep duration
+        or delay is set explicitly via ``SENSe<Ch>:SWEep:TIME`` or
+        ``SENSe<Ch>:SWEep:DWELl``.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        str
+            ``'1'`` if automatic sweep time is enabled; ``'0'`` if disabled.
+        """
 
         return self.query(f"SENSe{channel}:SWEep:TIME:AUTO?")
     

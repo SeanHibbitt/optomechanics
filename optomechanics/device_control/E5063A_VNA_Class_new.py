@@ -309,9 +309,20 @@ class VNA(Device):
  
     def initiate_continuous(self, channel, boolean):
         """
-        INITiate<Ch>:CONTinuous <Boolean>
-        Qualifies whether the analyzer measures in single sweep or in continuous sweep
-        mode
+        Made by Claude. Select single-sweep or continuous-sweep mode (``INITiate<Ch>:CONTinuous``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        boolean : str or int
+            ``'ON'`` / ``1`` for continuous sweep; ``'OFF'`` / ``0`` for
+            single sweep.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"INITiate{channel}:CONTinuous {boolean}")
     

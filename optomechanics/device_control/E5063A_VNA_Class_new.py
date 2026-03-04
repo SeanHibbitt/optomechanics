@@ -226,13 +226,27 @@ class VNA(Device):
     
     def sense_bandwidth_resolution(self, channel, band_width):
         """
-        This command sets/gets the IF bandwidth.
+        Made by Claude. Set the IF (resolution) bandwidth (``SENSe<Ch>:BANDwidth:RESolution``).
 
-        possible values:
-        10|15|20|30|40|50|70|100|150|200|300|400|500|700|1k|1.5k|2k|3k|4k|5k|7k|10k
-        |15k|20k|30k|40k|50k|70k|100k|150k|200k|300k
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        band_width : float
+            IF bandwidth (Hz).  Must be a power-of-ten multiple of one of
+            ``[1, 1.5, 2, 3, 4, 5, 7]`` and no greater than ``300000`` Hz.
+            Examples: 10, 15, 20, …, 100k, 150k, 200k, 300k.
 
-        
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        Raises
+        ------
+        ValueError
+            If ``band_width`` is not a valid value (guard logic present but
+            the ``try/except`` block does not correctly enforce it).
         """
         band_width_mods_truth = np.any(np.equal(np.array(band_width) % np.array([1,1.5,2,3,4,5,7]),[0,0,0,0,0,0,0]))\
             and band_width <= 300000

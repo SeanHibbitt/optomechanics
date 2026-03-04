@@ -205,8 +205,9 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] `Device.connected_devices()` — rewritten to NumPy format (329069b)
 
 **`device_control/E5063A_VNA_Class_new.py`**
-- [ ] `VNA.__init__()` — NO
-- [ ] All setter/getter methods — PARTIAL (plain text, no NumPy sections)
+- [x] `VNA` class — added NumPy class docstring (0d3528d)
+- [x] `VNA.__init__()` — added NumPy docstring (ef38d37)
+- [x] All setter/getter/query methods — rewritten to NumPy format (ca87ae0–834f692)
 
 **`device_control/Rohde_Schwarz_Class_new.py`**
 - [ ] `ZNA.__init__()` — NO

@@ -66,8 +66,8 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] `membrane.fm()` — rewritten to NumPy format (fd88a4b)
 
 **`data_analysis/attenuation_accounter.py`**
-- [ ] Module docstring — PARTIAL (exists as comment, not docstring)
-- [ ] `account_for_attenuation()` — PARTIAL
+- [x] Module docstring — added NumPy module docstring (af02dc9)
+- [x] `account_for_attenuation()` — rewritten to NumPy format (141500a)
 
 **`data_analysis/Plotting.py`**
 - [ ] `lighten_color()` — PARTIAL

@@ -108,31 +108,21 @@ class ZNA(Device):
         
     
     def sense_freq_start(self, channel, FreqVal):
-        
+
         """
-        [SENSe<Ch>:]FREQuency:STARt <FreqVal>
-        These commands defines the start and stop frequency for a frequency sweep. The values also define the display
-        range in a Cartesian diagram. The default start and stop
-        frequencies equal to the minimum and maximum frequency of the analyzer.
-        The ranges depend on the instrument model; see Table 7-16.
-        Suffix:
-        <Ch>
-        Channel number
-        Parameters:
-        <FreqVal> Start and stop frequency of the sweep
-        Increment: 0.1 kHz
-        Default unit: Hz
-        Example: *RST; FREQ:STAR 10MHz
-        Activate a frequency sweep and set the start frequency to
-        10 MHz.
-        FREQ:STOP 100MHz
-        Set the stop frequency to 100 MHz.
-        Manual operation: See "Start Frequency / Stop Frequency / Center Frequency /
-        Span Frequency" on page 539
-        Note: If the start frequency entered is greater than the current stop frequency, the stop
-        frequency is set to the start frequency plus the minimum frequency span
-        ([SENSe<Ch>:]FREQuency:SPAN).
-        see page 1510
+        Made by Claude. Set the sweep start frequency (``SENSe<Ch>:FREQuency:STARt``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        FreqVal : float
+            Start frequency (Hz).  Increment: 0.1 kHz.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:FREQuency:STARt {FreqVal}")
     

@@ -421,46 +421,29 @@ class ZNA(Device):
     
     def calculate_parameter_sdefine(self, channel, TraceName, Result):
         """
-        CALCulate<Ch>:PARameter:SDEFine <TraceName>, <Result>
-        Creates a trace and assigns a channel number, a name and a measurement parameter to it. The trace becomes the active trace in the channel but is not displayed.
-        Note: To display the trace defined via CALCulate<Ch>:PARameter:SDEFine, create a diagram (DISPlay[:WINDow<Wnd>][:STATe] ON) and assign the trace to this
-        diagram (DISPlay[:WINDow<Wnd>]:TRACe<WndTr>:FEED); see example below.
-        CALCulate<Ch>:PARameter:MEASure changes the measurement result of an
-        existing trace.
-        To select an existing trace as the active trace, use CALCulate<Ch>:PARameter:
-        SELect. You can open the trace manager to obtain an overview of all channels and
-        traces, including the traces that are not displayed.
-        SCPI command reference
-        R&S Command reference ®ZNA
-        User Manual 1178.6462.02 ─ 34 1164
-        Tip: This command has no query form. Use CALCulate<Ch>:PARameter:MEASure
-        <TraceName> to query the measurement result of the trace. CALCulate<Ch>:
-        PARameter:CATalog? returns a list of all defined traces.
-        Suffix:
-        <Ch>
-        .
-        Channel number referencing a previously defined channel. If
-        <Ch> does not exist, it is generated with default channel settings.
-        Setting parameters:
-        <TraceName> Trace name, string variable, e.g. 'Trc4'. See "Rules for trace
-        names" in "Table Area" on page 452. Trace names must be
-        unique across all channels and diagrams.
-        If a trace with the selected trace name already exists, the analyzer behaves as follows: If the existing trace is assigned to the
-        same channel as the new trace, it is deleted. The new trace is
-        not automatically assigned to a diagram area; see note above.
-        If the existing trace is assigned to a different channel, no new
-        trace can be created. The analyzer returns an error message.
-        <Result> Measurement result (string variable), see table below.
-        Example: CALC4:PAR:SDEF 'Ch4Tr1', 'S11'
-        Create channel 4 and a trace named Ch4Tr1 to measure the
-        input reflection coefficient S11.
-        DISP:WIND2:STAT ON
-        Create diagram area no. 2.
-        DISP:WIND2:TRAC:FEED 'CH4TR1'
-        Display the generated trace in diagram area no. 2.
-        Usage: Setting only
-        Manual operation: See "S-Parameter (selector)" on page 356  
-        see table on page 1164 for correct parameter definitions
+        Made by Claude. Create a trace and assign a measurement parameter (``CALCulate<Ch>:PARameter:SDEFine``).
+
+        The trace becomes the active trace in the channel but is not
+        displayed.  To display it, create a diagram window with
+        :meth:`display_window_state` and assign the trace with
+        :meth:`display_window_trace_feed`.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.  Created with default settings if it does not
+            already exist.
+        TraceName : str
+            Unique trace name (e.g. ``'Trc4'``).  An existing trace with the
+            same name in the same channel is replaced.
+        Result : str
+            Measurement parameter (e.g. ``'S11'``, ``'S21'``).  See the ZNA
+            manual (page 1164) for the full parameter table.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"CALCulate{channel}:PARameter:SDEFine '{TraceName}', '{Result}'")
           

@@ -283,7 +283,23 @@ class dated_logger(logger):
             self.update_file_path()
 
     def __call__(self, *args, **kwargs):
-        
+        """
+        Made by Claude. Append a row, rolling over to a new file if the day has changed.
+
+        Calls :meth:`check_update_file_path` before delegating to the parent
+        :meth:`~logger.__call__` to write the row.
+
+        Parameters
+        ----------
+        *args
+            Positional arguments forwarded to :meth:`~logger.__call__`.
+        **kwargs
+            Keyword arguments forwarded to :meth:`~logger.__call__`.
+
+        Returns
+        -------
+        None
+        """
         self.check_update_file_path()
         output = super().__call__(*args, **kwargs)
 

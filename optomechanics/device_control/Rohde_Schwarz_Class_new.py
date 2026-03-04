@@ -450,7 +450,19 @@ class ZNA(Device):
     
     def calculate_parameter_delete(self, channel, TraceName):
         """
-        See page 998 table
+        Made by Claude. Delete a named trace from a channel (``CALCulate<Ch>:PARameter:DELete``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        TraceName : str
+            Name of the trace to delete.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"CALCulate{channel}:PARameter:DELete '{TraceName}'")
     

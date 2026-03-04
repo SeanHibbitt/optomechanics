@@ -514,6 +514,14 @@ class VNA(Device):
     
 
     def error(self,):
+        """
+        Made by Claude. Query the instrument error queue (``SYST:ERR?``).
+
+        Returns
+        -------
+        str
+            Error code and message string from the instrument error queue.
+        """
         return self.query("SYST:ERR?")
         
     

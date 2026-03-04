@@ -70,8 +70,8 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] `account_for_attenuation()` — rewritten to NumPy format (141500a)
 
 **`data_analysis/Plotting.py`**
-- [ ] `lighten_color()` — PARTIAL
-- [ ] `update_plotly_layout()` — PARTIAL
+- [x] `lighten_color()` — rewritten to NumPy format (cda979e)
+- [x] `update_plotly_layout()` — rewritten to NumPy format (def9d67)
 
 **`data_analysis/Temperature_Reader.py`**
 - [ ] `temp_reader()` — PARTIAL

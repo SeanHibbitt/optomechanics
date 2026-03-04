@@ -497,7 +497,19 @@ class VNA(Device):
     
     
     def sense_freq_data(self, channel):
-        """ returns Freq stimulus data """
+        """
+        Made by Claude. Query the frequency stimulus data array (``SENSe<Ch>:FREQuency:DATA?``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        str
+            Comma-separated frequency values (Hz) as a string.
+        """
         return self.query(f"SENSe{channel}:FREQuency:DATA?")
     
 

@@ -529,6 +529,29 @@ class VNA(Device):
         
     
     def recieve_fdata(self, data_formats, channel, TraceName,):
+        """
+        Made by Claude. Retrieve formatted trace data for multiple data formats.
+
+        Iterates over ``data_formats``, sets the trace format with
+        :meth:`calculate_data_format`, and queries the data with
+        :meth:`calculate_data_fdata_query` for each format.
+
+        Parameters
+        ----------
+        data_formats : list of str
+            Sequence of format strings to retrieve in turn (e.g.
+            ``['MLOGarithmic', 'PHASe']``).
+        channel : int
+            Channel number.
+        TraceName : int or str
+            Trace identifier.
+
+        Returns
+        -------
+        None
+            Result is accumulated in ``data`` but not returned (incomplete
+            implementation — function body does not return ``data``).
+        """
         data = []
         for data_format in data_formats:
             self.calculate_data_format(self, channel, TraceName, data_format) 

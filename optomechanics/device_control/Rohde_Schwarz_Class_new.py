@@ -179,15 +179,21 @@ class ZNA(Device):
 
     def sense_sweep_type(self, channel, sense_sweep_type_format):
         """
-        [SENSe<Ch>:]SWEep:TYPE <Format>
-        Selects the sweep type, i.e. the sweep variable (frequency/power/time) and the position of the sweep points across the sweep range.
-        Suffix:
-        <Ch>
-        .
-        Channel number.
-        see page 1596
-        
-        types of sweep: LINear, LOGarithmic, POWer, CW, POINt, PULSe, IAMPlitude
+        Made by Claude. Select the sweep type (``SENSe<Ch>:SWEep:TYPE``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        sense_sweep_type_format : str
+            Sweep type.  One of ``'LINear'``, ``'LOGarithmic'``,
+            ``'POWer'``, ``'CW'``, ``'POINt'``, ``'PULSe'``, or
+            ``'IAMPlitude'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:SWEep:TYPE {sense_sweep_type_format}")
 

@@ -487,38 +487,26 @@ class ZNA(Device):
     
     def display_window_trace_feed(self, window, window_trace, TraceName ):
         """
-        See page 998
-        
-        Assigns an existing trace (CALCulate<Ch>:PARameter:SDEFine) to a diagram
-        area, using the <WndTr> suffix, and displays the trace. Use DISPlay[:
-        WINDow<Wnd>]:TRACe:EFEed to assign the trace to a diagram area without using a
-        numeric suffix.
-        Tip: A trace can be assigned to a diagram only once. If a attempt is made to assign the
-        same trace a second time (e.g. by typing DISP:WIND2:TRAC8:FEED 'CH4TR1'
-        after executing the program example below) an error message -114,"Header suffix out
-        of range" is generated. You can open the "Trace Manager" dialog to obtain an overview
-        of all channels and traces, including the traces that are not displayed.
-        Suffix:
-        <Wnd>
-        .
-        Number of an existing diagram area (defined by means of
-        DISPlay[:WINDow<Wnd>][:STATe] ON).
-        <WndTr> Trace number used to distinguish the traces of the same diagram area <Wnd>.
-        Parameters:
-        <TraceName> String parameter for the trace name, e.g. 'Trc4'.
-        Example: CALC4:PAR:SDEF 'Ch4Tr1', 'S11'
-        Create channel 4 and a trace named Ch4Tr1 to measure the
-        input reflection coefficient S11.
-        DISP:WIND2:STAT ON
-        Create diagram area no. 2.
-        DISP:WIND2:TRAC9:FEED 'CH4TR1'
-        Display the generated trace in diagram area no. 2, assigning the
-        trace number 9 to it.
-        Manual operation: See "Diagram / Channel" on page 450
+        Made by Claude. Assign a trace to a diagram window (``DISPlay:WINDow<Wnd>:TRACe<WndTr>:FEED``).
 
-        see page 1307
+        The window must already exist (created with :meth:`display_window_state`).
+        A trace can only be assigned to a given diagram once.
+
+        Parameters
+        ----------
+        window : int
+            Diagram area number.
+        window_trace : int
+            Trace slot number within the diagram area.
+        TraceName : str
+            Name of the trace to display (e.g. ``'Trc4'``).
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
-        
+
         return self.write(f"DISPlay:WINDow{window}:TRACe{window_trace}:FEED '{TraceName}'")
     
 

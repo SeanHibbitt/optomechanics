@@ -210,8 +210,9 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] All setter/getter/query methods — rewritten to NumPy format (ca87ae0–834f692)
 
 **`device_control/Rohde_Schwarz_Class_new.py`**
-- [ ] `ZNA.__init__()` — NO
-- [ ] All setter/getter methods — PARTIAL (plain text, no NumPy sections)
+- [x] `ZNA` class — added NumPy class docstring (95896b7)
+- [x] `ZNA.__init__()` — added NumPy docstring (d60cc89)
+- [x] All setter/getter/query/helper methods — rewritten to NumPy format (c46cf70–2cc3d7b)
 
 ### Other doc tasks
 - [ ] Decide whether `E5063A_VNA_Class_old.py` should be kept or removed

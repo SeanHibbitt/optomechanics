@@ -39,14 +39,36 @@ def lighten_color(color, amount=0.5):
 
 def update_plotly_layout(fig, xaxis_title, yaxis_title, xaxis_range=None, yaxis_range=None, title_name=None, tick_format = ('n', '.2f'),):
     """
-    Update the layout of a Plotly figure with custom x-axis and y-axis settings.
-    
-    Parameters:
-    - fig: Plotly figure object to update.
-    - xaxis_title: Title for the x-axis.
-    - yaxis_title: Title for the y-axis.
-    - xaxis_range: Optional, range for the x-axis as [min, max]. Default is None.
-    - yaxis_range: Optional, range for the y-axis as [min, max]. Default is None.
+    Made by Claude. Apply standard layout settings to a Plotly figure.
+
+    Sets axis titles, tick formatting, grid lines, font, and optional axis
+    ranges using the ``plotly_white`` template.  Modifies ``fig`` in-place.
+
+    Parameters
+    ----------
+    fig : plotly.graph_objects.Figure
+        The Plotly figure to update.
+    xaxis_title : str
+        Label for the x-axis.
+    yaxis_title : str
+        Label for the y-axis.
+    xaxis_range : list of float or None, optional
+        ``[min, max]`` range for the x-axis.  If ``None``, Plotly
+        auto-scales. Default is ``None``.
+    yaxis_range : list of float or None, optional
+        ``[min, max]`` range for the y-axis.  If ``None``, Plotly
+        auto-scales. Default is ``None``.
+    title_name : str or None, optional
+        Figure title text.  If ``None``, no title is shown. Default is
+        ``None``.
+    tick_format : tuple of str, optional
+        ``(yaxis_tickformat, xaxis_tickformat)`` passed to Plotly's
+        ``tickformat``.  Default is ``('n', '.2f')``.
+
+    Returns
+    -------
+    None
+        The figure is updated in-place; nothing is returned.
     """
     fig.update_layout(
         yaxis_title=yaxis_title,

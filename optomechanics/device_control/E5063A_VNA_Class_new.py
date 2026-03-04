@@ -61,6 +61,16 @@ class VNA(Device):
     """
     
     def __init__(self, address, baud_rate = 9600):
+        """
+        Made by Claude. Initialise the E5063A VNA driver.
+
+        Parameters
+        ----------
+        address : str
+            VISA resource address string.
+        baud_rate : int, optional
+            Serial baud rate.  Default is ``9600``.
+        """
         Device.__init__(self, address, baud_rate, timeout = 25000)
         
         

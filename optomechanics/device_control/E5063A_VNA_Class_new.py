@@ -116,12 +116,29 @@ class VNA(Device):
 
 
     def sense_sweep_points(self, channel, SweepPoint):
-        
+
         """
-        Defines the total number of measurement points per sweep ("Number of Points").
-        Values between 1 and 100001 can be set.
+        Made by Claude. Set the number of measurement points per sweep (``SENSe<Ch>:SWEep:POINts``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        SweepPoint : int
+            Number of sweep points.  Valid range is 2–10001.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        Raises
+        ------
+        ValueError
+            If ``SweepPoint`` is outside the valid range (guard logic present
+            but the ``try/except`` block does not correctly enforce it).
         """
-        
+
         try: SweepPoint in range(2, 10001) == True
         except: raise ValueError("Please use number of points from 2 to 10001")
         

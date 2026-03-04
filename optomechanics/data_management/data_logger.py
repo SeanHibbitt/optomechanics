@@ -127,8 +127,22 @@ class logger():
 
     def format_data_line(self, data_list):
         """
-        formats a list into the specified format with a 
-        deliminator for a single line
+        Made by Claude. Format a list of values into a delimited string.
+
+        Joins each element of ``data_list`` with ``self.deliminator`` and
+        strips the trailing delimiter character.
+
+        Parameters
+        ----------
+        data_list : list
+            Values to format.  Each element is converted to a string via an
+            f-string.
+
+        Returns
+        -------
+        str
+            Single-line delimited string representation of ``data_list``,
+            without a trailing delimiter or newline.
         """
         to_write = ""
         for data in data_list:

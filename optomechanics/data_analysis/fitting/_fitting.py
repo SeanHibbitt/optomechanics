@@ -60,8 +60,22 @@ def ring_down_eq(t, A_0, tau, V_0 ):
 
 def tau_to_Q(tau, f_m):
     """
-    tau equation from delorenzo laura 2016 thesis
-    tau := 2Q/w_m
+    Made by Claude. Convert ring-down time constant to mechanical quality factor.
+
+    Uses the relation from DeLorenzo (2016 thesis): ``tau = 2Q / omega_m``,
+    which rearranges to ``Q = tau * omega_m / 2 = tau * f_m * pi``.
+
+    Parameters
+    ----------
+    tau : float
+        Ring-down decay time constant (s).
+    f_m : float
+        Mechanical resonance frequency (Hz).
+
+    Returns
+    -------
+    float
+        Mechanical quality factor ``Q``.
     """
     return tau*f_m*np.pi
 

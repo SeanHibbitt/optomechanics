@@ -330,54 +330,28 @@ class ZNA(Device):
         return self.write(f"SOURce{channel}:POWer:LEVel:IMMediate:AMPLitude {IntSourcePow}")
     
     def Trace_copy(self, MemTraceName, DataTraceName):
-        
+
         """
-        TRACe:COPY <MemTraceName>, <DataTraceName>
-        Copies a data trace to a memory trace. The trace to be copied can be specified by two
-        alternative methods:
-        ● As the active data trace of channels 1 to 4 (CH1DATA, CH2DATA, CH3DATA,
-        CH4DATA). If a mathematical trace is active, the associated data trace is copied.
-        SCPI command reference
-        R&S Command reference ®ZNA
-        User Manual 1178.6462.02 ─ 34 1734
-        ● As a trace with a name (string variable).
-        The created memory trace can be specified as follows:
-        ● As the memory trace named Mem<n>[Trc<m>], where n = 1, ... 8 and Trc<m> is
-        the name of the copied data trace (MDATA1, MDATA2, MDATA3, MDATA4,
-        MDATA5, MDATA6, MDATA7, MDATA8).
-        ● As a memory trace with an arbitrary name (string variable).
-        An existing memory trace with the same name is overwritten.
-        Note: The copied trace is the data trace which is not modified by any mathematical
-        operations. To copy a mathematical trace to a memory trace, use TRACe:COPY:MATH.
-        To copy the active trace to the memory using an automatic memory trace name, use
-        CALCulate<Chn>:MATH:MEMorize.
-        Setting parameters:
-        <MemTraceName> Name of the memory trace (see also Table 7-17).
-        Range: <memory_trace> is either a string variable
-        (enclosed in single or double quotes) or one of the
-        following reserved names (no string variables):MDATA1 | MDATA2 | MDATA3 | MDATA4 |
-        MDATA5 | MDATA6 | MDATA7 | MDATA8 (only for
-        memory traces Mem<n>[Trc<m>], where n = 1, ...
-        8).
-        <DataTraceName> Name of the data trace (see also Table 7-17).
-        Range: <data_trace> is either a string variable (enclosed in
-        single or double quotes) or one of the following
-        reserved names (no string variables):CH1DATA |
-        CH2DATA | CH3DATA | CH4DATA (only for the
-        active data trace in channels Ch1, Ch2, Ch3, Ch4).
-        Example: *RST; :SWE:POIN 20
-        Create a trace with 20 sweep points, making the created trace
-        the active trace of channel 1 (omitted optional mnemonic
-        SENSe1).
-        TRAC:COPY "Mem_Pt20",CH1DATA
-        Copy the current state of the created trace to a memory trace
-        named "Mem_Pt20". The memory trace is not displayed.
-        DISP:WIND:TRAC2:FEED "MEM_PT20"
-        Display the created memory trace in the active diagram area
-        (diagram area no. 1).
-        Usage: Setting only
-        Manual operation: See "Data to <Destination>" on page 455 """
-        
+        Made by Claude. Copy a data trace to a memory trace (``TRACe:COPY``).
+
+        The source trace is the unmodified data trace.  An existing memory
+        trace with the same name is overwritten.
+
+        Parameters
+        ----------
+        MemTraceName : str
+            Name for the destination memory trace.  May be a string variable
+            or one of the reserved names ``MDATA1``–``MDATA8``.
+        DataTraceName : str
+            Name of the source data trace.  May be a string variable or one
+            of the reserved names ``CH1DATA``–``CH4DATA``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+        """
+
         return self.write(f"TRACe:COPY {MemTraceName}, {DataTraceName}")
  
     def initiate_continuous(self, channel, boolean):

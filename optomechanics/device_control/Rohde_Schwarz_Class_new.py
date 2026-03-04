@@ -67,6 +67,20 @@ class ZNA(Device):
     """
     
     def __init__(self, address, baud_rate = 9600, **kwargs):
+        """
+        Made by Claude. Initialise the ZNA driver.
+
+        Parameters
+        ----------
+        address : str
+            VISA resource address string.
+        baud_rate : int, optional
+            Serial baud rate.  Default is ``9600``.
+        **kwargs
+            Additional keyword arguments forwarded to
+            :class:`~optomechanics.device_control.Device_Visa_Super.Device`
+            (e.g. ``timeout``).
+        """
         Device.__init__(self, address, baud_rate, **kwargs)
         
     def calculate_format(self, channel, format_type):

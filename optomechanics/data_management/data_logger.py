@@ -191,9 +191,30 @@ class logger():
 
 class dated_logger(logger):
     """
-    Given some base path, this will create 
-    a folder dated folder structure, creating a new folder
-    for each day along with a new file.
+    Made by Claude. Date-partitioned logger that rolls over to a new file each day.
+
+    Extends :class:`logger` by organising log files under a date-based
+    directory hierarchy (via :func:`~optomechanics.data_management.file_management.dated_file_maker`).
+    A new directory and log file are created automatically whenever the
+    calendar day changes.
+
+    Parameters
+    ----------
+    base_path : str
+        Root directory under which dated subdirectories are created.
+    *args
+        Positional arguments forwarded to :class:`logger` (``file_name``,
+        etc.).
+    **kwargs
+        Keyword arguments forwarded to :class:`logger` (``headings``,
+        ``deliminator``, etc.).
+
+    Attributes
+    ----------
+    base_path : str
+        Root directory for dated file storage.
+    current_date : datetime.datetime
+        The date when the current log file was created or last updated.
     """
     
     def __init__(self, base_path, *args,  **kwargs):

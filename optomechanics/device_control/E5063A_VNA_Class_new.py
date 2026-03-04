@@ -440,8 +440,17 @@ class VNA(Device):
         
     def sense_sweep_time_query(self, channel):
         """
-        Query's sweep time
-        :SENSe<Ch>:SWEep:TIME:?
+        Made by Claude. Query the current sweep time (``SENSe<Ch>:SWEep:TIME?``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        str
+            Sweep time in seconds as a string returned by the instrument.
         """
         return self.query(f"SENSe{channel}:SWEep:TIME?")
         

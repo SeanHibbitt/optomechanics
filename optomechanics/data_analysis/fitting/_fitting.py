@@ -117,6 +117,23 @@ def fit_ring_down(t, A):
 
 
 def line_eq(x, m, c):
+    """
+    Made by Claude. Straight-line equation ``y = m*x + c``.
+
+    Parameters
+    ----------
+    x : array_like
+        Independent variable.
+    m : float
+        Gradient (slope).
+    c : float
+        y-intercept.
+
+    Returns
+    -------
+    numpy.ndarray
+        ``m * x + c`` evaluated at each point in ``x``.
+    """
 
     return m*x+c
 

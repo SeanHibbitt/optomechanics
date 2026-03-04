@@ -376,23 +376,22 @@ class ZNA(Device):
     
     def initiate_immediate_dummy(self,channel):
         """
-        INITiate<Ch>[:IMMediate][:DUMMy]
-        Starts a new single sweep sequence. This command is available in single sweep mode
-        only (INITiate<Ch>:CONTinuous OFF). The data of the last sweep (or previous
-        sweeps, see Chapter 8.2.4.3, "Retrieving the results of previous sweeps",
-        on page 1829) can be read using CALCulate<Chn>:DATA:NSWeep:FIRSt?
-        SDATa, <count>.
-        Note: In contrast to all other commands of the analyzer, the
-        INITiate<Ch>[:IMMediate]... commands have been implemented for overlapped execution; see Chapter 6.4, "Command processing", on page 1001.
-        Suffix:
-        <Ch>
-        .
-        Channel number. If the channel number does not exist the analyzer returns an error message. If the "ZVR" or "ZVABT" compatibility mode is active and INITiate<Ch>[:IMMediate]:
-        SCOPe ALL is selected, this suffix is ignored.
-        Example: See INITiate<Ch>:CONTinuous
-        Usage: Event
-        Manual operation: See "Restart Sweep" on page 583
-        See page 1325 of manual
+        Made by Claude. Trigger a new single sweep (``INITiate<Ch>:IMMediate:DUMMy``).
+
+        Available in single-sweep mode only
+        (``INITiate<Ch>:CONTinuous OFF``).  Implemented for overlapped
+        execution.  Previous sweep data can be retrieved with
+        ``CALCulate<Ch>:DATA:NSWeep:FIRSt? SDATa``.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"INITiate{channel}:IMMediate:DUMMy")    
     

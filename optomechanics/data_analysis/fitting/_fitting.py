@@ -32,8 +32,28 @@ RS_default_window_NENBW = 4.082911856792962
 
 def ring_down_eq(t, A_0, tau, V_0 ):
     """
-    Basic ring-down equation
-    tau := 2Q/w_m, as in delorenzo laura 2016 thesis
+    Made by Claude. Exponential ring-down decay equation.
+
+    Models the time-domain envelope of a freely decaying mechanical oscillator
+    as a decaying exponential plus a constant offset.  Following DeLorenzo
+    (2016 thesis), the decay time constant is ``tau = 2Q / omega_m``.
+
+    Parameters
+    ----------
+    t : array_like
+        Time array (s).
+    A_0 : float
+        Initial amplitude at ``t = 0`` (same units as the signal).
+    tau : float
+        Decay time constant (s), equal to ``2Q / omega_m``.
+    V_0 : float
+        Constant background offset (same units as the signal).
+
+    Returns
+    -------
+    numpy.ndarray
+        Ring-down signal ``A_0 * exp(-t / tau) + V_0`` evaluated at each
+        point in ``t``.
     """
 
     return A_0 * np.exp(-t/tau) + V_0

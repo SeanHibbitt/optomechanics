@@ -259,9 +259,20 @@ class VNA(Device):
     
     def sense_sweep_time_auto(self, channel, boolean):
         """
-        turns on or off the auto sweep mode
-        :SENSe<Ch>:SWEep:TIME:AUTO {ON|OFF|1|0}
-        :SENSe<Ch>:SWEep:TIME:AUTO?
+        Made by Claude. Enable or disable automatic sweep time (``SENSe<Ch>:SWEep:TIME:AUTO``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        boolean : str or int
+            ``'ON'`` / ``1`` to enable auto sweep time; ``'OFF'`` / ``0``
+            to disable.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
 
         return self.write(f"SENSe{channel}:SWEep:TIME:AUTO {boolean}")

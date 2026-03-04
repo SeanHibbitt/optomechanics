@@ -199,11 +199,19 @@ class ZNA(Device):
 
     def sense_average_state(self, channel, state):
         """
-        [SENSe:]AVERage[:STATe] Enable or disable the sweep average. Suffix: .
-        Channel number Parameters: ON | OFF - enables
-        or disables the automatic calculation of the sweep average over the specified number
-        of sweeps ([SENSe:]AVERage:COUNt).
-        *RST: OFF Example: See [SENSe:]AVERage:CLEar Manual operation: See "Factor / On / Reset" on page 554
+        Made by Claude. Enable or disable sweep averaging (``SENSe<Ch>:AVERage:STATe``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        state : str
+            ``'ON'`` to enable; ``'OFF'`` to disable.  Reset value: ``'OFF'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:AVERage:STATe {state}")
 

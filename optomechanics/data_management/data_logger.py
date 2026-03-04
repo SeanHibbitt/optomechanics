@@ -152,8 +152,20 @@ class logger():
 
     def write_line(self, data):
         """
-        write a line to the file
-        to_write should be a list
+        Made by Claude. Append a single delimited row to the log file.
+
+        Formats ``data`` with :meth:`format_data_line` and appends the
+        resulting string followed by a newline character to the log file.
+
+        Parameters
+        ----------
+        data : list
+            Values to write as a new row.  Each element is passed to
+            :meth:`format_data_line`.
+
+        Returns
+        -------
+        None
         """
         to_write = self.format_data_line(data)
         #print(f"writing to: {self.file_path + self.file_name} ")

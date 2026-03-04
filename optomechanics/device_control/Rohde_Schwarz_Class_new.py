@@ -582,32 +582,41 @@ class ZNA(Device):
     
     def calculate_data_nsweep_first_query(self, channel,\
             format_type = "SDATa", FwCount = "1", FwCountEnd = ""):
-    
+
         """
-        CALCulate<Chn>:DATA:NSWeep:FIRSt? <Format>, <FwCount>[, <FwCountEnd>]
-        Reads the response values of a trace or a consecutive group of traces acquired in single sweep mode (INITiate<Ch>:CONTinuous OFF).
-        Tip:
-        This command can only be used for [SENSe<Ch>:]SWEep:COUNt > 1.
-        Suffix:
-        <Chn>
-        .
-        Channel number used to identify the active trace
-        Query parameters:
-        <Format> SDATa
-        Read unformatted sweep data (fixed parameter): Returns the
-        real and imaginary part of each measurement point (2 values
-        per trace point irrespective of the selected trace format).
-        <FwCount> Number of the first sweep to be read. 1 denotes the first sweep
-        acquired, 2 denotes the second, and so forth. The sweep count
-        in single sweep mode is defined via [SENSe<Ch>:]SWEep:
-        COUNt.
-        Range: 1 to sweep count
-        <FwCountEnd> Number of the last sweep to be read. If this parameter is omitted, it is implicitly set to <FwCount> (a single sweep is read).
-        Range: <FwCount> to sweep count
-        Return values:
-        <Data> Response values, either in ASCII or block data format, depending on the current FORMat[:DATA] setting.
-        See page 1036
-        Doesn't work for one sweep
+        Made by Claude. Send a NSWeep:FIRSt read request as a write command (``CALCulate<Chn>:DATA:NSWeep:FIRSt?``).
+
+        Only valid when ``SENSe<Ch>:SWEep:COUNt`` > 1 and
+        ``INITiate<Ch>:CONTinuous OFF``.  Returns unformatted (real +
+        imaginary) data for the selected sweep or range of sweeps.
+
+        .. note::
+           This method uses :meth:`~Device.write` rather than
+           :meth:`~Device.query`.  Use :meth:`calculate_data_nsweep_first`
+           for the equivalent query call that returns data.  This variant
+           does not work for a single sweep (``SWEep:COUNt 1``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number identifying the active trace.
+        format_type : str, optional
+            Data format.  Must be ``'SDATa'`` (real + imaginary pairs,
+            2 values per point).  Default is ``'SDATa'``.
+        FwCount : str, optional
+            Index of the first sweep to read (1-based).  Default is ``'1'``.
+        FwCountEnd : str, optional
+            Index of the last sweep to read.  If ``''``, only the sweep at
+            ``FwCount`` is read.  Default is ``''``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        References
+        ----------
+        ZNA user manual, page 1036.
         """
         return self.write(f"CALCulate{channel}:DATA:NSWeep:FIRSt? {format_type},\
                           {FwCount}, {FwCountEnd}")

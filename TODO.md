@@ -77,7 +77,7 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] `temp_reader()` — rewritten to NumPy format (1599526)
 
 **`data_analysis/control_gui.py`**
-- [ ] `Control_PID()` — PARTIAL
+- [x] `Control_PID()` — rewritten to NumPy format (369554d)
 
 **`data_analysis/fitting/__init__.py`**
 - [x] Module docstring — added NumPy docstring (875c9f5)

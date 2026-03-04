@@ -25,10 +25,36 @@ from optomechanics.data_analysis.fitting.S21 import S21_eq, fit_S21_peak
 def OMIT_equation(f, f_m, g_m, A, floor, kk_tot):
 
     """
-    OMIT fitting equation, A is defined as:
-    A = (k_ext * 4 * omega_m * g_0**2 * n_d)  /  (sqrt(k**4 + 4*(w_p - w_c)) ))
-    floor = sqrt(k_ext**2 / (sqrt(k**4 + 4*(w_p - w_c))  )
+    Made by Claude. Optomechanically induced transparency (OMIT) lineshape equation.
 
+    Computes the OMIT transmission amplitude as a function of frequency.
+    The amplitude parameter ``A`` and background ``floor`` are defined as::
+
+        A     = (k_ext * 4 * omega_m * g_0**2 * n_d)
+                / sqrt(k**4 + 4*(w_p - w_c)**2)
+        floor = sqrt(k_ext**2
+                / sqrt(k**4 + 4*(w_p - w_c)**2))
+
+    Parameters
+    ----------
+    f : array_like
+        Frequency array (Hz).
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    g_m : float
+        Mechanical linewidth / damping rate (Hz).
+    A : float
+        OMIT peak amplitude (linear voltage units).
+    floor : float
+        Background transmission level (linear voltage units).
+    kk_tot : float
+        Total optical linewidth (Hz).
+
+    Returns
+    -------
+    OMIT : numpy.ndarray
+        OMIT transmission amplitude (linear voltage units) evaluated at each
+        frequency in ``f``.
     """
 
     w = 2*np.pi* f

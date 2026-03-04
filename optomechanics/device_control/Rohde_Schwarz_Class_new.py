@@ -512,13 +512,24 @@ class ZNA(Device):
 
     def calculate_parameter_delete_all(self,):
         """
-        CALCulate:PARameter:DELete:ALL
-        Deletes all traces in all channels of the active recall set, including the default trace
-        Trc1 in channel 1. The manual control screen shows "No Trace".
-        Example: See CALCulate<Ch>:PARameter:DELete
-        Usage: Event
-        Manual operation: See "Delete Trace" on page 450
-        see page 1161
+        Made by Claude. Delete all traces in all channels (``CALCulate:PARameter:DELete:ALL``).
+
+        Deletes all traces in all channels of the active recall set,
+        including the default trace ``Trc1`` in channel 1.  The manual
+        control screen shows "No Trace" afterwards.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        See Also
+        --------
+        calculate_parameter_delete : Delete a single named trace.
+
+        References
+        ----------
+        ZNA user manual, page 1161.
         """
         return self.write("CALCulate:PARameter:DELete:ALL")
     

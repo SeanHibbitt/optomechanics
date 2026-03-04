@@ -674,6 +674,16 @@ class ZNA(Device):
         return self.write("ROSC EXT")
     
     def load_cal(self, channel, file):
+        """
+        Made by Claude. Load and apply a calibration file to a channel (``MMEM:LOAD:CORR``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number to apply the calibration to.
+        file : str
+            Full path to the calibration file on the instrument file system.
+        """
         self.write(f"MMEM:LOAD:CORR {channel}, '{file}'")
 
     def sense_sweep_count(self, channel, count):

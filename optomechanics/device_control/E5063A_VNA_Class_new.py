@@ -375,8 +375,17 @@ class VNA(Device):
     
     def output_state(self, state):
         """
-        Turns on and off the signal output
-        state: ON/OFF
+        Made by Claude. Enable or disable the RF signal output (``OUTPut:STATe``).
+
+        Parameters
+        ----------
+        state : str
+            ``'ON'`` to enable the output; ``'OFF'`` to disable.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"OUTPut:STATe {state}")
     

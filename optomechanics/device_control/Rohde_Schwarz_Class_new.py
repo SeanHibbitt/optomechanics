@@ -149,31 +149,29 @@ class ZNA(Device):
 
 
     def sense_sweep_points(self, channel, SweepPoint):
-        
+
         """
-        Defines the total number of measurement points per sweep ("Number of Points").
-        Values between 1 and 100001 can be set.
-        Suffix:
-        <Ch>
-        .
-        Channel number 1
-        Parameters:
-        <SweepPoint> Number of points per sweep, in the range of 1 and 100001 for
-        frequency sweeps.
-        Range: see above
-        *RST: 201
-        Example: *RST
-        Reset the instrument, activating a frequency sweep with 201
-        sweep points.
-        SWE:TIME?
-        Query total sweep time.
-        SWE:POIN 2010
-        Multiply the (default) number of points by 10.
-        SWE:TIME?
-        Query total sweep time again. The analyzer estimates a sweep
-        time that is also multiplied by 10.
-        Manual operation: See "Number of Points" on page 540 """
-        
+        Made by Claude. Set the number of measurement points per sweep (``SENSe<Ch>:SWEep:POINts``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        SweepPoint : int
+            Number of sweep points.  Valid range 1–100001; reset value 201.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        Raises
+        ------
+        ValueError
+            If ``SweepPoint`` is outside the valid range (guard logic present
+            but the ``try/except`` block does not correctly enforce it).
+        """
+
         try: SweepPoint in range(1, 100002) == True
         except: raise ValueError("Please use number of points from 1 to 100001")
         

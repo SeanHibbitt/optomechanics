@@ -78,7 +78,17 @@ class logger():
 
     def create(self):
         """
-        creates file in specified location
+        Made by Claude. Create the log file and write the heading row.
+
+        Attempts to create ``self.file_path + self.file_name`` in exclusive
+        creation mode.  If the file already exists, calls :meth:`read`
+        instead to load existing data.
+
+        Returns
+        -------
+        bool
+            ``True`` if the file was newly created; ``False`` if it already
+            existed.
         """
         try: 
             print(f"try to create:{self.file_path + self.file_name}")

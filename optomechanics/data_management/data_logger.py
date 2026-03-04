@@ -249,6 +249,18 @@ class dated_logger(logger):
 
 
     def update_file_path(self):
+        """
+        Made by Claude. Create a new dated directory and log file for the current day.
+
+        Calls :func:`~optomechanics.data_management.file_management.dated_file_maker`
+        to build the dated directory under ``self.base_path``, updates
+        ``self.file_path`` and ``self.current_date``, and then calls
+        :meth:`~logger.create` to create the log file with the heading row.
+
+        Returns
+        -------
+        None
+        """
         print(f"creating dated folder")
         self.file_path = dated_file_maker(self.base_path)
         self.current_date = datetime.now()

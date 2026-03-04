@@ -328,9 +328,20 @@ class VNA(Device):
     
     def initiate_sweep(self,channel):
         """
-        INITiate<Ch>:IMMediate
-        Starts a new single sweep sequence. This command is available in single sweep mode
-        only (INITiate<Ch>:CONTinuous OFF).
+        Made by Claude. Trigger a single sweep (``INITiate<Ch>:IMMediate``).
+
+        Only available when the instrument is in single-sweep mode
+        (``INITiate<Ch>:CONTinuous OFF``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"INITiate{channel}")    
     

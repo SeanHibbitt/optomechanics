@@ -1019,10 +1019,21 @@ class ZNA(Device):
     #update for the zna for following point of peak via phase value
     
     def follow_value(self,):
-        
-        
-        
-        return 
+        """
+        Made by Claude. Track the peak value via phase — stub, not yet implemented.
+
+        .. warning::
+           This method is an empty stub; no tracking logic has been
+           implemented.
+
+        Returns
+        -------
+        None
+        """
+
+
+
+        return
     
         
 

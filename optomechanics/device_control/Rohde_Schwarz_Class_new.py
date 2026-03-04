@@ -687,6 +687,17 @@ class ZNA(Device):
         self.write(f"MMEM:LOAD:CORR {channel}, '{file}'")
 
     def sense_sweep_count(self, channel, count):
+        """
+        Made by Claude. Set the number of sweeps per measurement cycle (``SENSe<Ch>:SWEep:COUNt``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        count : int
+            Number of sweeps.  Used with ``INITiate<Ch>:CONTinuous OFF``
+            for single-sweep mode with multiple accumulations.
+        """
         self.write(f"sense{channel}:sweep:count {count}")
 
     def calculate_data_nsweep_first(self, channel, format, fwcount, fwcountend):

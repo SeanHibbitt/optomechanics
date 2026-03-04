@@ -116,11 +116,11 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] `fit_OMIT_set_floor()` — rewritten to NumPy format (2cfc35f)
 
 **`data_analysis/fitting/_fitting.py`** *(private module)*
-- [ ] `ring_down_eq()` — PARTIAL *(private)*
-- [ ] `tau_to_Q()` — PARTIAL *(private)*
-- [ ] `fit_ring_down()` — NO *(private)*
-- [ ] `line_eq()` — NO *(private)*
-- [ ] `fit_linear()` — NO *(private)*
+- [x] `ring_down_eq()` — rewritten to NumPy format (9b4b68b)
+- [x] `tau_to_Q()` — rewritten to NumPy format (5491332)
+- [x] `fit_ring_down()` — added NumPy docstring (1f109cb)
+- [x] `line_eq()` — added NumPy docstring (9b10d8e)
+- [x] `fit_linear()` — added NumPy docstring (039bac1)
 
 **`data_management/__init__.py`**
 - [x] Module docstring — added NumPy docstring (37cf08b)

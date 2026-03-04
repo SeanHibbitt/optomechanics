@@ -279,9 +279,25 @@ class VNA(Device):
     
     def source_power_level(self, channel, IntSourcePow = -10):
         """
-        :SOURce<Ch>:POWer:PORT<Pt>[:LEVel][:IMMediate][:AMPLitude] <Value>
-        range: -20 -> 0
+        Made by Claude. Set the internal source power level (``SOURce<Ch>:POWer:LEVel:IMMediate:AMPLitude``).
 
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        IntSourcePow : float, optional
+            Output power (dBm).  Must be in the range ``[-20, 0]``.
+            Default is ``-10``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        Raises
+        ------
+        ValueError
+            If ``IntSourcePow`` is outside ``[-20, 0]``.
         """
         if IntSourcePow <= 0 and IntSourcePow >=-20:
             pass

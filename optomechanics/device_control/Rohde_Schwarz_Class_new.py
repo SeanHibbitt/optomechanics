@@ -701,8 +701,33 @@ class ZNA(Device):
         self.write(f"sense{channel}:sweep:count {count}")
 
     def calculate_data_nsweep_first(self, channel, format, fwcount, fwcountend):
-        """ 
-        retrieve data from the specified channel, and the specified swepe
+        """
+        Made by Claude. Query trace data from a specific sweep in single-sweep mode (``CALCulate<Chn>:DATA:NSWeep:FIRSt?``).
+
+        Returns unformatted (real + imaginary) data for the specified sweep
+        or range of sweeps.  Requires ``SENSe<Ch>:SWEep:COUNt`` > 1 and
+        ``INITiate<Ch>:CONTinuous OFF``.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number identifying the active trace.
+        format : str
+            Data format.  Use ``'SDATa'`` for real + imaginary pairs
+            (2 values per point).
+        fwcount : int
+            Index of the first sweep to read (1-based).
+        fwcountend : int
+            Index of the last sweep to read.
+
+        Returns
+        -------
+        str
+            Comma-separated data string containing real and imaginary pairs.
+
+        See Also
+        --------
+        calculate_data_nsweep_first_query : Write variant of this command.
         """
         return self.query(f"calculate{channel}:data:nsweep:first? {format}, {fwcount}, {fwcountend}")
 

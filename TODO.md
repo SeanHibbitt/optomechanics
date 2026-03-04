@@ -142,17 +142,18 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] `dated_file_maker()` — rewritten to NumPy format (019b013)
 
 **`data_management/data_logger.py`**
-- [ ] `logger.__init__()` — NO
-- [ ] `logger.create()` — PARTIAL
-- [ ] `logger.read()` — PARTIAL
-- [ ] `logger.format_data_line()` — PARTIAL
-- [ ] `logger.write_line()` — PARTIAL
-- [ ] `logger.__call__()` — PARTIAL
-- [ ] `dated_logger` class — PARTIAL
-- [ ] `dated_logger.__init__()` — NO
-- [ ] `dated_logger.update_file_path()` — NO
-- [ ] `dated_logger.check_update_file_path()` — NO
-- [ ] `dated_logger.__call__()` — NO
+- [x] `logger` class — added NumPy class docstring (9eeb543)
+- [x] `logger.__init__()` — added NumPy docstring (d07eab9)
+- [x] `logger.create()` — rewritten to NumPy format (156591d)
+- [x] `logger.read()` — rewritten to NumPy format (ff69e29)
+- [x] `logger.format_data_line()` — rewritten to NumPy format (4378205)
+- [x] `logger.write_line()` — rewritten to NumPy format (0e8a868)
+- [x] `logger.__call__()` — rewritten to NumPy format (0db1df0)
+- [x] `dated_logger` class — added NumPy class docstring (a3c7bdd)
+- [x] `dated_logger.__init__()` — added NumPy docstring (4875d2e)
+- [x] `dated_logger.update_file_path()` — added NumPy docstring (394d2d8)
+- [x] `dated_logger.check_update_file_path()` — added NumPy docstring (0bb232e)
+- [x] `dated_logger.__call__()` — added NumPy docstring (52e0afa)
 
 **`device_control/__init__.py`**
 - [x] Module docstring — added NumPy docstring (ef0dbc0)

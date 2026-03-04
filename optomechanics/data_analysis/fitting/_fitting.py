@@ -81,6 +81,29 @@ def tau_to_Q(tau, f_m):
 
 
 def fit_ring_down(t, A):
+    """
+    Made by Claude. Fit an exponential ring-down decay to time-domain data.
+
+    Auto-generates initial parameter guesses and fits :func:`ring_down_eq`
+    using ``scipy.optimize.curve_fit``.
+
+    Parameters
+    ----------
+    t : array_like
+        Time array (s).
+    A : array_like
+        Measured amplitude array (same units as the signal).
+
+    Returns
+    -------
+    popt : numpy.ndarray
+        Optimal fit parameters ``[A_0, tau, V_0]``.
+    pcov : numpy.ndarray
+        Covariance matrix of ``popt``.
+    guesses : list
+        Initial guesses ``[tau_guess, A_0_guess, V_0_guess]`` used by
+        ``curve_fit``.
+    """
 
     tau_guess = t[find_closest_number(A, A/np.exp(1))]
     A_0_guess = np.max(A)

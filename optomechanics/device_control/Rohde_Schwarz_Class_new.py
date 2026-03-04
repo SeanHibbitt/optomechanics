@@ -732,7 +732,13 @@ class ZNA(Device):
         return self.query(f"calculate{channel}:data:nsweep:first? {format}, {fwcount}, {fwcountend}")
 
     def check_current_sweep_number():
-        """CALCULATE1:DATA:NSWEEP:COUNT?"""
+        """
+        Made by Claude. Query the number of completed sweeps (``CALCULATE1:DATA:NSWEEP:COUNT?``).
+
+        .. warning::
+           This method is missing the ``self`` parameter and is therefore a
+           broken stub — it cannot be called on an instance.
+        """
     
     ####Ease of Use Functions:
     

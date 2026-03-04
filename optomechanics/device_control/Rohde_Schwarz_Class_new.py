@@ -218,11 +218,17 @@ class ZNA(Device):
     
     def sense_average_clear(self, channel):
         """
-        [SENSe:]AVERage:CLEar Starts a new average cycle, clearing all previous results and thus eliminating their
-        effect on the new cycle. Suffix: . Channel number Example: SENS1:AVER:COUN 15; :AVER ON Set the average
-        factor for channel 1 to 15 (the mnemonic SENS1 can be omitted) and enable the sweep average. AVER:COUN 5;
-        CLE Reduce the average factor and restart the average. Usage: Event Manual operation:
-        See "Factor / On / Reset" on page 554
+        Made by Claude. Start a new average cycle, discarding previous results (``SENSe:AVERage:CLEar``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe:{channel}AVERage:CLEar")
         

@@ -751,7 +751,77 @@ class ZNA(Device):
               reset = True,_file_name = "default", file_location = "", ext_ref = True, use_cal = False,\
               extra_meta = {},
                   ):
-        
+        """
+        Made by Claude. Configure the ZNA, run a sweep, and save the results to a TSV file.
+
+        Performs the full sweep workflow: optional reset, trace/channel
+        setup, frequency/power/bandwidth configuration, sweep execution
+        (polling via ``*OPC?`` + ``read_bytes``), data retrieval in dB
+        and phase, and file save.  Populates :attr:`freq_list`,
+        :attr:`data_1`, and :attr:`data_2`.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        Result : str
+            S-parameter to measure (e.g. ``'S21'``).
+        TraceName : str
+            Name for the created trace (e.g. ``'Trc1'``).
+        freq_start : float
+            Sweep start frequency (Hz).
+        freq_stop : float
+            Sweep stop frequency (Hz).
+        number_of_points : int, optional
+            Number of frequency points.  Default is ``100``.
+        probe_power : float, optional
+            Source power (dBm).  Default is ``-10``.
+        band_width : float, optional
+            IF bandwidth (Hz).  Default is ``1e3``.
+        timeout : int, optional
+            Read timeout passed to :meth:`~Device.read_bytes` (ms).
+            Default is ``1000``.
+        sweep_count : int, optional
+            Number of sweeps in single-sweep mode.  Default is ``1``.
+        sense_average_state : str, optional
+            ``'ON'`` to enable sweep averaging; ``'OFF'`` to disable.
+            Default is ``'OFF'``.
+        sense_average_count_factor : int, optional
+            Sweep averaging factor (used when ``sense_average_state='ON'``).
+            Default is ``1``.
+        sense_average_point_count_factor : int, optional
+            Point-averaging factor (used when ``sense_average_state='ON'``).
+            Default is ``1``.
+        sense_sweep_type_format : str, optional
+            Sweep type: ``'LINear'`` or ``'LOGarithmic'``.
+            Default is ``'LINear'``.
+        reset : bool, optional
+            If ``True``, call ``CLS``, ``RST``, and delete all traces
+            before configuring.  Default is ``True``.
+        _file_name : str, optional
+            Base name for the output file.  Default is ``'default'``.
+        file_location : str, optional
+            Directory path for the output file.  Pass ``False`` to skip
+            saving.  Default is ``''``.
+        ext_ref : bool, optional
+            Reserved for future use (not currently used in the method body).
+            Default is ``True``.
+        use_cal : str or bool, optional
+            Path to a calibration file to load, or ``False`` to skip.
+            Default is ``False``.
+        extra_meta : dict, optional
+            Additional key-value pairs to include in the file metadata
+            header.  Default is ``{}``.
+
+        Returns
+        -------
+        data_pandas : pandas.DataFrame
+            DataFrame with columns ``freq[Hz]``, ``sweep_number_mag[dB]:<n>``,
+            and ``sweep_number_phase[rad]:<n>`` for each sweep ``n``.
+        meta_data_dict : dict
+            Dictionary of sweep metadata (timestamps, all sweep parameters).
+        """
+
         args = locals()
         
         if sense_sweep_type_format == "LINear":

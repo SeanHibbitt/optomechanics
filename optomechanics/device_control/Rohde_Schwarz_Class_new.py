@@ -309,37 +309,24 @@ class ZNA(Device):
     
     def source_power_level(self, channel, IntSourcePow = -10):
         """
-        SOURce<Ch>:POWer<PhyPt>[:LEVel][:IMMediate][:AMPLitude] <IntSourcePow>
-        
-        Defines the power of the internal signal source (channel base power). The setting is
-        valid for all sweep types, except power sweep.
-        Tip: Use SOURce<Ch>:POWer<PhyPt>:STARt and SOURce<Ch>:POWer<PhyPt>:
-        STOP to define the sweep range for a power sweep.
-        Suffix:
-        <Ch>
-        Channel number
-        <PhyPt> Test port number of the analyzer. This suffix is ignored because
-        the selected channel base power applies to all source ports
-        used in the active channel.
-        It is possible though to define a port-specific slope factor for the
-        source power (SOURce<Ch>:POWer<PhyPt>[:LEVel][:
-        IMMediate]:SLOPe) and a port-specific power offset
-        (SOURce<Ch>:POWer<PhyPt>[:LEVel][:IMMediate]:
-        OFFSet).
-        Parameters:
-        <IntSourcePow> Internal source power
-        Range: The usable power range is frequency-dependent;
-        refer to the data sheet.
-        *RST: -10 dBm
-        Default unit: dBm
-        Example: FUNC "XFR:POW:RAT B1, A2"
-        Activate a frequency sweep and select the ratio B1/A2 as measured parameter for channel and trace no. 1.
-        SOUR:POW -6
-        Set the internal source power for channel 1 to -6 dBm.
-        Manual operation: See "Power" on page 542 
-        
+        Made by Claude. Set the channel base source power (``SOURce<Ch>:POWer:LEVel:IMMediate:AMPLitude``).
+
+        Valid for all sweep types except power sweep.  The usable power range
+        is frequency-dependent; refer to the instrument data sheet.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        IntSourcePow : float, optional
+            Source power (dBm).  Reset value: ``-10``.  Default is ``-10``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
-        
+
         return self.write(f"SOURce{channel}:POWer:LEVel:IMMediate:AMPLitude {IntSourcePow}")
     
     def Trace_copy(self, MemTraceName, DataTraceName):

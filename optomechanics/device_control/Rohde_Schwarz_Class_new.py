@@ -988,6 +988,25 @@ class ZNA(Device):
         
 
     def save_data(self, file_name, location = "", meta_data = ""):
+        """
+        Made by Claude. Save the last sweep data to a tab-separated text file.
+
+        Writes a header line with ``meta_data``, a column-label row, then
+        one row per point containing log-magnitude (dB), phase, and
+        frequency.  Reads from :attr:`data_1`, :attr:`data_2`, and
+        :attr:`freq_list`, which are populated by :meth:`sweep`.
+
+        Parameters
+        ----------
+        file_name : str
+            File name (including extension) for the output file.
+        location : str, optional
+            Directory path.  Concatenated with ``file_name`` to form the
+            full path.  Default is ``''`` (current directory).
+        meta_data : str, optional
+            Metadata string written as the first line of the file.
+            Default is ``''``.
+        """
         with open(location+file_name, "w") as file1:
             file1.write(meta_data+"\n")
             file1.write('Logarithmic Magnitude [dB]\tPhase (e^iphase)\tFreq[Hz]\n')

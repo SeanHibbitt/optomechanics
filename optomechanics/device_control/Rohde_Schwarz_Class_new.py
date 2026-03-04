@@ -535,8 +535,21 @@ class ZNA(Device):
     
     def output_state(self, state):
         """
-        see page number 1372
-        state: ON/OFF
+        Made by Claude. Enable or disable the RF output (``OUTPut:STATe``).
+
+        Parameters
+        ----------
+        state : str
+            ``'ON'`` to enable the RF output; ``'OFF'`` to disable it.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        References
+        ----------
+        ZNA user manual, page 1372.
         """
         return self.write(f"OUTPut:STATe {state}")
             

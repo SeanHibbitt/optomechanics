@@ -268,6 +268,17 @@ class dated_logger(logger):
         #print(f"updating_file_path: \nfile_path = {self.file_path}")
 
     def check_update_file_path(self):
+        """
+        Made by Claude. Roll over to a new log file if the calendar day has changed.
+
+        Compares ``self.current_date.day`` with the current day.  If they
+        differ, calls :meth:`update_file_path` to create a new dated
+        directory and log file.
+
+        Returns
+        -------
+        None
+        """
         if self.current_date.day != datetime.now().day:
             self.update_file_path()
 

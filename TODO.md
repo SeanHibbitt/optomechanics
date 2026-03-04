@@ -111,9 +111,9 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] `FWHM_guesser()` — rewritten to NumPy format (a9ab139)
 
 **`data_analysis/fitting/omit.py`**
-- [ ] `OMIT_equation()` — PARTIAL
-- [ ] `fit_OMIT()` — PARTIAL
-- [ ] `fit_OMIT_set_floor()` — PARTIAL
+- [x] `OMIT_equation()` — rewritten to NumPy format (05576b7)
+- [x] `fit_OMIT()` — rewritten to NumPy format (623b6c0)
+- [x] `fit_OMIT_set_floor()` — rewritten to NumPy format (2cfc35f)
 
 **`data_analysis/fitting/_fitting.py`** *(private module)*
 - [ ] `ring_down_eq()` — PARTIAL *(private)*

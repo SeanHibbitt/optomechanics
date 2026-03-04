@@ -108,7 +108,16 @@ class logger():
 
     def read(self):
         """
-        reads the file into a pandas data frame
+        Made by Claude. Read the log file into ``self.data`` as a pandas DataFrame.
+
+        Uses ``self.deliminator`` as the separator and treats the first row as
+        the header.  The result is stored in ``self.data``.
+
+        Returns
+        -------
+        None
+            The loaded DataFrame is stored in ``self.data``; nothing is
+            returned.
         """
         kwargs = {
             "sep"   : self.deliminator,

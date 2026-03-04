@@ -77,9 +77,21 @@ class VNA(Device):
     
     def sense_freq_start(self, channel, FreqVal):
         """
-        Resolution of 1 Hz
+        Made by Claude. Set the sweep start frequency (``SENSe<Ch>:FREQuency:STARt``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        FreqVal : float
+            Start frequency (Hz).  Resolution is 1 Hz.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
-        
+
         return self.write(f"SENSe{channel}:FREQuency:STARt {FreqVal}")
     
     

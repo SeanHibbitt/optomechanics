@@ -138,6 +138,26 @@ def line_eq(x, m, c):
     return m*x+c
 
 def fit_linear(x, y, errors = 1, ):
+    """
+    Made by Claude. Fit a straight line to data using ``scipy.optimize.curve_fit``.
+
+    Parameters
+    ----------
+    x : array_like
+        Independent variable data.
+    y : array_like
+        Dependent variable data.
+    errors : array_like or float, optional
+        Measurement uncertainties on ``y``, passed as ``sigma`` to
+        ``curve_fit``.  Default is ``1`` (unweighted fit).
+
+    Returns
+    -------
+    popt : numpy.ndarray
+        Optimal fit parameters ``[m, c]`` for the line ``y = m*x + c``.
+    pcov : numpy.ndarray
+        Covariance matrix of ``popt``.
+    """
 
     popt, pcov = curve_fit(line_eq, x, y, sigma = errors )
 

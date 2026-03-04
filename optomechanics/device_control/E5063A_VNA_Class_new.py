@@ -350,13 +350,25 @@ class VNA(Device):
     
     def calculate_parameter_define(self, channel, TraceName, Result):
         """
-        Sets/gets the measurement parameter, this may have to be used in
-        tandem with other commands to create the channel and trace
-        Result is S parameter, i.e:
-            S11
-            S12
-            S21
-            S22
+        Made by Claude. Assign a measurement parameter to a trace (``CALCulate<Ch>:PARameter<Tr>:DEFine``).
+
+        May need to be used alongside other commands to create the channel
+        and trace first.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        TraceName : int or str
+            Trace identifier.
+        Result : str
+            S-parameter to measure, e.g. ``'S11'``, ``'S12'``, ``'S21'``,
+            or ``'S22'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"CALCulate{channel}:PARameter{TraceName}:DEFine {Result}")
           

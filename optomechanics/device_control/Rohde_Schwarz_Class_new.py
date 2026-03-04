@@ -25,19 +25,45 @@ import pandas
 
 class ZNA(Device):
     """
-    class for ZNA from rohde-schwarz
-    manual:  https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
-    website: https://www.rohde-schwarz.com/uk/manual/r-s-zna-user-manual-manuals_78701-601863.html
-    
-    
-    device type: R&S®ZNA67, 10 MHz to 67 GHz, 4 test ports 1.85 mm, order no. 1332.4500K64
-    frequency settings: 
-        Start, Stop:      100kHz to 67 GHz
-        Center:           >100 kHz to <67 GHz
-        Span:             1 Hz to 66.9999 GHz
-        
-    max sweep points = 100001
-    
+    Made by Claude. VISA driver for the Rohde & Schwarz ZNA vector network analyser.
+
+    Extends :class:`~optomechanics.device_control.Device_Visa_Super.Device`
+    with SCPI commands specific to the R&S ZNA family.
+
+    Device: R&S ZNA67, 10 MHz to 67 GHz, 4 test ports 1.85 mm
+    (order no. 1332.4500K64).
+
+    Frequency settings:
+      - Start / Stop: 100 kHz to 67 GHz
+      - Centre: >100 kHz to <67 GHz
+      - Span: 1 Hz to 66.9999 GHz
+
+    Maximum sweep points: 100 001.
+
+    Parameters
+    ----------
+    address : str
+        VISA resource address string (e.g. ``'TCPIP::192.168.x.x::INSTR'``).
+    baud_rate : int, optional
+        Serial baud rate.  Default is ``9600``.
+    **kwargs
+        Additional keyword arguments forwarded to the parent
+        :class:`~optomechanics.device_control.Device_Visa_Super.Device`
+        ``__init__`` (e.g. ``timeout``).
+
+    Attributes
+    ----------
+    freq_list : numpy.ndarray
+        Frequency array populated by :meth:`sweep`.
+    data_1 : numpy.ndarray
+        Log-magnitude (dB) data populated by :meth:`sweep`.
+    data_2 : numpy.ndarray
+        Phase (degrees) data populated by :meth:`sweep`.
+
+    References
+    ----------
+    ZNA user manual:
+    https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
     """
     
     def __init__(self, address, baud_rate = 9600, **kwargs):

@@ -8,11 +8,40 @@ from datetime import datetime
 
 class logger():
     """
-    Aim:
-    Neatly made class to log data to a specified file in 
-    a specified format and also to retrieve data
-    in a specified format.
-    Uses pandas
+    Made by Claude. Append-mode CSV data logger backed by a pandas DataFrame.
+
+    Creates the log file on instantiation if it does not already exist, writes
+    a header row, and provides methods for appending new rows and reading the
+    file back into a ``pandas.DataFrame``.
+
+    Parameters
+    ----------
+    file_name : str
+        Name of the log file (including extension, e.g. ``'log.csv'``).
+    file_path : str, optional
+        Directory path for the log file.  Default is ``""`` (current
+        directory).
+    headings : list of str, optional
+        Column headings written as the first row of a newly created file.
+        Default is ``[""]``.
+    deliminator : str, optional
+        Field delimiter character.  Default is ``","``
+    read_file : bool, optional
+        Reserved for future use — currently unused. Default is ``True``.
+
+    Attributes
+    ----------
+    file_path : str
+        Directory path where the log file is stored.
+    file_name : str
+        Name of the log file.
+    headings : list of str
+        Column headings for the log file.
+    deliminator : str
+        Field delimiter character.
+    data : pandas.DataFrame or None
+        Contents of the log file after :meth:`read` is called; ``None``
+        until then.
     """
 
     def __init__(self, file_name, file_path = "", headings = [""], deliminator = ",", read_file = True):

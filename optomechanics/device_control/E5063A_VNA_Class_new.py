@@ -457,9 +457,22 @@ class VNA(Device):
 
     
     def calculate_data_fdata_query(self, channel, TraceName):
-    
+
         """
-        returns data from a formatted data array of the given channel
+        Made by Claude. Retrieve formatted trace data (``CALCulate<Ch>:TRACe<Tr>:DATA:FDATa?``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        TraceName : int or str
+            Trace identifier.
+
+        Returns
+        -------
+        str
+            Comma-separated formatted data string.  The format is determined
+            by the last call to :meth:`calculate_data_format`.
         """
         return self.query(f"CALCulate{channel}:TRACe{TraceName}:DATA:FDATa?")
     

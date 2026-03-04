@@ -50,6 +50,26 @@ class Device(mainDevice):
     """
     
     def __init__(self, address, baud_rate = 9600, query_delay = 0, timeout = 10000  ):
+        """
+        Made by Claude. Initialise the RsInstrument-backed device.
+
+        Delegates to the parent
+        :meth:`~optomechanics.device_control.Device_Visa_Super.Device.__init__`
+        with a fixed timeout of ``25000`` ms, ignoring the ``timeout``
+        parameter passed to this constructor.
+
+        Parameters
+        ----------
+        address : str
+            VISA resource address string.
+        baud_rate : int, optional
+            Serial baud rate.  Default is ``9600``.
+        query_delay : float, optional
+            Delay between write and read in a query (s).  Default is ``0``.
+        timeout : float, optional
+            Intended VISA timeout (ms).  Currently ignored — parent is always
+            called with ``25000`` ms.  Default is ``10000``.
+        """
         Device.__init__(self, address, baud_rate, timeout = 25000)
 
     def open(self):

@@ -174,7 +174,17 @@ class logger():
 
     def __call__(self, data):
         """
-        can be used instead of write
+        Made by Claude. Alias for :meth:`write_line` — append a row by calling the instance.
+
+        Parameters
+        ----------
+        data : list
+            Values to write as a new row; passed directly to
+            :meth:`write_line`.
+
+        Returns
+        -------
+        None
         """
         self.write_line(data)
 

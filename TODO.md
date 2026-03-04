@@ -74,7 +74,7 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] `update_plotly_layout()` — rewritten to NumPy format (def9d67)
 
 **`data_analysis/Temperature_Reader.py`**
-- [ ] `temp_reader()` — PARTIAL
+- [x] `temp_reader()` — rewritten to NumPy format (1599526)
 
 **`data_analysis/control_gui.py`**
 - [ ] `Control_PID()` — PARTIAL

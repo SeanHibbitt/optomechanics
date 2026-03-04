@@ -661,6 +661,16 @@ class ZNA(Device):
     
     
     def use_ext_ref(self,):
+        """
+        Made by Claude. Switch the reference oscillator to external (``ROSC EXT``).
+
+        Configures the instrument to use an external 10 MHz reference signal.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+        """
         return self.write("ROSC EXT")
     
     def load_cal(self, channel, file):

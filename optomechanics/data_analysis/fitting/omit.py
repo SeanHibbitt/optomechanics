@@ -140,8 +140,37 @@ def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
 
 def fit_OMIT_set_floor(rel_freqs, mags_dB, k_tot, floor, guesses = False):
 
-    """ 
-    guesses should be [f_m, g_m, A]
+    """
+    Made by Claude. Fit the OMIT equation with a fixed background floor.
+
+    Identical to :func:`fit_OMIT` except that ``floor`` is held fixed at the
+    supplied value rather than being a free fit parameter.  This reduces the
+    parameter space to ``[f_m, g_m, A]``.
+
+    Parameters
+    ----------
+    rel_freqs : array_like
+        Frequency array (Hz), typically relative to a carrier.
+    mags_dB : array_like
+        Measured transmission magnitudes (dB).
+    k_tot : float
+        Fixed total optical linewidth (Hz) passed to :func:`OMIT_equation`.
+    floor : float
+        Fixed background transmission level (linear voltage).
+    guesses : list or False, optional
+        Initial parameter guesses ``[f_m, g_m, A]``.  If ``False``,
+        auto-guesses are generated from the data. Default is ``False``.
+
+    Returns
+    -------
+    popt : numpy.ndarray
+        Optimal fit parameters ``[f_m, g_m, A]``.
+    pcov : numpy.ndarray
+        Covariance matrix of ``popt``.
+    amplitude_linear_voltage : numpy.ndarray
+        Input magnitudes converted to linear voltage (used for fitting).
+    guesses : list
+        The parameter guesses actually used by ``curve_fit``.
     """
 
     #organise variables

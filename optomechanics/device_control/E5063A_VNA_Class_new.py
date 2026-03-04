@@ -570,43 +570,77 @@ class VNA(Device):
               sense_sweep_type_format = "LINear",\
               reset = True,_file_name = "default", file_location = "", extra_meta = {}, dummy_sweep = False, ):
         """
-        
+        Made by Claude. Configure the VNA and perform a single S-parameter sweep.
+
+        Resets the instrument (optionally), configures frequency range, sweep
+        type, source power, IF bandwidth, and averaging, then triggers a
+        single sweep.  Retrieves log-magnitude and phase data after the sweep
+        completes and optionally saves the result to a tab-delimited file.
 
         Parameters
         ----------
-        channel : TYPE
-            The channels you want to use, channels 
-            define themeasurements and recoreded infomation
-        Result : TYPE
-            What you are measuring, e.g "S11"
-        TraceName : TYPE
-            Name of the trace in the channel
-        freq_start : TYPE
-            Start frequency
-        freq_stop : TYPE
-            Stop frequency
-        number_of_points : TYPE, optional
-            Number of points to take measurements over
-        power : TYPE, optional
-            Power in dB, default is -10
-        band_width : TYPE, optional
-            Bandwidth to take each point for, The default is 1e3.
-        sense_average_state : TYPE, optional
-            If avering is ON orOFF The default is "OFF".
-        sense_average_count_factor : TYPE, optional
-            Another
-        sense_average_point_count_factor : TYPE, optional
-            DESCRIPTION. The default is 1.
-        sense_sweep_type_format : TYPE, optional
-            DESCRIPTION. The default is "LINear".
-        reset : TYPE, optional
-            DESCRIPTION. The default is True.
-        _file_name : TYPE, optional
-            DESCRIPTION. The default is "default".
-        file_location : TYPE, optional
-            DESCRIPTION. The default is "".
-         : TYPE
-            DESCRIPTION.
+        channel : int
+            Channel number for the measurement.
+        Result : str
+            S-parameter to measure (e.g. ``'S11'``, ``'S21'``).
+        TraceName : int or str
+            Trace identifier within the channel.
+        freq_start : float
+            Sweep start frequency (Hz).
+        freq_stop : float
+            Sweep stop frequency (Hz).
+        number_of_points : int
+            Number of frequency points in the sweep.
+        probe_power : float
+            Source power level (dBm).  Must be in ``[-20, 0]``.
+        band_width : float
+            IF (resolution) bandwidth (Hz).
+        calibration : str, optional
+            ``'ON'`` to apply calibration correction; ``'OFF'`` to disable.
+            Default is ``'ON'``.
+        load_state : str, optional
+            Path to the instrument state file to load on reset.
+            Default is a pre-defined calibration file path.
+        sense_average_state : str, optional
+            ``'ON'`` to enable sweep averaging; ``'OFF'`` to disable.
+            Default is ``'OFF'``.
+        sense_average_count_factor : int, optional
+            Number of sweeps to average (``SENSe:AVERage:COUNt``).
+            Default is ``1``.
+        sense_average_point_count_factor : int, optional
+            Reserved for future use; currently unused.  Default is ``1``.
+        sense_sweep_type_format : str, optional
+            Sweep type: ``'LINear'`` or ``'LOGarithmic'``.
+            Default is ``'LINear'``.
+        reset : bool, optional
+            If ``True``, calls :meth:`~Device.CLS`, :meth:`~Device.RST`, and
+            loads the state file before configuring. Default is ``True``.
+        _file_name : str, optional
+            Base name for the output file (extension appended automatically).
+            Default is ``'default'``.
+        file_location : str or bool, optional
+            Directory path for saving output.  Set to ``False`` to suppress
+            saving.  Default is ``''``.
+        extra_meta : dict, optional
+            Additional key-value pairs to include in the file metadata.
+            Default is ``{}``.
+        dummy_sweep : bool, optional
+            If ``True``, returns ``None`` immediately after triggering the
+            sweep (no data retrieval).  Default is ``False``.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Tabular data with columns ``freq[Hz]``,
+            ``sweep_number_mag[dB]:1``, and ``sweep_number_phase[rad]:1``.
+        dict
+            Metadata dictionary including sweep parameters and timestamps.
+
+        Raises
+        ------
+        Exception
+            If ``sense_sweep_type_format`` is not ``'LINear'`` or
+            ``'LOGarithmic'``.
         """
         print(f"error info pre-run check \n{self.error()}")
         

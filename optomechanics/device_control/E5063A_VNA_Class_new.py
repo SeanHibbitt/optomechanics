@@ -477,9 +477,21 @@ class VNA(Device):
         return self.query(f"CALCulate{channel}:TRACe{TraceName}:DATA:FDATa?")
     
     def calculate_data_sdata_query(self, channel, TraceName):
-    
+
         """
-        returns data from a corrected data array of the given channel
+        Made by Claude. Retrieve corrected (complex) trace data (``CALCulate<Ch>:TRACe<Tr>:DATA:SDATa?``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        TraceName : int or str
+            Trace identifier.
+
+        Returns
+        -------
+        str
+            Comma-separated corrected data string (real/imaginary pairs).
         """
         return self.query(f"CALCulate{channel}:TRACe{TraceName}:DATA:SDATa?")
     

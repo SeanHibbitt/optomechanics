@@ -146,9 +146,20 @@ class VNA(Device):
 
     def sense_sweep_type(self, channel, sense_sweep_type_format):
         """
-        [SENSe<Ch>:]SWEep:TYPE <Format>
-        Selects the sweep type
-        types of sweep: LINear, LOGarithmic, SEGment
+        Made by Claude. Set the sweep type (``SENSe<Ch>:SWEep:TYPE``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        sense_sweep_type_format : str
+            Sweep type.  One of ``'LINear'``, ``'LOGarithmic'``, or
+            ``'SEGment'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:SWEep:TYPE {sense_sweep_type_format}")
 

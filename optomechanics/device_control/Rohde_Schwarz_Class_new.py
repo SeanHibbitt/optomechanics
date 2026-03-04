@@ -468,8 +468,19 @@ class ZNA(Device):
     
     def display_window_state(self, window, state):
         """
-        see page 998
-        state: ON, OFF
+        Made by Claude. Create or destroy a diagram window (``DISPlay:WINDow<Wnd>:STATe``).
+
+        Parameters
+        ----------
+        window : int
+            Window (diagram area) number.
+        state : str
+            ``'ON'`` to create the window; ``'OFF'`` to remove it.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"DISPlay:WINDow{window}:STATe {state}")
     

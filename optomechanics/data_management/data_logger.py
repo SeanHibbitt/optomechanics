@@ -218,6 +218,22 @@ class dated_logger(logger):
     """
     
     def __init__(self, base_path, *args,  **kwargs):
+        """
+        Made by Claude. Initialise the dated logger and create the first day's log file.
+
+        Calls the parent :class:`logger` ``__init__``, sets ``base_path``,
+        records the current date, and calls :meth:`update_file_path` to
+        create the dated directory and log file.
+
+        Parameters
+        ----------
+        base_path : str
+            Root directory under which dated subdirectories are created.
+        *args
+            Positional arguments forwarded to :class:`logger`.
+        **kwargs
+            Keyword arguments forwarded to :class:`logger`.
+        """
         super().__init__(*args, **kwargs)
         #introduce new base_path variable
         #for root folder location

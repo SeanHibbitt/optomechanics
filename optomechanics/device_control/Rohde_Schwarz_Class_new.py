@@ -85,34 +85,23 @@ class ZNA(Device):
         
     def calculate_format(self, channel, format_type):
         """
-        CALCulate<Chn>:FORMat <Type>
-        Defines how the measured result at any sweep point is post-processed and presented
-        in the graphical display.
-        Note: The analyzer allows arbitrary combinations of display formats and measured
-        quantities; see Chapter 5.3, "Format softtool", on page 436 and
-        CALCulate<Ch>:PARameter... commands. Nevertheless, it is advisable to check
-        which display formats are appropriate for an analysis of a particular measured quantity;
-        see Chapter 4.2.3.3, "Measured quantities and trace formats", on page 154.
-        Suffix:
-        <Chn>
-        .
-        Channel number used to identify the active trace
-        Parameters:
-        <Type> MLINear | MLOGarithmic | PHASe | UPHase | POLar | SMITh |
-        ISMith | GDELay | REAL | IMAGinary | SWR | COMPlex |
-        MAGNitude | LOGarithmic
-        See list of parameters below.
-        *RST: MLOGarithmic
-        Example: CALC4:PAR:SDEF 'Ch4Tr1', 'S11'
-        Create channel 4 and a trace named Ch4Tr1 to measure the
-        input reflection coefficient S11. The trace becomes the active
-        trace in channel 4.
-        CALC4:FORM MLIN; :DISP:WIND:TRAC2:FEED 'CH4TR1'
-        Calculate the magnitude of S11 and display it in a linearly scaled
-        Cartesian diagram, assigning the trace number 2.
-        Manual operation: See "dB Mag" on page 437
+        Made by Claude. Set the trace display format (``CALCulate<Ch>:FORMat``).
 
-        (see page 1255 for a table and more infomation)
+        Parameters
+        ----------
+        channel : int
+            Channel number identifying the active trace.
+        format_type : str
+            Display format.  One of ``'MLINear'``, ``'MLOGarithmic'``,
+            ``'PHASe'``, ``'UPHase'``, ``'POLar'``, ``'SMITh'``,
+            ``'ISMith'``, ``'GDELay'``, ``'REAL'``, ``'IMAGinary'``,
+            ``'SWR'``, ``'COMPlex'``, ``'MAGNitude'``, or
+            ``'LOGarithmic'``.  Reset value: ``'MLOGarithmic'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         
         return self.write(f"CALCulate{channel}:FORMat {format_type}")    

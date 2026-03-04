@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Aug 13 15:32:57 2024
+Made by Claude. Attenuation correction utilities for the optomechanics suite.
 
-@author: RoomTemp
+Provides helpers for compensating measured dB data for known cable or
+component attenuation.  Key functions:
+
+- :func:`account_for_attenuation` -- subtract attenuation from dB data
 """
 
 #minus the log

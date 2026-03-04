@@ -41,10 +41,10 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 > Priority: fix files that are already in the MkDocs nav first.
 
 **`optomechanics/__init__.py`**
-- [ ] Module docstring — PARTIAL
+- [x] Module docstring — rewritten to NumPy format (26edd87)
 
 **`data_analysis/__init__.py`**
-- [ ] Module docstring — NO
+- [x] Module docstring — added NumPy docstring (835696e)
 
 **`data_analysis/unit_conversions.py`** *(in nav)*
 - [x] All functions (`watts_ratio_to_dB`, `dB_to_watts_ratio`, `dB_to_linear_voltage`, `linear_voltage_to_dB`, `Vpp_to_Vrms`, `Vp_to_Vrms`, `Vrms_to_Vpp`, `Vrms_to_Vp`, `Vrms_to_watts`, `watts_to_dBw`, `RMS_to_dBw`, `RMS_to_dBm`, `dBw_to_watts`, `dBm_to_dBw`, `dBm_to_RMS`, `watts_to_dBm`, `dBm_to_watts`, `Vrms_squared_to_watts`) — rewritten to NumPy format, each committed individually (45f98bd–c5427e9)
@@ -80,7 +80,7 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [ ] `Control_PID()` — PARTIAL
 
 **`data_analysis/fitting/__init__.py`**
-- [ ] Module docstring — NO
+- [x] Module docstring — added NumPy docstring (875c9f5)
 
 **`data_analysis/fitting/S21.py`** *(in nav)*
 - [x] `S21_eq()` — rewritten to NumPy format (56dbdc2)
@@ -123,7 +123,7 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [ ] `fit_linear()` — NO *(private)*
 
 **`data_management/__init__.py`**
-- [ ] Module docstring — NO
+- [x] Module docstring — added NumPy docstring (37cf08b)
 
 **`data_management/data_management.py`** *(in nav)*
 - [x] `read_file()` — rewritten to NumPy format (3fb6a7d)
@@ -155,7 +155,7 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [ ] `dated_logger.__call__()` — NO
 
 **`device_control/__init__.py`**
-- [ ] Module docstring — NO
+- [x] Module docstring — added NumPy docstring (ef0dbc0)
 
 **`device_control/Device_Visa_Super.py`** *(in nav)*
 - [x] `Device` class — added NumPy class docstring (d57106d)

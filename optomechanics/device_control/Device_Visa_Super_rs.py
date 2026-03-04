@@ -94,10 +94,16 @@ class Device(mainDevice):
         #self.RST()
         return self
 
-    @staticmethod 
+    @staticmethod
     def connected_devices():
         """
-        return a list of connected resources via RsInstrument
+        Made by Claude. List all VISA resources visible to the RsInstrument backend.
+
+        Returns
+        -------
+        list of str
+            VISA resource address strings for all currently connected
+            instruments, as reported by :meth:`RsInstrument.list_resources`.
         """
         instr_list = RsInstrument.list_resources("?*")
         return instr_list

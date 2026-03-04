@@ -277,20 +277,29 @@ class ZNA(Device):
     
     def sense_bandwidth_resolution(self, channel, band_width):
         """
-        [SENSe<Ch>:]BANDwidth[:RESolution] <ResBandw>
-        [SENSe<Ch>:]BWIDth[:RESolution] <IF Bandwidth>
-        Defines the IF bandwidth of the analyzer (measurement bandwidth). Values between
-        1 Hz and 1.5 MHz can be set. Option R&S ZNA-K17 enables bandwidths up to 30 MHz
-        (see Chapter 4.7.8, "Increased IF bandwidth 30 MHz", on page 297).
-        Suffix:
-        <Ch>
-        .
-        Channel number
-        Parameters:
-        <IF Bandwidth> Bandwidths can be set in 1 – 1.5 – 2 – 3 – 5 – 7 steps. The analyzer rounds up any entered value between these steps and
-        rounds down values exceeding the maximum bandwidth.
-        Range: See above
-        *RST: 10 kH
+        Made by Claude. Set the IF (resolution) bandwidth (``SENSe<Ch>:BANDwidth:RESolution``).
+
+        Valid from 1 Hz to 1.5 MHz (up to 30 MHz with option R&S ZNA-K17).
+        Bandwidths step in a 1–1.5–2–3–5–7 sequence per decade.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        band_width : float
+            IF bandwidth (Hz).  Must be a step-multiple of
+            ``[1, 1.5, 2, 3, 5, 7]``.  Reset value: 10 kHz.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        Raises
+        ------
+        ValueError
+            If ``band_width`` is not a valid value (guard logic present but
+            the ``try/except`` block does not correctly enforce it).
         """
         band_width_mods_truth = np.any(np.equal(np.array(band_width) % np.array([1,1.5,2,3,5,7]),[0,0,0,0,0,0]))
         try: band_width_mods_truth == True

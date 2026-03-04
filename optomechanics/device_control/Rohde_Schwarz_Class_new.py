@@ -254,9 +254,23 @@ class ZNA(Device):
     
     def sense_average_point_count(self, channel, factor):
         """
-        Defines the number of consecutive pulses to be point averaged ([SENSe: ]AVERage:POINt[:STATe] ON) Suffix: .
-        Channel number Parameters: Point average factor Range: 1 to 100000 *RST: 10 Options: R&S ZNA-K7
-        Manual operation: See "Point Average/Factor" on page 725
+        Made by Claude. Set the point-averaging factor (``SENSe<Ch>:AVERage:POINt:COUNt``).
+
+        Requires option R&S ZNA-K7.  Point averaging must be enabled with
+        ``SENSe<Ch>:AVERage:POINt:STATe ON`` before this setting takes effect.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        factor : int
+            Number of pulses to average at each point.  Range: 1–100000;
+            reset value: 10.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:AVERage:POINt:COUNt {factor}")
         

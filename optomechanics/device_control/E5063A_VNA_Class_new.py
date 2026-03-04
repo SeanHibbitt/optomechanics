@@ -390,11 +390,24 @@ class VNA(Device):
         return self.write(f"OUTPut:STATe {state}")
     
     def display_window_trace_y_scale_auto(self, channel, TraceName, boolean):
-        
+
         """
-        turns on or off autoscale, not sure if this is contiuous or not
-        True
-        False
+        Made by Claude. Enable or disable Y-axis autoscale for a trace (``DISPlay:WINDow<Ch>:TRACe<Tr>:Y:SCALe:AUTO``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel / window number.
+        TraceName : int or str
+            Trace identifier.
+        boolean : bool or str
+            ``True`` / ``'ON'`` to enable autoscale; ``False`` / ``'OFF'``
+            to disable.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f":DISPlay:WINDow{channel}:TRACe{TraceName}:Y:SCALe:AUTO {boolean}")
     

@@ -97,9 +97,21 @@ class VNA(Device):
     
     def sense_freq_stop(self, channel, FreqVal):
         """
-        Resolution of 1 Hz
+        Made by Claude. Set the sweep stop frequency (``SENSe<Ch>:FREQuency:STOP``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        FreqVal : float
+            Stop frequency (Hz).  Resolution is 1 Hz.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
-        
+
         return self.write(f"SENSe{channel}:FREQuency:STOP {FreqVal}")
 
 

@@ -185,9 +185,17 @@ class VNA(Device):
     
     def sense_average_clear(self, channel):
         """
-        [SENSe:]AVERage:CLEar Starts a new average cycle, 
-        clearing all previous results and thus eliminating their
-        effect on the new cycle
+        Made by Claude. Start a new average cycle, discarding previous results (``SENSe:AVERage:CLEar``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe:{channel}AVERage:CLEar")
         

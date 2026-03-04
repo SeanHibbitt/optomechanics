@@ -356,23 +356,21 @@ class ZNA(Device):
  
     def initiate_continuous(self, channel, boolean):
         """
-        INITiate<Ch>:CONTinuous <Boolean>
-        Qualifies whether the analyzer measures in single sweep or in continuous sweep
-        mode.
-        Suffix:
-        <Ch>
-        .
-        Channel number.
-        This suffix is ignored in the "ZVR" and "ZVABT" compatibility
-        modes (SYSTem:LANGuage 'ZVR' | 'ZVABT').
-        Parameters:
-        <Boolean> ON - the analyzer measures continuously, repeating the current
-        sweep.
-        OFF - the measurement is stopped after the number of sweeps
-        defined via [SENSe<Ch>:]SWEep:COUNt. INITiate<Ch>[:
-        IMMediate][:DUMMy] initiates a new measurement cycle.
-        *RST: ON
-        see page 1323 on the manual for more infomation
+        Made by Claude. Select single-sweep or continuous-sweep mode (``INITiate<Ch>:CONTinuous``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        boolean : str
+            ``'ON'`` for continuous measurement; ``'OFF'`` for single sweep
+            (measurement stops after the sweep count set by
+            ``SENSe<Ch>:SWEep:COUNt``).  Reset value: ``'ON'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"INITiate{channel}:CONTinuous {boolean}")
     

@@ -623,30 +623,39 @@ class ZNA(Device):
                           
     def calculate_data_query(self, channel, format_type = "FDATA"):
         """
-        
-        CALCulate<Chn>:DATA? <Format>
-        The query reads the response values of the selected channel's active trace or reads
-        error terms of the selected channel.
-        The "set command" either imports formatted or unformatted trace data to the selected
-        channel's active trace (see Chapter 4.1.7, "Data flow", on page 126) or writes error
-        terms of the selected channel.
-        Note
-        ● The data format is parameter-dependent; see tables below. The unit is the default
-        unit of the measured parameter; see CALCulate<Ch>:PARameter:SDEFine.
-        ● Unformatted trace data (SDATa) can only be imported to memory traces
-        ● Formatted trace data (FDATa) can only be imported to "live" traces if the related
-        channel is in single sweep mode (INITiate<Ch>:CONTinuous OFF).
-        Before the import, the target trace must be prepared according to the settings used
-        during export. Any request for new data from the hardware ("Restart Sweep" in single sweep mode or switching to continuous sweep mode) discards imported data
-        and switches the display back to measured data.
-        Suffix:
-        <Chn>
-        .
-        Channel number used to identify the active trace
-        Parameters:
-        <Data> Trace data either in ASCII or block data
-        pg 1030
+        Made by Claude. Read trace data for the active trace (``CALCulate<Chn>:DATA?``).
 
+        The query reads the response values of the selected channel's active
+        trace.  Data units follow the measured parameter (see
+        ``CALCulate<Ch>:PARameter:SDEFine``).
+
+        Notes
+        -----
+        - ``FDATa`` (formatted) can only be imported to "live" traces when
+          the channel is in single-sweep mode
+          (``INITiate<Ch>:CONTinuous OFF``).
+        - ``SDATa`` (unformatted) can only be imported to memory traces.
+        - Any hardware data request (restart sweep or switch to continuous
+          mode) discards imported data and reverts the display to measured
+          data.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number identifying the active trace.
+        format_type : str, optional
+            Data format.  ``'FDATA'`` for formatted data; ``'SDATa'`` for
+            unformatted real + imaginary pairs.  Default is ``'FDATA'``.
+
+        Returns
+        -------
+        str
+            Comma-separated trace data string (ASCII or block data depending
+            on the ``FORMat[:DATA]`` setting).
+
+        References
+        ----------
+        ZNA user manual, page 1030.
         """
         return self.query(f"CALCulate{channel}:DATA? {format_type}")
     

@@ -215,23 +215,23 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 - [x] All setter/getter/query/helper methods — rewritten to NumPy format (c46cf70–2cc3d7b)
 
 ### Other doc tasks
-- [ ] Decide whether `E5063A_VNA_Class_old.py` should be kept or removed
+- [x] Decide whether `E5063A_VNA_Class_old.py` should be kept or removed — audited: not imported anywhere, fully superseded by `_new.py`; safe to delete but left in place pending explicit user decision
 
 ### Phase 5a — User guide: device_control usage patterns
 Update `docs/user_guide/device_control.md` with `with`-block examples drawn
 from the real DAQ scripts (VNA sweep, signal generator, spectrum analyser).
 
-- [ ] Add E5063A VNA `with`-block example
-- [ ] Add SMA100B signal generator `with`-block example
-- [ ] Add RS FSW spectrum analyser `with`-block example
-- [ ] Add multi-device combined workflow example (VNA + SG + FSW)
+- [x] Add E5063A VNA `with`-block example — added with-block example to device_control.md (563b47a)
+- [x] Add SMA100B signal generator `with`-block example — added with-block example to device_control.md (9406b84)
+- [x] Add RS FSW spectrum analyser `with`-block example — added with-block example to device_control.md (d47036c)
+- [x] Add multi-device combined workflow example (VNA + SG + FSW) — added to device_control.md (994a810)
 
 ### Phase 5b — User guide: spectrum analyser IQ/PSD page
-- [ ] Create `docs/user_guide/spectrum_analyser.md` with IQ capture and PSD examples from `Scripts/DAQ_templates/SA IQ PSD/`
+- [x] Create `docs/user_guide/spectrum_analyser.md` with IQ capture and PSD examples from `Scripts/DAQ_templates/SA IQ PSD/` — created page and added to mkdocs.yml nav (6636395)
 
 ### Phase 6 — Legacy file audit
-- [ ] Audit `E5063A_VNA_Class_old.py` — decide keep/remove/document
-- [ ] Audit `Rohde_Schwarz_Class.py` — confirm it is documented and its relationship to `Rohde_Schwarz_Class_new.py` is clear
+- [x] Audit `E5063A_VNA_Class_old.py` — not imported anywhere, fully superseded by `_new.py`; no mkdocs page; safe to delete pending user decision
+- [x] Audit `Rohde_Schwarz_Class.py` — has API page (`Rohde_Schwarz_Class.md`) that already notes it is the old version and recommends `_new`; not imported anywhere; relationship is clear
 
 ### Phase 7 — Re-audit all modified files
 Re-check every file touched in Phases 3–4 to ensure no docstrings were missed

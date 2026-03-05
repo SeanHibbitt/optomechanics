@@ -34,6 +34,7 @@ nav:
     - user_guide/index.md
     - Data Analysis: user_guide/data_analysis.md
     - Device Control: user_guide/device_control.md
+    - Spectrum Analyser (IQ/PSD): user_guide/spectrum_analyser.md
     - Data Management: user_guide/data_management.md
   - API Reference:
     - api_reference/index.md

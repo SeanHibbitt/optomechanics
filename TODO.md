@@ -250,6 +250,82 @@ where needed.
   /c/Users/seanh/miniconda3/envs/exp/python.exe -m mkdocs build --strict
   ```
 
+### Phase 9 — Fix broken module imports
+Fourteen modules currently fail to import, so mkdocstrings generates empty API pages for them.
+Two are already fixed (commit 6027572): `data_management/__init__.py` and `data_logger.py`.
+The Python executable to use is `/d/miniconda3/envs/exp/python.exe`.
+
+Run this to check current import status:
+```
+/d/miniconda3/envs/exp/python.exe -c "
+import sys; sys.path.insert(0,'.')
+for m in ['optomechanics.device_control.Rohde_Schwarz_Class_new',
+          'optomechanics.device_control.SMA100B',
+          'optomechanics.device_control.SPD3303XE',
+          'optomechanics.device_control.KeithleyDMM6500',
+          'optomechanics.device_control.Lakeshore_372_AC_Res_Temp_Controller',
+          'optomechanics.device_control.RS_FSL',
+          'optomechanics.device_control.RS_FSW',
+          'optomechanics.device_control.RS_FSW_new',
+          'optomechanics.device_control.Yokogawa',
+          'optomechanics.data_analysis.fitting.Sww',
+          'optomechanics.data_analysis.fitting.omit',
+          'optomechanics.device_control.VNA']:
+    try: __import__(m); print('OK ', m)
+    except Exception as e: print('FAIL', m, e)
+"
+```
+
+Fixes needed (one commit per file):
+
+- [ ] `Rohde_Schwarz_Class_new.py` — line 20: `from optomechanics.Fitting import re_and_im_to_dB_and_phase`. The `optomechanics.Fitting` module does not exist. Define `re_and_im_to_dB_and_phase` locally (takes `re`, `im` arrays; returns `20*log10(sqrt(re²+im²))` and `arctan2(im,re)`) or import `linear_voltage_to_dB` from `unit_conversions` and `np.angle`/`np.abs` directly.
+- [ ] `SMA100B.py` — line 9: `from Optomechanics import Device` → `from .Device_Visa_Super import Device`
+- [ ] `SPD3303XE.py` — line 1: `from Optomechanics import Device` → `from .Device_Visa_Super import Device`
+- [ ] `KeithleyDMM6500.py` — line 8: `from Optomechanics import Device` → `from .Device_Visa_Super import Device`
+- [ ] `Lakeshore_372_AC_Res_Temp_Controller.py` — line 2: `from Optomechanics import Device` → `from .Device_Visa_Super import Device`
+- [ ] `RS_FSL.py` — line 1: `from DeviceClasses import Device` → `from .Device_Visa_Super import Device`
+- [ ] `RS_FSW.py` — line 1: `from DeviceClasses import Device` → `from .Device_Visa_Super import Device`; line 6: `from DeviceClasses.Utilities.Fitting import dBm_to_watts, watts_to_dBm` → `from optomechanics.data_analysis.unit_conversions import dBm_to_watts, watts_to_dBm`
+- [ ] `RS_FSW_new.py` — line 1: `from Optomechanics.Device_Visa_Super_rs import Device` → `from .Device_Visa_Super_rs import Device`; line 6: `from Optomechanics.Utilities.Fitting import dBm_to_watts, watts_to_dBm, RMS_to_dBm` → `from optomechanics.data_analysis.unit_conversions import dBm_to_watts, watts_to_dBm, RMS_to_dBm`
+- [ ] `Yokogawa.py` — line 1: `from DeviceClasses import Device` → `from .Device_Visa_Super import Device`
+- [ ] Add `data_analysis/fitting/_fitting.py` API page to mkdocs nav (user requested) — create `docs/api_reference/data_analysis/fitting/_fitting.md` and add to `mkdocs.yml`
+- [ ] Re-run `mkdocs build --strict` after all import fixes to confirm zero warnings
+
+### Phase 10 — Documentation overview pages audit
+Check each overview/index page to ensure all modules are listed and descriptions are accurate.
+
+- [ ] Audit `api_reference/index.md` — verify it links to all three subpackage overviews
+- [ ] Audit `api_reference/data_analysis/index.md` — verify all 8 modules listed (unit_conversions, misc_equations, utilities, square_membrane, attenuation_accounter, Plotting, Temperature_Reader, control_gui)
+- [ ] Audit `api_reference/data_analysis/fitting/index.md` — verify S21, Sww, omit, _fitting listed
+- [ ] Audit `api_reference/device_control/index.md` — verify all 14 drivers listed
+- [ ] Audit `api_reference/data_management/index.md` — verify data_management, file_management, data_logger listed
+- [ ] Audit `user_guide/index.md` — verify all guide pages linked including new ones from Phase 11
+
+### Phase 11 — User guide: experiment workflow pages
+Create end-to-end workflow guides drawing on the DAQ templates in `optomechanics/Scripts/DAQ_templates/`.
+Add each new page to the `User Guide` section of `mkdocs.yml` nav.
+
+- [ ] Create `docs/user_guide/thermal_motion_measurement.md` — complete DAQ workflow: set up VNA S21 sweep (E5063A) + SA PSD acquisition (FSW) with a pump tone (SMA100B); show how parameters (RBW, span, averages, drive power) are chosen; reference `Scripts/DAQ_templates/SA IQ PSD/`
+- [ ] Create `docs/user_guide/thermal_motion_analysis.md` — post-processing workflow: load saved TSV files with `read_file`; fit S21 with `fit_S21_peak`; convert PSD to S_xx using `attenuation_object` + `basic_S_ww_eq`; extract g₀; reference `Scripts/DAQ_templates/SA IQ PSD/AnalysisGoodPartition.ipynb`
+- [ ] Create `docs/user_guide/attenuation_measurement.md` — how to measure attenuation of a cable/component with the VNA; acquiring S21 as a function of frequency; saving as `attenuation_object` TSV
+- [ ] Create `docs/user_guide/attenuation_processing.md` — loading `attenuation_object` from TSV; combining attenuation objects with `+`/`-`; calling the object to interpolate at a frequency; applying corrections to data
+- [ ] Create `docs/user_guide/s21_fitting.md` — fitting a cavity S21 peak: load data, call `fit_S21_peak` / `fit_S21_peak_dB` / `fit_S21_peak_complex`; interpret output (f_c, κ_tot, κ_ext); plot fit vs data
+- [ ] Update `docs/user_guide/data_management.md` — add practical examples for `read_file`, `save_data_3`, `dated_file_maker`, `attenuation_object`; currently this page may be sparse
+- [ ] Add all new Phase 11 pages to `mkdocs.yml` nav under `User Guide`
+
+### Phase 12 — Getting Started fixes
+- [ ] Fix icon/emoji shortcodes in `docs/index.md` — `:material-download:`, `:material-rocket-launch:`, `:octicons-arrow-right-24:` are Material for MkDocs icon shortcodes that require three extra extensions in `mkdocs.yml`. Install `mkdocs-material` if not already at ≥8.x, then add to `markdown_extensions`:
+  ```yaml
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  ```
+  Confirm with `pip show mkdocs-material` that version ≥ 8.0 is installed; if older, upgrade: `pip install "mkdocs-material>=9"`.
+- [ ] Review `getting_started/quickstart.md` — check the quick-start example still works after import fixes
+- [ ] Review `getting_started/installation.md` — ensure conda env setup instructions are accurate
+
+
 ---
 
 ## Code / Features

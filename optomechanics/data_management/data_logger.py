@@ -1,4 +1,4 @@
-from Optomechanics.data_management.file_management import make_path, dated_file_maker
+from .file_management import make_path, dated_file_maker
 import pandas
 from datetime import datetime
 

@@ -8,3 +8,5 @@ modules include:
 - :mod:`~optomechanics.data_management.file_management` -- dated directory creation
 - :mod:`~optomechanics.data_management.data_logger` -- timestamped data logging
 """
+
+from .data_management import save_data_3, attenuation_object, read_file, read_meta_data

@@ -278,16 +278,16 @@ for m in ['optomechanics.device_control.Rohde_Schwarz_Class_new',
 
 Fixes needed (one commit per file):
 
-- [ ] `Rohde_Schwarz_Class_new.py` — line 20: `from optomechanics.Fitting import re_and_im_to_dB_and_phase`. The `optomechanics.Fitting` module does not exist. Define `re_and_im_to_dB_and_phase` locally (takes `re`, `im` arrays; returns `20*log10(sqrt(re²+im²))` and `arctan2(im,re)`) or import `linear_voltage_to_dB` from `unit_conversions` and `np.angle`/`np.abs` directly.
-- [ ] `SMA100B.py` — line 9: `from Optomechanics import Device` → `from .Device_Visa_Super import Device`
-- [ ] `SPD3303XE.py` — line 1: `from Optomechanics import Device` → `from .Device_Visa_Super import Device`
-- [ ] `KeithleyDMM6500.py` — line 8: `from Optomechanics import Device` → `from .Device_Visa_Super import Device`
-- [ ] `Lakeshore_372_AC_Res_Temp_Controller.py` — line 2: `from Optomechanics import Device` → `from .Device_Visa_Super import Device`
-- [ ] `RS_FSL.py` — line 1: `from DeviceClasses import Device` → `from .Device_Visa_Super import Device`
-- [ ] `RS_FSW.py` — line 1: `from DeviceClasses import Device` → `from .Device_Visa_Super import Device`; line 6: `from DeviceClasses.Utilities.Fitting import dBm_to_watts, watts_to_dBm` → `from optomechanics.data_analysis.unit_conversions import dBm_to_watts, watts_to_dBm`
-- [ ] `RS_FSW_new.py` — line 1: `from Optomechanics.Device_Visa_Super_rs import Device` → `from .Device_Visa_Super_rs import Device`; line 6: `from Optomechanics.Utilities.Fitting import dBm_to_watts, watts_to_dBm, RMS_to_dBm` → `from optomechanics.data_analysis.unit_conversions import dBm_to_watts, watts_to_dBm, RMS_to_dBm`
-- [ ] `Yokogawa.py` — line 1: `from DeviceClasses import Device` → `from .Device_Visa_Super import Device`
-- [ ] Add `data_analysis/fitting/_fitting.py` API page to mkdocs nav (user requested) — create `docs/api_reference/data_analysis/fitting/_fitting.md` and add to `mkdocs.yml`
+- [x] `Rohde_Schwarz_Class_new.py` — replaced `optomechanics.Fitting` with `linear_voltage_to_dB` + `np.arctan2` inlined (051f0b0)
+- [x] `SMA100B.py` — `from Optomechanics import Device` → relative (db483dc)
+- [x] `SPD3303XE.py` — `from Optomechanics import Device` → relative (4552627)
+- [x] `KeithleyDMM6500.py` — `from Optomechanics import Device` → relative (7d96c2c)
+- [x] `Lakeshore_372_AC_Res_Temp_Controller.py` — `from Optomechanics import Device` → relative (af9b466)
+- [x] `RS_FSL.py` — `from DeviceClasses import Device` → relative (76f366b)
+- [x] `RS_FSW.py` — Device + unit_conversions imports fixed (45c1109)
+- [x] `RS_FSW_new.py` — Device_Visa_Super_rs + unit_conversions imports fixed (dca2dac)
+- [x] `Yokogawa.py` — `from DeviceClasses import Device` → relative (3fd4c5b)
+- [x] Add `data_analysis/fitting/_fitting.py` API page to mkdocs nav — created `_fitting.md` and added to `mkdocs.yml` (7a4c418)
 - [ ] Re-run `mkdocs build --strict` after all import fixes to confirm zero warnings
 
 ### Phase 10 — Documentation overview pages audit

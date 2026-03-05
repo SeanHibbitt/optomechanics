@@ -217,6 +217,39 @@ Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` styl
 ### Other doc tasks
 - [ ] Decide whether `E5063A_VNA_Class_old.py` should be kept or removed
 
+### Phase 5a — User guide: device_control usage patterns
+Update `docs/user_guide/device_control.md` with `with`-block examples drawn
+from the real DAQ scripts (VNA sweep, signal generator, spectrum analyser).
+
+- [ ] Add E5063A VNA `with`-block example
+- [ ] Add SMA100B signal generator `with`-block example
+- [ ] Add RS FSW spectrum analyser `with`-block example
+- [ ] Add multi-device combined workflow example (VNA + SG + FSW)
+
+### Phase 5b — User guide: spectrum analyser IQ/PSD page
+- [ ] Create `docs/user_guide/spectrum_analyser.md` with IQ capture and PSD examples from `Scripts/DAQ_templates/SA IQ PSD/`
+
+### Phase 6 — Legacy file audit
+- [ ] Audit `E5063A_VNA_Class_old.py` — decide keep/remove/document
+- [ ] Audit `Rohde_Schwarz_Class.py` — confirm it is documented and its relationship to `Rohde_Schwarz_Class_new.py` is clear
+
+### Phase 7 — Re-audit all modified files
+Re-check every file touched in Phases 3–4 to ensure no docstrings were missed
+and all NumPy sections (Parameters, Returns, Raises, Examples) are present
+where needed.
+
+- [ ] Re-audit `data_analysis/` modules
+- [ ] Re-audit `data_analysis/fitting/` modules
+- [ ] Re-audit `device_control/` modules
+- [ ] Re-audit `data_management/` modules
+
+### Phase 8 — Build verification
+- [ ] Run `mkdocs build --strict` and fix any warnings or errors
+  ```
+  cd optomechanics_documentation
+  /c/Users/seanh/miniconda3/envs/exp/python.exe -m mkdocs build --strict
+  ```
+
 ---
 
 ## Code / Features

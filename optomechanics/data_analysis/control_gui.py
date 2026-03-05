@@ -6,9 +6,42 @@ import json
 
 def Control_PID(pid_settings = {}, file = r"C:\Users\RoomTemp\Documents\Python\remote_control.json", update = True):
     """
-    Controls the pid settings by:
-    opening and editing the 'Remote_Control.json' file
+    Made by Claude. Update PID controller settings via a shared JSON configuration file.
 
+    Opens ``file``, merges the key-value pairs in ``pid_settings`` into the
+    ``Remote_Control`` section, optionally sets the ``update`` flag to
+    ``True``, and writes the modified JSON back to disk.  Prints the previous
+    and new settings and returns the current temperature read from the file.
+
+    Parameters
+    ----------
+    pid_settings : dict, optional
+        Mapping of PID setting keys to their new values.  Each key-value pair
+        is written into ``all_settings['Remote_Control']``.  Default is
+        ``{}`` (no changes).
+    file : str, optional
+        Path to the remote-control JSON file.
+        Default is ``r"C:\\Users\\RoomTemp\\Documents\\Python\\remote_control.json"``.
+    update : bool, optional
+        If ``True``, sets ``all_settings['Remote_Control']['update']`` to
+        ``True`` after applying ``pid_settings``.  Default is ``True``.
+
+    Returns
+    -------
+    float or None
+        The current temperature value read from
+        ``all_settings['Remote_Control']['temp']``, or ``None`` if an
+        exception is caught.
+
+    Raises
+    ------
+    FileNotFoundError
+        Caught internally — prints a message and traceback; returns ``None``.
+    KeyError
+        Caught internally — prints a message and traceback; returns ``None``.
+    Exception
+        All other exceptions are caught internally — prints traceback; returns
+        ``None``.
     """
     try:
         with open(file, 'r') as f:

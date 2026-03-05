@@ -11,36 +11,86 @@ from ..data_management import save_data_3
 from ..data_analysis.fitting._fitting import dBm_to_watts, watts_to_dBm, watts_ratio_to_dB
 
 class Vector_Network_Analyser():
-    
-    
+    """
+    Made by Claude. Software pseudo-VNA built from a signal generator and spectrum analyser.
+
+    Combines an arbitrary signal-generation function and a spectrum-analysis
+    function to emulate a one-port VNA S21 sweep.  Only one S-parameter can
+    be swept at a time.
+
+    Parameters
+    ----------
+    signal_generator : callable
+        Function with signature ``SG(frequency, power, OnOff)`` that controls
+        the signal generator.
+    signal_analyser : callable
+        Function with signature ``SA(freq, band_width) -> (amplitude_dBm, frequencies)``
+        that acquires a spectrum around `freq`.  Minimise span and sweep
+        points on the SA to reduce measurement time.
+
+    Attributes
+    ----------
+    SG : callable
+        The signal-generator function.
+    SA : callable
+        The spectrum-analyser function.
+    data : list
+        Output of the last `sweep` call: ``[frequencies, amplitudes_dB, amplitudes_sig_dB]``.
+    """
+
     def __init__(self, signal_generator, signal_analyser,):
         
         """
-        returns an instance of the Vector_Network_Analyser class
-        after being passed a signal_generator and signal_analyser
-        function.
-        
-        The functions must fit:
-            
-        def SG(frequency, power, OnOff )
-        
-        def SA(freq, band_width):
-            return amplitude[dBm], frequency
-        
-        
-        span and sweep_points should be minimised in SA
-        
-        (to be updated with phase)
-        
-        Setup to only sweep one S parameter at a time as not
-        a proper VNA
-        
+        Made by Claude. Store the signal-generator and spectrum-analyser callables.
         """
         
         self.SG = signal_generator
         self.SA = signal_analyser
 
     def sweep(self, central_frequency, span, sweep_points, power, band_width, extra_meta = {}, save_location = None, file_name = ""):
+        """
+        Made by Claude. Perform a pseudo-VNA S21 frequency sweep.
+
+        Steps the signal generator across a frequency range, acquires a
+        spectrum at each step using the spectrum analyser, and computes the
+        mean and standard deviation of the power ratio (S21) in dB.
+        Optionally saves the result to a tab-delimited file.
+
+        Parameters
+        ----------
+        central_frequency : float
+            Centre frequency of the sweep (Hz).
+        span : float
+            Total frequency span (Hz).
+        sweep_points : int
+            Number of frequency steps.
+        power : float
+            Signal generator output power (dBm).
+        band_width : float
+            Spectrum analyser resolution bandwidth (Hz).
+        extra_meta : dict, optional
+            Additional metadata key-value pairs to include in the saved file.
+            Default is ``{}``.
+        save_location : str or None, optional
+            Directory path for saving the output file.  If ``None``, no file
+            is written. Default is None.
+        file_name : str, optional
+            Output filename (including extension). Default is ``""``.
+
+        Returns
+        -------
+        frequencies : numpy.ndarray
+            Frequency array (Hz) used for the sweep.
+        amplitudes : numpy.ndarray
+            Mean S21 at each frequency step (dB).
+        amplitudes_sig : numpy.ndarray
+            Standard deviation of S21 at each frequency step (dB).
+
+        Raises
+        ------
+        ValueError
+            If ``central_frequency - span / 2 <= 0``.
+        """
         if central_frequency-span/2 <=0:
             raise ValueError("invalid span")
         

@@ -25,144 +25,153 @@ import pandas
 
 class ZNA(Device):
     """
-    class for ZNA from rohde-schwarz
-    manual:  https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
-    website: https://www.rohde-schwarz.com/uk/manual/r-s-zna-user-manual-manuals_78701-601863.html
-    
-    
-    device type: R&S®ZNA67, 10 MHz to 67 GHz, 4 test ports 1.85 mm, order no. 1332.4500K64
-    frequency settings: 
-        Start, Stop:      100kHz to 67 GHz
-        Center:           >100 kHz to <67 GHz
-        Span:             1 Hz to 66.9999 GHz
-        
-    max sweep points = 100001
-    
+    Made by Claude. VISA driver for the Rohde & Schwarz ZNA vector network analyser.
+
+    Extends :class:`~optomechanics.device_control.Device_Visa_Super.Device`
+    with SCPI commands specific to the R&S ZNA family.
+
+    Device: R&S ZNA67, 10 MHz to 67 GHz, 4 test ports 1.85 mm
+    (order no. 1332.4500K64).
+
+    Frequency settings:
+      - Start / Stop: 100 kHz to 67 GHz
+      - Centre: >100 kHz to <67 GHz
+      - Span: 1 Hz to 66.9999 GHz
+
+    Maximum sweep points: 100 001.
+
+    Parameters
+    ----------
+    address : str
+        VISA resource address string (e.g. ``'TCPIP::192.168.x.x::INSTR'``).
+    baud_rate : int, optional
+        Serial baud rate.  Default is ``9600``.
+    **kwargs
+        Additional keyword arguments forwarded to the parent
+        :class:`~optomechanics.device_control.Device_Visa_Super.Device`
+        ``__init__`` (e.g. ``timeout``).
+
+    Attributes
+    ----------
+    freq_list : numpy.ndarray
+        Frequency array populated by :meth:`sweep`.
+    data_1 : numpy.ndarray
+        Log-magnitude (dB) data populated by :meth:`sweep`.
+    data_2 : numpy.ndarray
+        Phase (degrees) data populated by :meth:`sweep`.
+
+    References
+    ----------
+    ZNA user manual:
+    https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
     """
     
     def __init__(self, address, baud_rate = 9600, **kwargs):
+        """
+        Made by Claude. Initialise the ZNA driver.
+
+        Parameters
+        ----------
+        address : str
+            VISA resource address string.
+        baud_rate : int, optional
+            Serial baud rate.  Default is ``9600``.
+        **kwargs
+            Additional keyword arguments forwarded to
+            :class:`~optomechanics.device_control.Device_Visa_Super.Device`
+            (e.g. ``timeout``).
+        """
         Device.__init__(self, address, baud_rate, **kwargs)
         
     def calculate_format(self, channel, format_type):
         """
-        CALCulate<Chn>:FORMat <Type>
-        Defines how the measured result at any sweep point is post-processed and presented
-        in the graphical display.
-        Note: The analyzer allows arbitrary combinations of display formats and measured
-        quantities; see Chapter 5.3, "Format softtool", on page 436 and
-        CALCulate<Ch>:PARameter... commands. Nevertheless, it is advisable to check
-        which display formats are appropriate for an analysis of a particular measured quantity;
-        see Chapter 4.2.3.3, "Measured quantities and trace formats", on page 154.
-        Suffix:
-        <Chn>
-        .
-        Channel number used to identify the active trace
-        Parameters:
-        <Type> MLINear | MLOGarithmic | PHASe | UPHase | POLar | SMITh |
-        ISMith | GDELay | REAL | IMAGinary | SWR | COMPlex |
-        MAGNitude | LOGarithmic
-        See list of parameters below.
-        *RST: MLOGarithmic
-        Example: CALC4:PAR:SDEF 'Ch4Tr1', 'S11'
-        Create channel 4 and a trace named Ch4Tr1 to measure the
-        input reflection coefficient S11. The trace becomes the active
-        trace in channel 4.
-        CALC4:FORM MLIN; :DISP:WIND:TRAC2:FEED 'CH4TR1'
-        Calculate the magnitude of S11 and display it in a linearly scaled
-        Cartesian diagram, assigning the trace number 2.
-        Manual operation: See "dB Mag" on page 437
+        Made by Claude. Set the trace display format (``CALCulate<Ch>:FORMat``).
 
-        (see page 1255 for a table and more infomation)
+        Parameters
+        ----------
+        channel : int
+            Channel number identifying the active trace.
+        format_type : str
+            Display format.  One of ``'MLINear'``, ``'MLOGarithmic'``,
+            ``'PHASe'``, ``'UPHase'``, ``'POLar'``, ``'SMITh'``,
+            ``'ISMith'``, ``'GDELay'``, ``'REAL'``, ``'IMAGinary'``,
+            ``'SWR'``, ``'COMPlex'``, ``'MAGNitude'``, or
+            ``'LOGarithmic'``.  Reset value: ``'MLOGarithmic'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         
         return self.write(f"CALCulate{channel}:FORMat {format_type}")    
         
     
     def sense_freq_start(self, channel, FreqVal):
-        
+
         """
-        [SENSe<Ch>:]FREQuency:STARt <FreqVal>
-        These commands defines the start and stop frequency for a frequency sweep. The values also define the display
-        range in a Cartesian diagram. The default start and stop
-        frequencies equal to the minimum and maximum frequency of the analyzer.
-        The ranges depend on the instrument model; see Table 7-16.
-        Suffix:
-        <Ch>
-        Channel number
-        Parameters:
-        <FreqVal> Start and stop frequency of the sweep
-        Increment: 0.1 kHz
-        Default unit: Hz
-        Example: *RST; FREQ:STAR 10MHz
-        Activate a frequency sweep and set the start frequency to
-        10 MHz.
-        FREQ:STOP 100MHz
-        Set the stop frequency to 100 MHz.
-        Manual operation: See "Start Frequency / Stop Frequency / Center Frequency /
-        Span Frequency" on page 539
-        Note: If the start frequency entered is greater than the current stop frequency, the stop
-        frequency is set to the start frequency plus the minimum frequency span
-        ([SENSe<Ch>:]FREQuency:SPAN).
-        see page 1510
+        Made by Claude. Set the sweep start frequency (``SENSe<Ch>:FREQuency:STARt``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        FreqVal : float
+            Start frequency (Hz).  Increment: 0.1 kHz.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:FREQuency:STARt {FreqVal}")
     
     
     def sense_freq_stop(self, channel, FreqVal):
-        
+
         """
-        [SENSe<Ch>:]FREQuency:STOP <FreqVal>
-        These commands defines the start and stop frequency for a frequency sweep. The values also define the display
-        range in a Cartesian diagram. The default start and stop
-        frequencies equal to the minimum and maximum frequency of the analyzer.
-        The ranges depend on the instrument model; see Table 7-16.
-        Suffix:
-        <Ch>
-        Channel number
-        Parameters:
-        <FreqVal> Start and stop frequency of the sweep
-        Increment: 0.1 kHz
-        Default unit: Hz
-        Example: *RST; FREQ:STAR 10MHz
-        Activate a frequency sweep and set the start frequency to
-        10 MHz.
-        FREQ:STOP 100MHz
-        Set the stop frequency to 100 MHz.
-        Manual operation: See "Start Frequency / Stop Frequency / Center Frequency /
-        Span Frequency" on page 539
-        Note: If the start frequency entered is greater than the current stop frequency, the stop
-        frequency is set to the start frequency plus the minimum frequency span
-        ([SENSe<Ch>:]FREQuency:SPAN)."""
-        
+        Made by Claude. Set the sweep stop frequency (``SENSe<Ch>:FREQuency:STOP``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        FreqVal : float
+            Stop frequency (Hz).  Increment: 0.1 kHz.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+        """
+
         return self.write(f"SENSe{channel}:FREQuency:STOP {FreqVal}")
 
 
     def sense_sweep_points(self, channel, SweepPoint):
-        
+
         """
-        Defines the total number of measurement points per sweep ("Number of Points").
-        Values between 1 and 100001 can be set.
-        Suffix:
-        <Ch>
-        .
-        Channel number 1
-        Parameters:
-        <SweepPoint> Number of points per sweep, in the range of 1 and 100001 for
-        frequency sweeps.
-        Range: see above
-        *RST: 201
-        Example: *RST
-        Reset the instrument, activating a frequency sweep with 201
-        sweep points.
-        SWE:TIME?
-        Query total sweep time.
-        SWE:POIN 2010
-        Multiply the (default) number of points by 10.
-        SWE:TIME?
-        Query total sweep time again. The analyzer estimates a sweep
-        time that is also multiplied by 10.
-        Manual operation: See "Number of Points" on page 540 """
-        
+        Made by Claude. Set the number of measurement points per sweep (``SENSe<Ch>:SWEep:POINts``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        SweepPoint : int
+            Number of sweep points.  Valid range 1–100001; reset value 201.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        Raises
+        ------
+        ValueError
+            If ``SweepPoint`` is outside the valid range (guard logic present
+            but the ``try/except`` block does not correctly enforce it).
+        """
+
         try: SweepPoint in range(1, 100002) == True
         except: raise ValueError("Please use number of points from 1 to 100001")
         
@@ -170,74 +179,127 @@ class ZNA(Device):
 
     def sense_sweep_type(self, channel, sense_sweep_type_format):
         """
-        [SENSe<Ch>:]SWEep:TYPE <Format>
-        Selects the sweep type, i.e. the sweep variable (frequency/power/time) and the position of the sweep points across the sweep range.
-        Suffix:
-        <Ch>
-        .
-        Channel number.
-        see page 1596
-        
-        types of sweep: LINear, LOGarithmic, POWer, CW, POINt, PULSe, IAMPlitude
+        Made by Claude. Select the sweep type (``SENSe<Ch>:SWEep:TYPE``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        sense_sweep_type_format : str
+            Sweep type.  One of ``'LINear'``, ``'LOGarithmic'``,
+            ``'POWer'``, ``'CW'``, ``'POINt'``, ``'PULSe'``, or
+            ``'IAMPlitude'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:SWEep:TYPE {sense_sweep_type_format}")
 
     def sense_average_state(self, channel, state):
         """
-        [SENSe:]AVERage[:STATe] Enable or disable the sweep average. Suffix: .
-        Channel number Parameters: ON | OFF - enables
-        or disables the automatic calculation of the sweep average over the specified number
-        of sweeps ([SENSe:]AVERage:COUNt).
-        *RST: OFF Example: See [SENSe:]AVERage:CLEar Manual operation: See "Factor / On / Reset" on page 554
+        Made by Claude. Enable or disable sweep averaging (``SENSe<Ch>:AVERage:STATe``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        state : str
+            ``'ON'`` to enable; ``'OFF'`` to disable.  Reset value: ``'OFF'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:AVERage:STATe {state}")
 
     
     def sense_average_clear(self, channel):
         """
-        [SENSe:]AVERage:CLEar Starts a new average cycle, clearing all previous results and thus eliminating their
-        effect on the new cycle. Suffix: . Channel number Example: SENS1:AVER:COUN 15; :AVER ON Set the average
-        factor for channel 1 to 15 (the mnemonic SENS1 can be omitted) and enable the sweep average. AVER:COUN 5;
-        CLE Reduce the average factor and restart the average. Usage: Event Manual operation:
-        See "Factor / On / Reset" on page 554
+        Made by Claude. Start a new average cycle, discarding previous results (``SENSe:AVERage:CLEar``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe:{channel}AVERage:CLEar")
         
     
     def sense_average_count(self, channel, average_factor):
         """
-        Defines the number of consecutive sweeps to be combined for the sweep average ("Factor").
-        Suffix: . Channel number Parameters: Sweep average factor Range: 1 to 1000 
-        *RST: 10 Example: See [SENSe:]AVERage:CLEar Manual operation: See "Factor / On / Reset" on page 554
+        Made by Claude. Set the sweep averaging factor (``SENSe<Ch>:AVERage:COUNt``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        average_factor : int
+            Number of sweeps to average.  Range: 1–1000; reset value: 10.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:AVERage:COUNt {average_factor}")
      
     
     def sense_average_point_count(self, channel, factor):
         """
-        Defines the number of consecutive pulses to be point averaged ([SENSe: ]AVERage:POINt[:STATe] ON) Suffix: .
-        Channel number Parameters: Point average factor Range: 1 to 100000 *RST: 10 Options: R&S ZNA-K7
-        Manual operation: See "Point Average/Factor" on page 725
+        Made by Claude. Set the point-averaging factor (``SENSe<Ch>:AVERage:POINt:COUNt``).
+
+        Requires option R&S ZNA-K7.  Point averaging must be enabled with
+        ``SENSe<Ch>:AVERage:POINt:STATe ON`` before this setting takes effect.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        factor : int
+            Number of pulses to average at each point.  Range: 1–100000;
+            reset value: 10.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:AVERage:POINt:COUNt {factor}")
         
     
     def sense_bandwidth_resolution(self, channel, band_width):
         """
-        [SENSe<Ch>:]BANDwidth[:RESolution] <ResBandw>
-        [SENSe<Ch>:]BWIDth[:RESolution] <IF Bandwidth>
-        Defines the IF bandwidth of the analyzer (measurement bandwidth). Values between
-        1 Hz and 1.5 MHz can be set. Option R&S ZNA-K17 enables bandwidths up to 30 MHz
-        (see Chapter 4.7.8, "Increased IF bandwidth 30 MHz", on page 297).
-        Suffix:
-        <Ch>
-        .
-        Channel number
-        Parameters:
-        <IF Bandwidth> Bandwidths can be set in 1 – 1.5 – 2 – 3 – 5 – 7 steps. The analyzer rounds up any entered value between these steps and
-        rounds down values exceeding the maximum bandwidth.
-        Range: See above
-        *RST: 10 kH
+        Made by Claude. Set the IF (resolution) bandwidth (``SENSe<Ch>:BANDwidth:RESolution``).
+
+        Valid from 1 Hz to 1.5 MHz (up to 30 MHz with option R&S ZNA-K17).
+        Bandwidths step in a 1–1.5–2–3–5–7 sequence per decade.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        band_width : float
+            IF bandwidth (Hz).  Must be a step-multiple of
+            ``[1, 1.5, 2, 3, 5, 7]``.  Reset value: 10 kHz.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        Raises
+        ------
+        ValueError
+            If ``band_width`` is not a valid value (guard logic present but
+            the ``try/except`` block does not correctly enforce it).
         """
         band_width_mods_truth = np.any(np.equal(np.array(band_width) % np.array([1,1.5,2,3,5,7]),[0,0,0,0,0,0]))
         try: band_width_mods_truth == True
@@ -247,275 +309,247 @@ class ZNA(Device):
     
     def source_power_level(self, channel, IntSourcePow = -10):
         """
-        SOURce<Ch>:POWer<PhyPt>[:LEVel][:IMMediate][:AMPLitude] <IntSourcePow>
-        
-        Defines the power of the internal signal source (channel base power). The setting is
-        valid for all sweep types, except power sweep.
-        Tip: Use SOURce<Ch>:POWer<PhyPt>:STARt and SOURce<Ch>:POWer<PhyPt>:
-        STOP to define the sweep range for a power sweep.
-        Suffix:
-        <Ch>
-        Channel number
-        <PhyPt> Test port number of the analyzer. This suffix is ignored because
-        the selected channel base power applies to all source ports
-        used in the active channel.
-        It is possible though to define a port-specific slope factor for the
-        source power (SOURce<Ch>:POWer<PhyPt>[:LEVel][:
-        IMMediate]:SLOPe) and a port-specific power offset
-        (SOURce<Ch>:POWer<PhyPt>[:LEVel][:IMMediate]:
-        OFFSet).
-        Parameters:
-        <IntSourcePow> Internal source power
-        Range: The usable power range is frequency-dependent;
-        refer to the data sheet.
-        *RST: -10 dBm
-        Default unit: dBm
-        Example: FUNC "XFR:POW:RAT B1, A2"
-        Activate a frequency sweep and select the ratio B1/A2 as measured parameter for channel and trace no. 1.
-        SOUR:POW -6
-        Set the internal source power for channel 1 to -6 dBm.
-        Manual operation: See "Power" on page 542 
-        
+        Made by Claude. Set the channel base source power (``SOURce<Ch>:POWer:LEVel:IMMediate:AMPLitude``).
+
+        Valid for all sweep types except power sweep.  The usable power range
+        is frequency-dependent; refer to the instrument data sheet.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        IntSourcePow : float, optional
+            Source power (dBm).  Reset value: ``-10``.  Default is ``-10``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
-        
+
         return self.write(f"SOURce{channel}:POWer:LEVel:IMMediate:AMPLitude {IntSourcePow}")
     
     def Trace_copy(self, MemTraceName, DataTraceName):
-        
+
         """
-        TRACe:COPY <MemTraceName>, <DataTraceName>
-        Copies a data trace to a memory trace. The trace to be copied can be specified by two
-        alternative methods:
-        ● As the active data trace of channels 1 to 4 (CH1DATA, CH2DATA, CH3DATA,
-        CH4DATA). If a mathematical trace is active, the associated data trace is copied.
-        SCPI command reference
-        R&S Command reference ®ZNA
-        User Manual 1178.6462.02 ─ 34 1734
-        ● As a trace with a name (string variable).
-        The created memory trace can be specified as follows:
-        ● As the memory trace named Mem<n>[Trc<m>], where n = 1, ... 8 and Trc<m> is
-        the name of the copied data trace (MDATA1, MDATA2, MDATA3, MDATA4,
-        MDATA5, MDATA6, MDATA7, MDATA8).
-        ● As a memory trace with an arbitrary name (string variable).
-        An existing memory trace with the same name is overwritten.
-        Note: The copied trace is the data trace which is not modified by any mathematical
-        operations. To copy a mathematical trace to a memory trace, use TRACe:COPY:MATH.
-        To copy the active trace to the memory using an automatic memory trace name, use
-        CALCulate<Chn>:MATH:MEMorize.
-        Setting parameters:
-        <MemTraceName> Name of the memory trace (see also Table 7-17).
-        Range: <memory_trace> is either a string variable
-        (enclosed in single or double quotes) or one of the
-        following reserved names (no string variables):MDATA1 | MDATA2 | MDATA3 | MDATA4 |
-        MDATA5 | MDATA6 | MDATA7 | MDATA8 (only for
-        memory traces Mem<n>[Trc<m>], where n = 1, ...
-        8).
-        <DataTraceName> Name of the data trace (see also Table 7-17).
-        Range: <data_trace> is either a string variable (enclosed in
-        single or double quotes) or one of the following
-        reserved names (no string variables):CH1DATA |
-        CH2DATA | CH3DATA | CH4DATA (only for the
-        active data trace in channels Ch1, Ch2, Ch3, Ch4).
-        Example: *RST; :SWE:POIN 20
-        Create a trace with 20 sweep points, making the created trace
-        the active trace of channel 1 (omitted optional mnemonic
-        SENSe1).
-        TRAC:COPY "Mem_Pt20",CH1DATA
-        Copy the current state of the created trace to a memory trace
-        named "Mem_Pt20". The memory trace is not displayed.
-        DISP:WIND:TRAC2:FEED "MEM_PT20"
-        Display the created memory trace in the active diagram area
-        (diagram area no. 1).
-        Usage: Setting only
-        Manual operation: See "Data to <Destination>" on page 455 """
-        
+        Made by Claude. Copy a data trace to a memory trace (``TRACe:COPY``).
+
+        The source trace is the unmodified data trace.  An existing memory
+        trace with the same name is overwritten.
+
+        Parameters
+        ----------
+        MemTraceName : str
+            Name for the destination memory trace.  May be a string variable
+            or one of the reserved names ``MDATA1``–``MDATA8``.
+        DataTraceName : str
+            Name of the source data trace.  May be a string variable or one
+            of the reserved names ``CH1DATA``–``CH4DATA``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+        """
+
         return self.write(f"TRACe:COPY {MemTraceName}, {DataTraceName}")
  
     def initiate_continuous(self, channel, boolean):
         """
-        INITiate<Ch>:CONTinuous <Boolean>
-        Qualifies whether the analyzer measures in single sweep or in continuous sweep
-        mode.
-        Suffix:
-        <Ch>
-        .
-        Channel number.
-        This suffix is ignored in the "ZVR" and "ZVABT" compatibility
-        modes (SYSTem:LANGuage 'ZVR' | 'ZVABT').
-        Parameters:
-        <Boolean> ON - the analyzer measures continuously, repeating the current
-        sweep.
-        OFF - the measurement is stopped after the number of sweeps
-        defined via [SENSe<Ch>:]SWEep:COUNt. INITiate<Ch>[:
-        IMMediate][:DUMMy] initiates a new measurement cycle.
-        *RST: ON
-        see page 1323 on the manual for more infomation
+        Made by Claude. Select single-sweep or continuous-sweep mode (``INITiate<Ch>:CONTinuous``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        boolean : str
+            ``'ON'`` for continuous measurement; ``'OFF'`` for single sweep
+            (measurement stops after the sweep count set by
+            ``SENSe<Ch>:SWEep:COUNt``).  Reset value: ``'ON'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"INITiate{channel}:CONTinuous {boolean}")
     
     def initiate_immediate_dummy(self,channel):
         """
-        INITiate<Ch>[:IMMediate][:DUMMy]
-        Starts a new single sweep sequence. This command is available in single sweep mode
-        only (INITiate<Ch>:CONTinuous OFF). The data of the last sweep (or previous
-        sweeps, see Chapter 8.2.4.3, "Retrieving the results of previous sweeps",
-        on page 1829) can be read using CALCulate<Chn>:DATA:NSWeep:FIRSt?
-        SDATa, <count>.
-        Note: In contrast to all other commands of the analyzer, the
-        INITiate<Ch>[:IMMediate]... commands have been implemented for overlapped execution; see Chapter 6.4, "Command processing", on page 1001.
-        Suffix:
-        <Ch>
-        .
-        Channel number. If the channel number does not exist the analyzer returns an error message. If the "ZVR" or "ZVABT" compatibility mode is active and INITiate<Ch>[:IMMediate]:
-        SCOPe ALL is selected, this suffix is ignored.
-        Example: See INITiate<Ch>:CONTinuous
-        Usage: Event
-        Manual operation: See "Restart Sweep" on page 583
-        See page 1325 of manual
+        Made by Claude. Trigger a new single sweep (``INITiate<Ch>:IMMediate:DUMMy``).
+
+        Available in single-sweep mode only
+        (``INITiate<Ch>:CONTinuous OFF``).  Implemented for overlapped
+        execution.  Previous sweep data can be retrieved with
+        ``CALCulate<Ch>:DATA:NSWeep:FIRSt? SDATa``.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"INITiate{channel}:IMMediate:DUMMy")    
     
     def sense_sweep_time_auto(self, channel):
         """
-        [SENSe<Ch>:]SWEep:TIME:AUTO <Boolean>
-        When enabled, the (minimum) sweep time is calculated internally using
-        the other channel settings and zero delay ([SENSe<Ch>:]SWEep:DWELl).
-        Note: The automatically calculated sweep duration is ignored for
-        the sweep types
-        "Time" and "CW Mode" ([SENSe<Ch>:]SWEep:TYPE).
-        Suffix:
-        <Ch>
-        .
-        Channel number
-        Parameters:
-        <Boolean> ON | OFF - turn the automatic calculation of the sweep time on
-        or off.
-        OFF is also set if the sweep duration or delay is set explicitly
-        using [SENSe<Ch>:]SWEep:TIME or [SENSe<Ch>:]SWEep:
-        DWELl.
-        *RST: ON
-        Example: SWE:TIME 1
-        Set a total sweep time of 1 s.
-        SWE:TIME:AUTO?
-        A query returns the value 1.
-        Manual operation: See "Sweep Time / Auto" on page 557 """
+        Made by Claude. Query the automatic sweep time state (``SENSe<Ch>:SWEep:TIME:AUTO``).
+
+        .. note::
+           Despite the method name, this function *queries* (not sets) the
+           auto-sweep-time state.  Use :meth:`sense_sweep_time_auto_query`
+           for the same effect with explicit intent.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        str
+            ``'1'`` (auto on) or ``'0'`` (auto off) as returned by the
+            instrument.
+        """
 
         return self.query(f"SENSe{channel}:SWEep:TIME:AUTO")
     
     
     def calculate_parameter_sdefine(self, channel, TraceName, Result):
         """
-        CALCulate<Ch>:PARameter:SDEFine <TraceName>, <Result>
-        Creates a trace and assigns a channel number, a name and a measurement parameter to it. The trace becomes the active trace in the channel but is not displayed.
-        Note: To display the trace defined via CALCulate<Ch>:PARameter:SDEFine, create a diagram (DISPlay[:WINDow<Wnd>][:STATe] ON) and assign the trace to this
-        diagram (DISPlay[:WINDow<Wnd>]:TRACe<WndTr>:FEED); see example below.
-        CALCulate<Ch>:PARameter:MEASure changes the measurement result of an
-        existing trace.
-        To select an existing trace as the active trace, use CALCulate<Ch>:PARameter:
-        SELect. You can open the trace manager to obtain an overview of all channels and
-        traces, including the traces that are not displayed.
-        SCPI command reference
-        R&S Command reference ®ZNA
-        User Manual 1178.6462.02 ─ 34 1164
-        Tip: This command has no query form. Use CALCulate<Ch>:PARameter:MEASure
-        <TraceName> to query the measurement result of the trace. CALCulate<Ch>:
-        PARameter:CATalog? returns a list of all defined traces.
-        Suffix:
-        <Ch>
-        .
-        Channel number referencing a previously defined channel. If
-        <Ch> does not exist, it is generated with default channel settings.
-        Setting parameters:
-        <TraceName> Trace name, string variable, e.g. 'Trc4'. See "Rules for trace
-        names" in "Table Area" on page 452. Trace names must be
-        unique across all channels and diagrams.
-        If a trace with the selected trace name already exists, the analyzer behaves as follows: If the existing trace is assigned to the
-        same channel as the new trace, it is deleted. The new trace is
-        not automatically assigned to a diagram area; see note above.
-        If the existing trace is assigned to a different channel, no new
-        trace can be created. The analyzer returns an error message.
-        <Result> Measurement result (string variable), see table below.
-        Example: CALC4:PAR:SDEF 'Ch4Tr1', 'S11'
-        Create channel 4 and a trace named Ch4Tr1 to measure the
-        input reflection coefficient S11.
-        DISP:WIND2:STAT ON
-        Create diagram area no. 2.
-        DISP:WIND2:TRAC:FEED 'CH4TR1'
-        Display the generated trace in diagram area no. 2.
-        Usage: Setting only
-        Manual operation: See "S-Parameter (selector)" on page 356  
-        see table on page 1164 for correct parameter definitions
+        Made by Claude. Create a trace and assign a measurement parameter (``CALCulate<Ch>:PARameter:SDEFine``).
+
+        The trace becomes the active trace in the channel but is not
+        displayed.  To display it, create a diagram window with
+        :meth:`display_window_state` and assign the trace with
+        :meth:`display_window_trace_feed`.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.  Created with default settings if it does not
+            already exist.
+        TraceName : str
+            Unique trace name (e.g. ``'Trc4'``).  An existing trace with the
+            same name in the same channel is replaced.
+        Result : str
+            Measurement parameter (e.g. ``'S11'``, ``'S21'``).  See the ZNA
+            manual (page 1164) for the full parameter table.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"CALCulate{channel}:PARameter:SDEFine '{TraceName}', '{Result}'")
           
     
     def calculate_parameter_delete(self, channel, TraceName):
         """
-        See page 998 table
+        Made by Claude. Delete a named trace from a channel (``CALCulate<Ch>:PARameter:DELete``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        TraceName : str
+            Name of the trace to delete.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"CALCulate{channel}:PARameter:DELete '{TraceName}'")
     
     def display_window_state(self, window, state):
         """
-        see page 998
-        state: ON, OFF
+        Made by Claude. Create or destroy a diagram window (``DISPlay:WINDow<Wnd>:STATe``).
+
+        Parameters
+        ----------
+        window : int
+            Window (diagram area) number.
+        state : str
+            ``'ON'`` to create the window; ``'OFF'`` to remove it.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"DISPlay:WINDow{window}:STATe {state}")
     
     
     def display_window_trace_feed(self, window, window_trace, TraceName ):
         """
-        See page 998
-        
-        Assigns an existing trace (CALCulate<Ch>:PARameter:SDEFine) to a diagram
-        area, using the <WndTr> suffix, and displays the trace. Use DISPlay[:
-        WINDow<Wnd>]:TRACe:EFEed to assign the trace to a diagram area without using a
-        numeric suffix.
-        Tip: A trace can be assigned to a diagram only once. If a attempt is made to assign the
-        same trace a second time (e.g. by typing DISP:WIND2:TRAC8:FEED 'CH4TR1'
-        after executing the program example below) an error message -114,"Header suffix out
-        of range" is generated. You can open the "Trace Manager" dialog to obtain an overview
-        of all channels and traces, including the traces that are not displayed.
-        Suffix:
-        <Wnd>
-        .
-        Number of an existing diagram area (defined by means of
-        DISPlay[:WINDow<Wnd>][:STATe] ON).
-        <WndTr> Trace number used to distinguish the traces of the same diagram area <Wnd>.
-        Parameters:
-        <TraceName> String parameter for the trace name, e.g. 'Trc4'.
-        Example: CALC4:PAR:SDEF 'Ch4Tr1', 'S11'
-        Create channel 4 and a trace named Ch4Tr1 to measure the
-        input reflection coefficient S11.
-        DISP:WIND2:STAT ON
-        Create diagram area no. 2.
-        DISP:WIND2:TRAC9:FEED 'CH4TR1'
-        Display the generated trace in diagram area no. 2, assigning the
-        trace number 9 to it.
-        Manual operation: See "Diagram / Channel" on page 450
+        Made by Claude. Assign a trace to a diagram window (``DISPlay:WINDow<Wnd>:TRACe<WndTr>:FEED``).
 
-        see page 1307
+        The window must already exist (created with :meth:`display_window_state`).
+        A trace can only be assigned to a given diagram once.
+
+        Parameters
+        ----------
+        window : int
+            Diagram area number.
+        window_trace : int
+            Trace slot number within the diagram area.
+        TraceName : str
+            Name of the trace to display (e.g. ``'Trc4'``).
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
-        
+
         return self.write(f"DISPlay:WINDow{window}:TRACe{window_trace}:FEED '{TraceName}'")
     
 
     def calculate_parameter_delete_all(self,):
         """
-        CALCulate:PARameter:DELete:ALL
-        Deletes all traces in all channels of the active recall set, including the default trace
-        Trc1 in channel 1. The manual control screen shows "No Trace".
-        Example: See CALCulate<Ch>:PARameter:DELete
-        Usage: Event
-        Manual operation: See "Delete Trace" on page 450
-        see page 1161
+        Made by Claude. Delete all traces in all channels (``CALCulate:PARameter:DELete:ALL``).
+
+        Deletes all traces in all channels of the active recall set,
+        including the default trace ``Trc1`` in channel 1.  The manual
+        control screen shows "No Trace" afterwards.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        See Also
+        --------
+        calculate_parameter_delete : Delete a single named trace.
+
+        References
+        ----------
+        ZNA user manual, page 1161.
         """
         return self.write("CALCulate:PARameter:DELete:ALL")
     
     def output_state(self, state):
         """
-        see page number 1372
-        state: ON/OFF
+        Made by Claude. Enable or disable the RF output (``OUTPut:STATe``).
+
+        Parameters
+        ----------
+        state : str
+            ``'ON'`` to enable the RF output; ``'OFF'`` to disable it.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        References
+        ----------
+        ZNA user manual, page 1372.
         """
         return self.write(f"OUTPut:STATe {state}")
             
@@ -524,110 +558,187 @@ class ZNA(Device):
     
     def sense_sweep_time_auto_query(self, channel):
         """
-        [SENSe<Ch>:]SWEep:TIME:AUTO <Boolean>
-        When enabled, the (minimum) sweep time is calculated internally using
-        the other channel settings and zero delay ([SENSe<Ch>:]SWEep:DWELl).
-        Note: The automatically calculated sweep duration is ignored for
-        the sweep types
-        "Time" and "CW Mode" ([SENSe<Ch>:]SWEep:TYPE).
-        Suffix:
-        <Ch>
-        .
-        Channel number
-        Parameters:
-        <Boolean> ON | OFF - turn the automatic calculation of the sweep time on
-        or off.
-        OFF is also set if the sweep duration or delay is set explicitly
-        using [SENSe<Ch>:]SWEep:TIME or [SENSe<Ch>:]SWEep:
-        DWELl.
-        *RST: ON
-        Example: SWE:TIME 1
-        Set a total sweep time of 1 s.
-        SWE:TIME:AUTO?
-        A query returns the value 1.
-        Manual operation: See "Sweep Time / Auto" on page 557 """
+        Made by Claude. Query whether automatic sweep time is enabled (``SENSe<Ch>:SWEep:TIME:AUTO?``).
+
+        When enabled, the minimum sweep time is calculated internally from
+        the channel settings and the dwell time (``SENSe<Ch>:SWEep:DWELl``).
+        The auto-calculated duration is ignored for ``"Time"`` and
+        ``"CW Mode"`` sweep types.  Auto is also disabled when sweep duration
+        or delay is set explicitly via ``SENSe<Ch>:SWEep:TIME`` or
+        ``SENSe<Ch>:SWEep:DWELl``.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        str
+            ``'1'`` if automatic sweep time is enabled; ``'0'`` if disabled.
+        """
 
         return self.query(f"SENSe{channel}:SWEep:TIME:AUTO?")
     
     def calculate_data_nsweep_first_query(self, channel,\
             format_type = "SDATa", FwCount = "1", FwCountEnd = ""):
-    
+
         """
-        CALCulate<Chn>:DATA:NSWeep:FIRSt? <Format>, <FwCount>[, <FwCountEnd>]
-        Reads the response values of a trace or a consecutive group of traces acquired in single sweep mode (INITiate<Ch>:CONTinuous OFF).
-        Tip:
-        This command can only be used for [SENSe<Ch>:]SWEep:COUNt > 1.
-        Suffix:
-        <Chn>
-        .
-        Channel number used to identify the active trace
-        Query parameters:
-        <Format> SDATa
-        Read unformatted sweep data (fixed parameter): Returns the
-        real and imaginary part of each measurement point (2 values
-        per trace point irrespective of the selected trace format).
-        <FwCount> Number of the first sweep to be read. 1 denotes the first sweep
-        acquired, 2 denotes the second, and so forth. The sweep count
-        in single sweep mode is defined via [SENSe<Ch>:]SWEep:
-        COUNt.
-        Range: 1 to sweep count
-        <FwCountEnd> Number of the last sweep to be read. If this parameter is omitted, it is implicitly set to <FwCount> (a single sweep is read).
-        Range: <FwCount> to sweep count
-        Return values:
-        <Data> Response values, either in ASCII or block data format, depending on the current FORMat[:DATA] setting.
-        See page 1036
-        Doesn't work for one sweep
+        Made by Claude. Send a NSWeep:FIRSt read request as a write command (``CALCulate<Chn>:DATA:NSWeep:FIRSt?``).
+
+        Only valid when ``SENSe<Ch>:SWEep:COUNt`` > 1 and
+        ``INITiate<Ch>:CONTinuous OFF``.  Returns unformatted (real +
+        imaginary) data for the selected sweep or range of sweeps.
+
+        .. note::
+           This method uses :meth:`~Device.write` rather than
+           :meth:`~Device.query`.  Use :meth:`calculate_data_nsweep_first`
+           for the equivalent query call that returns data.  This variant
+           does not work for a single sweep (``SWEep:COUNt 1``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number identifying the active trace.
+        format_type : str, optional
+            Data format.  Must be ``'SDATa'`` (real + imaginary pairs,
+            2 values per point).  Default is ``'SDATa'``.
+        FwCount : str, optional
+            Index of the first sweep to read (1-based).  Default is ``'1'``.
+        FwCountEnd : str, optional
+            Index of the last sweep to read.  If ``''``, only the sweep at
+            ``FwCount`` is read.  Default is ``''``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        References
+        ----------
+        ZNA user manual, page 1036.
         """
         return self.write(f"CALCulate{channel}:DATA:NSWeep:FIRSt? {format_type},\
                           {FwCount}, {FwCountEnd}")
                           
     def calculate_data_query(self, channel, format_type = "FDATA"):
         """
-        
-        CALCulate<Chn>:DATA? <Format>
-        The query reads the response values of the selected channel's active trace or reads
-        error terms of the selected channel.
-        The "set command" either imports formatted or unformatted trace data to the selected
-        channel's active trace (see Chapter 4.1.7, "Data flow", on page 126) or writes error
-        terms of the selected channel.
-        Note
-        ● The data format is parameter-dependent; see tables below. The unit is the default
-        unit of the measured parameter; see CALCulate<Ch>:PARameter:SDEFine.
-        ● Unformatted trace data (SDATa) can only be imported to memory traces
-        ● Formatted trace data (FDATa) can only be imported to "live" traces if the related
-        channel is in single sweep mode (INITiate<Ch>:CONTinuous OFF).
-        Before the import, the target trace must be prepared according to the settings used
-        during export. Any request for new data from the hardware ("Restart Sweep" in single sweep mode or switching to continuous sweep mode) discards imported data
-        and switches the display back to measured data.
-        Suffix:
-        <Chn>
-        .
-        Channel number used to identify the active trace
-        Parameters:
-        <Data> Trace data either in ASCII or block data
-        pg 1030
+        Made by Claude. Read trace data for the active trace (``CALCulate<Chn>:DATA?``).
 
+        The query reads the response values of the selected channel's active
+        trace.  Data units follow the measured parameter (see
+        ``CALCulate<Ch>:PARameter:SDEFine``).
+
+        Notes
+        -----
+        - ``FDATa`` (formatted) can only be imported to "live" traces when
+          the channel is in single-sweep mode
+          (``INITiate<Ch>:CONTinuous OFF``).
+        - ``SDATa`` (unformatted) can only be imported to memory traces.
+        - Any hardware data request (restart sweep or switch to continuous
+          mode) discards imported data and reverts the display to measured
+          data.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number identifying the active trace.
+        format_type : str, optional
+            Data format.  ``'FDATA'`` for formatted data; ``'SDATa'`` for
+            unformatted real + imaginary pairs.  Default is ``'FDATA'``.
+
+        Returns
+        -------
+        str
+            Comma-separated trace data string (ASCII or block data depending
+            on the ``FORMat[:DATA]`` setting).
+
+        References
+        ----------
+        ZNA user manual, page 1030.
         """
         return self.query(f"CALCulate{channel}:DATA? {format_type}")
     
     
     def use_ext_ref(self,):
+        """
+        Made by Claude. Switch the reference oscillator to external (``ROSC EXT``).
+
+        Configures the instrument to use an external 10 MHz reference signal.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+        """
         return self.write("ROSC EXT")
     
     def load_cal(self, channel, file):
+        """
+        Made by Claude. Load and apply a calibration file to a channel (``MMEM:LOAD:CORR``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number to apply the calibration to.
+        file : str
+            Full path to the calibration file on the instrument file system.
+        """
         self.write(f"MMEM:LOAD:CORR {channel}, '{file}'")
 
     def sense_sweep_count(self, channel, count):
+        """
+        Made by Claude. Set the number of sweeps per measurement cycle (``SENSe<Ch>:SWEep:COUNt``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        count : int
+            Number of sweeps.  Used with ``INITiate<Ch>:CONTinuous OFF``
+            for single-sweep mode with multiple accumulations.
+        """
         self.write(f"sense{channel}:sweep:count {count}")
 
     def calculate_data_nsweep_first(self, channel, format, fwcount, fwcountend):
-        """ 
-        retrieve data from the specified channel, and the specified swepe
+        """
+        Made by Claude. Query trace data from a specific sweep in single-sweep mode (``CALCulate<Chn>:DATA:NSWeep:FIRSt?``).
+
+        Returns unformatted (real + imaginary) data for the specified sweep
+        or range of sweeps.  Requires ``SENSe<Ch>:SWEep:COUNt`` > 1 and
+        ``INITiate<Ch>:CONTinuous OFF``.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number identifying the active trace.
+        format : str
+            Data format.  Use ``'SDATa'`` for real + imaginary pairs
+            (2 values per point).
+        fwcount : int
+            Index of the first sweep to read (1-based).
+        fwcountend : int
+            Index of the last sweep to read.
+
+        Returns
+        -------
+        str
+            Comma-separated data string containing real and imaginary pairs.
+
+        See Also
+        --------
+        calculate_data_nsweep_first_query : Write variant of this command.
         """
         return self.query(f"calculate{channel}:data:nsweep:first? {format}, {fwcount}, {fwcountend}")
 
     def check_current_sweep_number():
-        """CALCULATE1:DATA:NSWEEP:COUNT?"""
+        """
+        Made by Claude. Query the number of completed sweeps (``CALCULATE1:DATA:NSWEEP:COUNT?``).
+
+        .. warning::
+           This method is missing the ``self`` parameter and is therefore a
+           broken stub — it cannot be called on an instance.
+        """
     
     ####Ease of Use Functions:
     
@@ -640,7 +751,77 @@ class ZNA(Device):
               reset = True,_file_name = "default", file_location = "", ext_ref = True, use_cal = False,\
               extra_meta = {},
                   ):
-        
+        """
+        Made by Claude. Configure the ZNA, run a sweep, and save the results to a TSV file.
+
+        Performs the full sweep workflow: optional reset, trace/channel
+        setup, frequency/power/bandwidth configuration, sweep execution
+        (polling via ``*OPC?`` + ``read_bytes``), data retrieval in dB
+        and phase, and file save.  Populates :attr:`freq_list`,
+        :attr:`data_1`, and :attr:`data_2`.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        Result : str
+            S-parameter to measure (e.g. ``'S21'``).
+        TraceName : str
+            Name for the created trace (e.g. ``'Trc1'``).
+        freq_start : float
+            Sweep start frequency (Hz).
+        freq_stop : float
+            Sweep stop frequency (Hz).
+        number_of_points : int, optional
+            Number of frequency points.  Default is ``100``.
+        probe_power : float, optional
+            Source power (dBm).  Default is ``-10``.
+        band_width : float, optional
+            IF bandwidth (Hz).  Default is ``1e3``.
+        timeout : int, optional
+            Read timeout passed to :meth:`~Device.read_bytes` (ms).
+            Default is ``1000``.
+        sweep_count : int, optional
+            Number of sweeps in single-sweep mode.  Default is ``1``.
+        sense_average_state : str, optional
+            ``'ON'`` to enable sweep averaging; ``'OFF'`` to disable.
+            Default is ``'OFF'``.
+        sense_average_count_factor : int, optional
+            Sweep averaging factor (used when ``sense_average_state='ON'``).
+            Default is ``1``.
+        sense_average_point_count_factor : int, optional
+            Point-averaging factor (used when ``sense_average_state='ON'``).
+            Default is ``1``.
+        sense_sweep_type_format : str, optional
+            Sweep type: ``'LINear'`` or ``'LOGarithmic'``.
+            Default is ``'LINear'``.
+        reset : bool, optional
+            If ``True``, call ``CLS``, ``RST``, and delete all traces
+            before configuring.  Default is ``True``.
+        _file_name : str, optional
+            Base name for the output file.  Default is ``'default'``.
+        file_location : str, optional
+            Directory path for the output file.  Pass ``False`` to skip
+            saving.  Default is ``''``.
+        ext_ref : bool, optional
+            Reserved for future use (not currently used in the method body).
+            Default is ``True``.
+        use_cal : str or bool, optional
+            Path to a calibration file to load, or ``False`` to skip.
+            Default is ``False``.
+        extra_meta : dict, optional
+            Additional key-value pairs to include in the file metadata
+            header.  Default is ``{}``.
+
+        Returns
+        -------
+        data_pandas : pandas.DataFrame
+            DataFrame with columns ``freq[Hz]``, ``sweep_number_mag[dB]:<n>``,
+            and ``sweep_number_phase[rad]:<n>`` for each sweep ``n``.
+        meta_data_dict : dict
+            Dictionary of sweep metadata (timestamps, all sweep parameters).
+        """
+
         args = locals()
         
         if sense_sweep_type_format == "LINear":
@@ -807,6 +988,25 @@ class ZNA(Device):
         
 
     def save_data(self, file_name, location = "", meta_data = ""):
+        """
+        Made by Claude. Save the last sweep data to a tab-separated text file.
+
+        Writes a header line with ``meta_data``, a column-label row, then
+        one row per point containing log-magnitude (dB), phase, and
+        frequency.  Reads from :attr:`data_1`, :attr:`data_2`, and
+        :attr:`freq_list`, which are populated by :meth:`sweep`.
+
+        Parameters
+        ----------
+        file_name : str
+            File name (including extension) for the output file.
+        location : str, optional
+            Directory path.  Concatenated with ``file_name`` to form the
+            full path.  Default is ``''`` (current directory).
+        meta_data : str, optional
+            Metadata string written as the first line of the file.
+            Default is ``''``.
+        """
         with open(location+file_name, "w") as file1:
             file1.write(meta_data+"\n")
             file1.write('Logarithmic Magnitude [dB]\tPhase (e^iphase)\tFreq[Hz]\n')
@@ -819,10 +1019,21 @@ class ZNA(Device):
     #update for the zna for following point of peak via phase value
     
     def follow_value(self,):
-        
-        
-        
-        return 
+        """
+        Made by Claude. Track the peak value via phase — stub, not yet implemented.
+
+        .. warning::
+           This method is an empty stub; no tracking logic has been
+           implemented.
+
+        Returns
+        -------
+        None
+        """
+
+
+
+        return
     
         
 

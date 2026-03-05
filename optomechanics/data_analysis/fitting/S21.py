@@ -3,7 +3,7 @@ from scipy.optimize import curve_fit
 import traceback
 import plotly.graph_objects as go
 import pandas as pd
-from optomechanics.data_management import attenuation_object
+from optomechanics.data_management.data_management import attenuation_object
 from optomechanics.data_analysis.unit_conversions import watts_ratio_to_dB, dB_to_watts_ratio, dB_to_linear_voltage,\
                                                      linear_voltage_to_dB, Vpp_to_Vrms, Vp_to_Vrms,\
                                                      Vrms_to_Vpp, Vrms_to_Vp, Vrms_to_watts,\
@@ -22,8 +22,24 @@ from optomechanics.data_analysis.utilities import split_complex_wrapper, split_c
 
 def S21_eq(freq,*p):
     """
-    S21 equation for our cavities in linear voltage ratio
-    
+    Made by Claude. S21 transmission model for a cavity in linear voltage ratio.
+
+    Parameters
+    ----------
+    freq : array-like
+        Frequency array (Hz).
+    *p : float
+        Model parameters in order:
+        p[0] f_0   — cavity resonance frequency (Hz),
+        p[1] k_tot — total linewidth (Hz),
+        p[2] k_ext — external coupling rate (Hz),
+        p[3] att_m — linear background slope,
+        p[4] att_c — linear background offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        S21 amplitude as a linear voltage ratio.
     """
     f_0=p[0]
     k_tot=p[1]
@@ -36,8 +52,29 @@ def S21_eq(freq,*p):
 
 def S21_eq_complex(freq,*p):
     """
-    S21 equation for our cavities in linear voltage ratio
-    
+    Made by Claude. Complex S21 transmission model for a cavity with linear background.
+
+    Returns the complex-valued S21 as a linear voltage ratio, including both real and
+    imaginary linear background terms.
+
+    Parameters
+    ----------
+    freq : array-like
+        Frequency array (Hz).
+    *p : float
+        Model parameters in order:
+        p[0] f_0   — cavity resonance frequency (Hz),
+        p[1] k_tot — total linewidth (Hz),
+        p[2] k_ext — external coupling rate (Hz),
+        p[3] r_m   — real background slope,
+        p[4] r_c   — real background offset,
+        p[5] i_m   — imaginary background slope,
+        p[6] i_c   — imaginary background offset.
+
+    Returns
+    -------
+    numpy.ndarray of complex
+        Complex S21 as a linear voltage ratio.
     """
     f_0=p[0]
     k_tot=p[1]
@@ -54,8 +91,24 @@ def S21_eq_complex(freq,*p):
 
 def S21_eq_phase(freq,*p):
     """
-    S21 equation for our cavities in linear voltage ratio
-    
+    Made by Claude. Phase of the S21 cavity transmission model.
+
+    Parameters
+    ----------
+    freq : array-like
+        Frequency array (Hz).
+    *p : float
+        Model parameters in order:
+        p[0] f_0   — cavity resonance frequency (Hz),
+        p[1] k_tot — total linewidth (Hz),
+        p[2] k_ext — external coupling rate (Hz),
+        p[3] att_m — (unused) linear background slope,
+        p[4] att_c — (unused) linear background offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        Phase of the S21 in radians.
     """
     f_0=p[0]
     k_tot=p[1]
@@ -68,8 +121,24 @@ def S21_eq_phase(freq,*p):
 
 def S21_eq_dB(freq,*p):
     """
-    S21 equation for our cavities in dB
-    
+    Made by Claude. S21 transmission model for a cavity in dB.
+
+    Parameters
+    ----------
+    freq : array-like
+        Frequency array (Hz).
+    *p : float
+        Model parameters in order:
+        p[0] f_0   — cavity resonance frequency (Hz),
+        p[1] k_tot — total linewidth (Hz),
+        p[2] k_ext — external coupling rate (Hz),
+        p[3] att_m — linear background slope,
+        p[4] att_c — linear background offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        S21 amplitude in dB.
     """
     f_0=p[0]
     k_tot=p[1]
@@ -85,19 +154,41 @@ def S21_eq_dB(freq,*p):
 
 def fit_S21_peak_dB(powers_dB, frequencies, guesses = False, signal_applied = False, errors = None, equation = S21_eq_dB ):
     """
-    Wrapper for fit_S21_peak to instead fit in dB
-    Takes powers in dB and frequencies, then fits and returns popt and pcov
-    errors should be given in dB
+    Made by Claude. Fit the S21 cavity model to power data in dB.
 
-    errors = (upper_error_dB, lower_error_dB)
+    Wrapper around `fit_S21_peak` that accepts dB input and uses `S21_eq_dB`.
 
-    if account for applied signal, give:
-    [bandwidth, number_of_signals]
-    bandwidth is used to determine filter frequencies for signal
-    Uses "S21_eq_dB()"
-    p[0] = f_0
-    p[1] = k_tot[Hz]
-    p[2] = k_ext[Hz]
+    Parameters
+    ----------
+    powers_dB : array-like
+        Measured S21 amplitudes in dB.
+    frequencies : array-like
+        Corresponding frequency array (Hz).
+    guesses : list or False, optional
+        Initial parameter guesses ``[f_0, k_tot, k_ext, att_m, att_c]``.
+        If False, guesses are estimated automatically.
+    signal_applied : list or False, optional
+        ``[bandwidth, number_of_signals]`` to notch out applied tones before
+        fitting.  If False, no notching is applied.
+    errors : tuple or None, optional
+        ``(upper_error_dB, lower_error_dB)`` — asymmetric errors in dB.
+    equation : callable, optional
+        Equation to fit. Default is `S21_eq_dB`.
+
+    Returns
+    -------
+    popt : list
+        Optimised parameters ``[f_0, k_tot, k_ext, att_m, att_c]``.
+    pcov : numpy.ndarray
+        Covariance matrix of `popt`.
+    guesses : list
+        Initial guesses used.
+    amplitude_linear_voltage : numpy.ndarray
+        Data converted to linear voltage ratio used for fitting.
+    frequencies : numpy.ndarray
+        Frequencies used for fitting (after optional signal removal).
+    errors : array-like or None
+        Errors used for fitting.
     """
     return fit_S21_peak(powers_dB, frequencies, guesses, signal_applied, errors, equation = S21_eq_dB)
 
@@ -105,19 +196,43 @@ def fit_S21_peak_dB(powers_dB, frequencies, guesses = False, signal_applied = Fa
 
 def fit_S21_peak_complex(complex_data, frequencies, guesses = False, signal_applied = False, equation = S21_eq_complex ):
     """
-    not a wrapper, code needs re-factoring into smaller blocks. fits  for fit_S21_peak to fit complex
-    Takes re and imag linear voltage ratio data and attempts to unwrap and normalise the phase offset
-    errors should be given in dB
+    Made by Claude. Fit the S21 cavity model to complex linear voltage ratio data.
 
-    errors = (upper_error_dB, lower_error_dB)
+    Fits real and imaginary parts simultaneously using ``split_complex_wrapper``
+    with ``S21_eq_complex``.
 
-    if account for applied signal, give:
-    [bandwidth, number_of_signals]
-    bandwidth is used to determine filter frequencies for signal
-    Uses "S21_eq_dB()"
-    p[0] = f_0
-    p[1] = k_tot[Hz]
-    p[2] = k_ext[Hz]
+    Parameters
+    ----------
+    complex_data : array-like of complex
+        Measured S21 as complex linear voltage ratios.
+    frequencies : array-like
+        Corresponding frequency array (Hz).
+    guesses : list or False, optional
+        Initial parameter guesses
+        ``[f_0, k_tot, k_ext, r_m, r_c, i_m, i_c]``.
+        If False, guesses are estimated automatically.
+    signal_applied : list or False, optional
+        ``[bandwidth, number_of_signals]`` to notch out applied tones before
+        fitting.  If False, no notching is applied.
+    equation : callable, optional
+        Complex equation to fit. Default is `S21_eq_complex`.
+
+    Returns
+    -------
+    popt : numpy.ndarray
+        Optimised parameters ``[f_0, k_tot, k_ext, r_m, r_c, i_m, i_c]``.
+    pcov : numpy.ndarray
+        Covariance matrix of `popt`.
+    guesses : list
+        Initial guesses used.
+    complex_data : numpy.ndarray of complex
+        Data used for fitting (after optional signal removal).
+    frequencies : numpy.ndarray
+        Frequencies used for fitting (after optional signal removal).
+    chi_squared : float
+        Sum of squared residuals.
+    r_squared : float
+        R-squared goodness-of-fit.
     """
     #setup input variables
     complex_data = np.array(complex_data)
@@ -187,19 +302,42 @@ def fit_S21_peak_complex(complex_data, frequencies, guesses = False, signal_appl
 
 def fit_S21_peak(powers_dB, frequencies, guesses = False, signal_applied = False, errors = None, equation = S21_eq ):
     """
-    Takes powers in dB and frequencies, then fits and returns popt and pcov
-    errors should be given in dB
+    Made by Claude. Fit the S21 cavity model to power data in linear voltage ratio.
 
-    errors = (upper_error_dB, lower_error_dB)
+    Accepts powers in dB, converts to linear voltage ratio internally, then
+    fits with `S21_eq` (or a supplied `equation`).
 
-    if account for applied signal, give:
-    [bandwidth, number_of_signals]
-    bandwidth is used to determine filter frequencies for signal
-    Uses "S21_eq()"
-    p[0] = f_0
-    p[1] = k_tot[Hz]
-    p[2] = k_ext[Hz]
+    Parameters
+    ----------
+    powers_dB : array-like
+        Measured S21 amplitudes in dB.
+    frequencies : array-like
+        Corresponding frequency array (Hz).
+    guesses : list or False, optional
+        Initial parameter guesses ``[f_0, k_tot, k_ext, att_m, att_c]``.
+        If False, guesses are estimated automatically.
+    signal_applied : list or False, optional
+        ``[bandwidth, number_of_signals]`` to notch out applied tones before
+        fitting.  If False, no notching is applied.
+    errors : tuple or None, optional
+        ``(upper_error_dB, lower_error_dB)`` — asymmetric errors in dB.
+    equation : callable, optional
+        Equation to fit. Default is `S21_eq`.
 
+    Returns
+    -------
+    popt : list
+        Optimised parameters ``[f_0, k_tot, k_ext, att_m, att_c]``.
+    pcov : numpy.ndarray
+        Covariance matrix of `popt`.
+    guesses : list
+        Initial guesses used.
+    amplitude_linear_voltage : numpy.ndarray
+        Data as linear voltage ratio used for fitting.
+    frequencies : numpy.ndarray
+        Frequencies used for fitting (after optional signal removal).
+    errors : array-like or None
+        Errors used for fitting.
     """
 
     #setup input variables

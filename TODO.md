@@ -244,7 +244,7 @@ where needed.
 - [x] Re-audit `data_management/` modules — data_management, file_management, data_logger all clean
 
 ### Phase 8 — Build verification
-- [ ] Run `mkdocs build --strict` and fix any warnings or errors
+- [x] Run `mkdocs build --strict` and fix any warnings or errors — fixed 6 cross-reference warnings in Rohde_Schwarz_Class.py; build passes clean (88e22e9)
   ```
   cd optomechanics_documentation
   /c/Users/seanh/miniconda3/envs/exp/python.exe -m mkdocs build --strict

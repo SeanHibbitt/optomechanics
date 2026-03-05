@@ -28,7 +28,8 @@ from optomechanics.data_management.data_management import read_file
 from optomechanics.data_analysis.fitting.S21 import fit_S21_peak_dB
 
 # Load a saved sweep (TSV produced by Device.save_data_3 or similar)
-data = read_file("path/to/sweep.tsv")
+# read_file returns (data_pandas, meta_data)
+data, meta = read_file("path/to/sweep.tsv")
 freqs   = np.array(data["freq[Hz]"])
 s21_dB  = np.array(data["sweep_number_mag[dB]:1"])
 

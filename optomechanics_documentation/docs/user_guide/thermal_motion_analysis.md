@@ -24,14 +24,22 @@ Calculate g₀ = G · x_zpf
 
 ## Step 1 — Load the saved data
 
+`sa_paths` and `vna_paths` are lists of file paths to the TSV files saved during
+the measurement (see [Thermal Motion Measurement](thermal_motion_measurement.md)).
+Use `glob.glob` or `pathlib.Path.glob` to collect them from the dated directories.
+
 ```python
+import glob
 import pandas as pd
 from optomechanics.data_management.data_management import read_file
+
+sa_paths  = sorted(glob.glob("/data/thermal_motion/*/SA_*.tsv"))
+vna_paths = sorted(glob.glob("/data/thermal_motion/*/S21_*.tsv"))
 
 # Load all SA rows into a DataFrame (one row per sweep)
 sa_rows = []
 for path in sorted(sa_paths):
-    meta, data = read_file(path)
+    data, meta = read_file(path)
     row = dict(meta)
     row["data"] = data
     sa_rows.append(row)
@@ -40,7 +48,7 @@ SA_df = pd.DataFrame(sa_rows)
 # Same for VNA S21
 vna_rows = []
 for path in sorted(vna_paths):
-    meta, data = read_file(path)
+    data, meta = read_file(path)
     row = dict(meta)
     row["data"] = data
     vna_rows.append(row)
@@ -68,6 +76,10 @@ vna_extra.load_from_tsv("vna_extra_atten.tsv")
 
 ## Step 3 — Normalise and fit
 
+`fit_S_xx` is a class whose methods handle normalisation and fitting.
+`__average_and_fit_S_xx__` is the main entry point that averages sweeps at the
+same drive power, normalises to $G^2 S_{xx}$, and fits the Lorentzian model.
+
 ```python
 from optomechanics.data_analysis.fitting.Sww import fit_S_xx
 
@@ -76,6 +88,7 @@ m_eff = 150e-15  # effective mass in kg — look up for your membrane mode
 result = fit_S_xx.__average_and_fit_S_xx__(
     SA_df         = SA_df,
     select        = {"drive_power": ["-20"], "domain": ["freq"]},
+    # select filters rows in SA_df; values must match metadata strings as saved
     m_eff         = m_eff,
     S21_df        = S21_df,
     VNA_S21_extra_atten   = vna_extra,

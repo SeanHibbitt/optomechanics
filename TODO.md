@@ -321,11 +321,11 @@ Add each new page to the `User Guide` section of `mkdocs.yml` nav.
 ### Phase 13 — Documentation quality audit
 Thorough review of all documentation pages from the perspective of a completely new user. Is each page clear, accurate, and useful? Implement any improvements found.
 
-- [ ] Audit all user guide pages for clarity and completeness from a new-user perspective
-- [ ] Audit getting_started pages (installation, quickstart) for accuracy and ease of follow
-- [ ] Audit API reference index pages for accuracy and completeness
-- [ ] Implement any improvements identified by the audit
-- [ ] Verify `mkdocs build --strict` still passes after improvements
+- [x] Audit all user guide pages for clarity and completeness from a new-user perspective — 6 pages audited; bugs fixed in s21_fitting, data_management, thermal_motion_analysis, thermal_motion_measurement (87ce437–6ff99df)
+- [x] Audit getting_started pages (installation, quickstart) for accuracy and ease of follow — git clone step added to installation.md; quickstart return variables clarified (cd87965, ee42fee)
+- [x] Audit API reference index pages for accuracy and completeness — all entries verified accurate and complete; no changes needed
+- [x] Implement any improvements identified by the audit — 6 files updated across 6 commits (87ce437–ee42fee)
+- [x] Verify `mkdocs build --strict` still passes after improvements — zero warnings, clean build confirmed
 
 ### Phase 14 — Unit test suite
 Add an explicit unit test base for the Python package. Tests should use defined inputs and expected outputs, be simple cases that run almost instantaneously, and cover each public module.

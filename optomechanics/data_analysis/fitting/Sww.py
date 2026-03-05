@@ -18,6 +18,38 @@ from optomechanics.data_analysis.fitting.S21 import S21_eq, fit_S21_peak
 from optomechanics.data_analysis.misc_equations import photon_number                                 
 
 
+def basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
+    """
+    Made by Claude. Lorentzian approximation of the mechanical displacement spectral density.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    omega_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    A : float
+        Amplitude scaling factor.
+    nf : float
+        Noise floor offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        Spectral density S_ww (W/Hz or arb. units matching `A`).
+    """
+    freqs = freqs*2*np.pi
+
+    omega_m = omega_m *2*np.pi
+
+    G_m = G_m *2 *np.pi
+
+    S_ww =  (A /((G_m**2) + 4*(freqs - omega_m )**2)) +nf
+
+    return S_ww
+
 class fit_S_xx:
     """
     Made by Claude. High-level fitter for the mechanical displacement spectral density S_xx.
@@ -396,40 +428,6 @@ class fit_S_xx:
     
 ## old fitters ----------------------------
 
-
-
-
-def basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
-    """
-    Made by Claude. Lorentzian approximation of the mechanical displacement spectral density.
-
-    Parameters
-    ----------
-    freqs : array-like
-        Frequency array (Hz).
-    omega_m : float
-        Mechanical resonance frequency (Hz).
-    G_m : float
-        Mechanical linewidth / damping rate (Hz).
-    A : float
-        Amplitude scaling factor.
-    nf : float
-        Noise floor offset.
-
-    Returns
-    -------
-    numpy.ndarray
-        Spectral density S_ww (W/Hz or arb. units matching `A`).
-    """
-    freqs = freqs*2*np.pi
-
-    omega_m = omega_m *2*np.pi
-
-    G_m = G_m *2 *np.pi
-
-    S_ww =  (A /((G_m**2) + 4*(freqs - omega_m )**2)) +nf
-
-    return S_ww
 
 def basic_S_ww_eq_2(freqs, omega_m, G_m, A, nf):
     """

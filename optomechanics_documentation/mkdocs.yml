@@ -106,6 +106,8 @@ markdown_extensions:
       generic: true
   - admonition
   - pymdownx.details
+  - attr_list
+  - md_in_html
   - toc:
       permalink: true
 

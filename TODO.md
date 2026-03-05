@@ -9,31 +9,31 @@
 The following Python modules exist in the package but have no corresponding MkDocs page:
 
 **data_analysis/**
-- [ ] `attenuation_accounter.py`
-- [ ] `Plotting.py`
-- [ ] `Temperature_Reader.py`
-- [ ] `control_gui.py`
+- [x] `attenuation_accounter.py` — added api_reference page (3aaf978)
+- [x] `Plotting.py` — added api_reference page (83dfe2e)
+- [x] `Temperature_Reader.py` — added api_reference page (71bdebf)
+- [x] `control_gui.py` — added api_reference page (b729523)
 
 **data_analysis/fitting/**
-- [ ] `omit.py`
+- [x] `omit.py` — added api_reference page (df6a9d2)
 
 **device_control/**
-- [ ] `E5063A_VNA_Class_new.py`
-- [ ] `Rohde_Schwarz_Class.py`
-- [ ] `Rohde_Schwarz_Class_new.py`
-- [ ] `RS_FSL.py`
-- [ ] `RS_FSW.py`
-- [ ] `RS_FSW_new.py`
-- [ ] `SMA100B.py`
-- [ ] `SPD3303XE.py`
-- [ ] `Tektronix_AFG1022.py`
-- [ ] `Yokogawa.py`
-- [ ] `KeithleyDMM6500.py`
-- [ ] `Lakeshore_372_AC_Res_Temp_Controller.py`
-- [ ] `Device_Visa_Super_rs.py`
+- [x] `E5063A_VNA_Class_new.py` — added api_reference page (404f726)
+- [x] `Rohde_Schwarz_Class.py` — added api_reference page (8c74dff)
+- [x] `Rohde_Schwarz_Class_new.py` — added api_reference page (fc91d9e)
+- [x] `RS_FSL.py` — added api_reference page (ccc0fbd)
+- [x] `RS_FSW.py` — added api_reference page (de4b877)
+- [x] `RS_FSW_new.py` — added api_reference page (2e07a07)
+- [x] `SMA100B.py` — added api_reference page (7a2bc75)
+- [x] `SPD3303XE.py` — added api_reference page (afb2617)
+- [x] `Tektronix_AFG1022.py` — added api_reference page (55fad10)
+- [x] `Yokogawa.py` — added api_reference page (9a3bbfb)
+- [x] `KeithleyDMM6500.py` — added api_reference page (f87c0cb)
+- [x] `Lakeshore_372_AC_Res_Temp_Controller.py` — added api_reference page (78c9aca)
+- [x] `Device_Visa_Super_rs.py` — added api_reference page (445916a)
 
 **data_management/**
-- [ ] `data_logger.py`
+- [x] `data_logger.py` — added api_reference page (4e61ed7)
 
 ### Missing / incomplete NumPy docstrings
 Legend: **NO** = no docstring at all · **PARTIAL** = plain text / `:param` style · **SECTIONS** = has NumPy structure but missing some sections

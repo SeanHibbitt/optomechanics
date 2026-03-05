@@ -63,5 +63,24 @@ with Signal_Generator('TCPIP::192.168.0.2::INSTR') as sg:
 # Connection is closed automatically on exit.
 ```
 
+## RS FSW spectrum analyser
+
+```python
+from optomechanics.device_control.RS_FSW import FSW
+
+with FSW('TCPIP::192.168.0.3::INSTR') as fsw:
+    df, meta = fsw.sweep(
+        central_freq=7e9,      # centre frequency (Hz)
+        span=200e6,            # span (Hz)
+        band_width=1e3,        # resolution bandwidth (Hz)
+        sweep_points=1001,
+        average_number=5,      # on-instrument averages
+    )
+
+import numpy as np
+frequencies = np.fromstring(fsw.x_data_query(), sep=',')
+power_dBm   = np.fromstring(fsw.y_data_query(), sep=',')
+```
+
 See the [API Reference](../api_reference/device_control/index.md) for all available classes
 and methods.

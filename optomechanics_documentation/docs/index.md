@@ -12,21 +12,21 @@ New to the package? Start here.
 
 <div class="grid cards" markdown>
 
-- :material-download: **Installation**
+- **Installation**
 
     ---
 
     Set up the conda environment and install the package.
 
-    [:octicons-arrow-right-24: Installation](getting_started/installation.md)
+    [Installation](getting_started/installation.md)
 
-- :material-rocket-launch: **Quick start**
+- **Quick start**
 
     ---
 
     Run your first S21 fit in a few lines of code.
 
-    [:octicons-arrow-right-24: Quick start](getting_started/quickstart.md)
+    [Quick start](getting_started/quickstart.md)
 
 </div>
 

@@ -47,5 +47,21 @@ with VNA('TCPIP::192.168.0.1::INSTR') as vna:
 `df` is a `pandas.DataFrame` with columns `freq[Hz]`, magnitude (dB), and
 phase (rad).  `meta` is a dict of sweep parameters and timestamps.
 
+## SMA100B signal generator
+
+```python
+from optomechanics.device_control.SMA100B import Signal_Generator
+
+with Signal_Generator('TCPIP::192.168.0.2::INSTR') as sg:
+    sg.set_mw_frequency(7e9)   # 7 GHz
+    sg.set_mw_power(-10)       # -10 dBm
+    sg.turn_mw('ON')
+
+    # ... perform measurements ...
+
+    sg.turn_mw('Off')
+# Connection is closed automatically on exit.
+```
+
 See the [API Reference](../api_reference/device_control/index.md) for all available classes
 and methods.

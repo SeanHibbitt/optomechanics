@@ -55,6 +55,9 @@ optomechanics/.vscode/
 .vscode/settings.json
 .claude
 *.__pycache__
+*/__pycache__/
+*__pycache__
+*__pycache__/*
 *.pyc
 optomechanics/__pycache__/
 optomechanics/data_analysis/__pycache__/unit_conversions.cpython-312.pyc
@@ -64,4 +67,4 @@ optomechanics_documentation/site/
 TODO.md
 CLAUDE.md
 *.cpython-312.pyc
-
+*.cpython-312*

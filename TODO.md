@@ -238,10 +238,10 @@ Re-check every file touched in Phases 3–4 to ensure no docstrings were missed
 and all NumPy sections (Parameters, Returns, Raises, Examples) are present
 where needed.
 
-- [ ] Re-audit `data_analysis/` modules
-- [ ] Re-audit `data_analysis/fitting/` modules
-- [ ] Re-audit `device_control/` modules
-- [ ] Re-audit `data_management/` modules
+- [x] Re-audit `data_analysis/` modules — all functions have docstrings; `wrapped` inner func in utilities.py intentionally undocumented (no params)
+- [x] Re-audit `data_analysis/fitting/` modules — all 24 E5063A and 33 RS-ZNA methods have docstrings; S21/Sww/omit/_fitting all clean
+- [x] Re-audit `device_control/` modules — E5063A_new (24 fns) and Rohde_Schwarz_new (33 fns) fully documented; Device_Visa_Super clean
+- [x] Re-audit `data_management/` modules — data_management, file_management, data_logger all clean
 
 ### Phase 8 — Build verification
 - [ ] Run `mkdocs build --strict` and fix any warnings or errors

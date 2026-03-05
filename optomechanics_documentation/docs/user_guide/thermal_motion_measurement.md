@@ -60,9 +60,9 @@ f_pump   = f0 - f_mech          # red-sideband drive
 P_drive  = -20                   # dBm at SG output
 
 with Signal_Generator("GPIB0::20::INSTR") as sg:
-    sg.set_frequency(f_pump)
-    sg.set_power(P_drive)
-    sg.set_output_state("ON")
+    sg.set_mw_frequency(f_pump)
+    sg.set_mw_power(P_drive)
+    sg.turn_mw("ON")
 ```
 
 ## Step 3 — Acquire the noise PSD

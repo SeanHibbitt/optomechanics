@@ -44,10 +44,13 @@ save_data_3(
 
 **Loading data:**
 
+`read_file` returns a `(data, meta)` tuple: a `pandas.DataFrame` of data rows and a
+`dict` of metadata key-value pairs.
+
 ```python
 from optomechanics.data_management.data_management import read_file
 
-meta, data = read_file("path/to/cavity_S21.tsv")
+data, meta = read_file("path/to/cavity_S21.tsv")
 freqs  = data["freq[Hz]"]
 s21_dB = data["sweep_number_mag[dB]:1"]
 print(meta)   # dict of metadata key-value pairs

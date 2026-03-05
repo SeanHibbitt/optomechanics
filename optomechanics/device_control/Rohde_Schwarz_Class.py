@@ -246,8 +246,8 @@ class ZNA(Device):
     
     def source_power_level(self, channel, IntSourcePow = -10):
         """
-        SOURce<Ch>:POWer<PhyPt>[:LEVel][:IMMediate][:AMPLitude] <IntSourcePow>
-        
+        ``SOURce<Ch>:POWer<PhyPt>[:LEVel][:IMMediate][:AMPLitude] <IntSourcePow>``
+
         Defines the power of the internal signal source (channel base power). The setting is
         valid for all sweep types, except power sweep.
         Tip: Use SOURce<Ch>:POWer<PhyPt>:STARt and SOURce<Ch>:POWer<PhyPt>:
@@ -259,10 +259,8 @@ class ZNA(Device):
         the selected channel base power applies to all source ports
         used in the active channel.
         It is possible though to define a port-specific slope factor for the
-        source power (SOURce<Ch>:POWer<PhyPt>[:LEVel][:
-        IMMediate]:SLOPe) and a port-specific power offset
-        (SOURce<Ch>:POWer<PhyPt>[:LEVel][:IMMediate]:
-        OFFSet).
+        source power (``SOURce<Ch>:POWer<PhyPt>[:LEVel][:IMMediate]:SLOPe``) and a port-specific power offset
+        (``SOURce<Ch>:POWer<PhyPt>[:LEVel][:IMMediate]:OFFSet``).
         Parameters:
         <IntSourcePow> Internal source power
         Range: The usable power range is frequency-dependent;
@@ -345,8 +343,7 @@ class ZNA(Device):
         <Boolean> ON - the analyzer measures continuously, repeating the current
         sweep.
         OFF - the measurement is stopped after the number of sweeps
-        defined via [SENSe<Ch>:]SWEep:COUNt. INITiate<Ch>[:
-        IMMediate][:DUMMy] initiates a new measurement cycle.
+        defined via [SENSe<Ch>:]SWEep:COUNt. ``INITiate<Ch>[:IMMediate][:DUMMy]`` initiates a new measurement cycle.
         *RST: ON
         see page 1323 on the manual for more infomation
         """
@@ -354,7 +351,7 @@ class ZNA(Device):
     
     def initiate_immediate_dummy(self,channel):
         """
-        INITiate<Ch>[:IMMediate][:DUMMy]
+        ``INITiate<Ch>[:IMMediate][:DUMMy]``
         Starts a new single sweep sequence. This command is available in single sweep mode
         only (INITiate<Ch>:CONTinuous OFF). The data of the last sweep (or previous
         sweeps, see Chapter 8.2.4.3, "Retrieving the results of previous sweeps",
@@ -406,12 +403,11 @@ class ZNA(Device):
         """
         CALCulate<Ch>:PARameter:SDEFine <TraceName>, <Result>
         Creates a trace and assigns a channel number, a name and a measurement parameter to it. The trace becomes the active trace in the channel but is not displayed.
-        Note: To display the trace defined via CALCulate<Ch>:PARameter:SDEFine, create a diagram (DISPlay[:WINDow<Wnd>][:STATe] ON) and assign the trace to this
+        Note: To display the trace defined via CALCulate<Ch>:PARameter:SDEFine, create a diagram (``DISPlay[:WINDow<Wnd>][:STATe]`` ON) and assign the trace to this
         diagram (DISPlay[:WINDow<Wnd>]:TRACe<WndTr>:FEED); see example below.
         CALCulate<Ch>:PARameter:MEASure changes the measurement result of an
         existing trace.
-        To select an existing trace as the active trace, use CALCulate<Ch>:PARameter:
-        SELect. You can open the trace manager to obtain an overview of all channels and
+        To select an existing trace as the active trace, use ``CALCulate<Ch>:PARameter:SELect``. You can open the trace manager to obtain an overview of all channels and
         traces, including the traces that are not displayed.
         SCPI command reference
         R&S Command reference ®ZNA
@@ -467,8 +463,7 @@ class ZNA(Device):
         See page 998
         
         Assigns an existing trace (CALCulate<Ch>:PARameter:SDEFine) to a diagram
-        area, using the <WndTr> suffix, and displays the trace. Use DISPlay[:
-        WINDow<Wnd>]:TRACe:EFEed to assign the trace to a diagram area without using a
+        area, using the <WndTr> suffix, and displays the trace. Use ``DISPlay[:WINDow<Wnd>]:TRACe:EFEed`` to assign the trace to a diagram area without using a
         numeric suffix.
         Tip: A trace can be assigned to a diagram only once. If a attempt is made to assign the
         same trace a second time (e.g. by typing DISP:WIND2:TRAC8:FEED 'CH4TR1'
@@ -479,7 +474,7 @@ class ZNA(Device):
         <Wnd>
         .
         Number of an existing diagram area (defined by means of
-        DISPlay[:WINDow<Wnd>][:STATe] ON).
+        ``DISPlay[:WINDow<Wnd>][:STATe]`` ON).
         <WndTr> Trace number used to distinguish the traces of the same diagram area <Wnd>.
         Parameters:
         <TraceName> String parameter for the trace name, e.g. 'Trc4'.

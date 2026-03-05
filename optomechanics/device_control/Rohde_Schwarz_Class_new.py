@@ -17,7 +17,7 @@ import numpy as np
 #import pyvisa  as visa
 #from pyvisa import constants
 from .Device_Visa_Super import Device
-from optomechanics.Fitting import re_and_im_to_dB_and_phase
+from optomechanics.data_analysis.unit_conversions import linear_voltage_to_dB
 import pandas
 
 
@@ -950,7 +950,8 @@ class ZNA(Device):
                 #print(sweep.T)
                 re = sweep[0]
                 im = sweep[1]
-                power_db, phase = re_and_im_to_dB_and_phase(re, im)
+                power_db = linear_voltage_to_dB(np.sqrt(re**2 + im**2))
+                phase = np.arctan2(im, re)
                 data_dict[f"sweep_number_mag[dB]:{i+1}"] = power_db
                 data_dict[f"sweep_number_phase[rad]:{i+1}"] = phase
 

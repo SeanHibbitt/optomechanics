@@ -53,6 +53,7 @@ nav:
         - S21: api_reference/data_analysis/fitting/S21.md
         - Sww: api_reference/data_analysis/fitting/Sww.md
         - omit: api_reference/data_analysis/fitting/omit.md
+        - _fitting: api_reference/data_analysis/fitting/_fitting.md
     - device_control:
       - Overview: api_reference/device_control/index.md
       - Device_Visa_Super: api_reference/device_control/Device_Visa_Super.md

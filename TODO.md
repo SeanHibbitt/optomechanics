@@ -288,7 +288,7 @@ Fixes needed (one commit per file):
 - [x] `RS_FSW_new.py` — Device_Visa_Super_rs + unit_conversions imports fixed (dca2dac)
 - [x] `Yokogawa.py` — `from DeviceClasses import Device` → relative (3fd4c5b)
 - [x] Add `data_analysis/fitting/_fitting.py` API page to mkdocs nav — created `_fitting.md` and added to `mkdocs.yml` (7a4c418)
-- [ ] Re-run `mkdocs build --strict` after all import fixes to confirm zero warnings
+- [x] Re-run `mkdocs build --strict` — zero warnings, clean build (38cbbc1)
 
 ### Phase 10 — Documentation overview pages audit
 Check each overview/index page to ensure all modules are listed and descriptions are accurate.

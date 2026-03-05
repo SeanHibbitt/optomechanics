@@ -82,5 +82,46 @@ frequencies = np.fromstring(fsw.x_data_query(), sep=',')
 power_dBm   = np.fromstring(fsw.y_data_query(), sep=',')
 ```
 
+## Multi-device workflow: software VNA (SG + FSW)
+
+`Vector_Network_Analyser` in `VNA.py` emulates a one-port VNA by combining a
+signal generator and a spectrum analyser.  Connect both instruments and pass
+thin wrapper callables:
+
+```python
+from optomechanics.device_control.SMA100B import Signal_Generator
+from optomechanics.device_control.RS_FSW import FSW
+from optomechanics.device_control.VNA import Vector_Network_Analyser
+
+with Signal_Generator('TCPIP::192.168.0.2::INSTR') as sg, \
+     FSW('TCPIP::192.168.0.3::INSTR') as fsw:
+
+    def sg_func(freq, power, on_off):
+        sg.set_mw_frequency(freq)
+        sg.set_mw_power(power)
+        sg.turn_mw(on_off)
+
+    def sa_func(freq, band_width):
+        fsw.set_cent_freq(freq)
+        fsw.set_bw(band_width)
+        fsw.write('INIT:IMM')
+        fsw.WAI()
+        power = fsw.y_data_query()
+        freqs = fsw.x_data_query()
+        return power, freqs
+
+    vna = Vector_Network_Analyser(sg_func, sa_func)
+    frequencies, s21_dB, s21_err = vna.sweep(
+        central_frequency=7e9,
+        span=200e6,
+        sweep_points=201,
+        power=-10,
+        band_width=1e3,
+        save_location='/path/to/data/',
+        file_name='s21_sweep.tsv',
+    )
+# Both instrument connections are closed automatically on exit.
+```
+
 See the [API Reference](../api_reference/device_control/index.md) for all available classes
 and methods.

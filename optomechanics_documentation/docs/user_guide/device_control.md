@@ -25,16 +25,27 @@ analyser to implement a software-defined VNA sweep.
 
 ## Usage pattern
 
+All drivers support the Python `with` statement, which automatically opens and
+closes the VISA connection:
+
 ```python
-import pyvisa
-from optomechanics.device_control.E5063A_VNA_Class_new import E5063A
+from optomechanics.device_control.E5063A_VNA_Class_new import VNA
 
-rm  = pyvisa.ResourceManager()
-vna = E5063A(rm.open_resource("GPIB0::16::INSTR"))
-
-frequencies, s21_dB = vna.sweep(start=6.9e9, stop=7.1e9, points=1001)
-vna.close()
+with VNA('TCPIP::192.168.0.1::INSTR') as vna:
+    df, meta = vna.sweep(
+        channel=1,
+        Result='S21',
+        TraceName=1,
+        freq_start=6.9e9,
+        freq_stop=7.1e9,
+        number_of_points=1001,
+        probe_power=-10,
+        band_width=1e3,
+    )
 ```
+
+`df` is a `pandas.DataFrame` with columns `freq[Hz]`, magnitude (dB), and
+phase (rad).  `meta` is a dict of sweep parameters and timestamps.
 
 See the [API Reference](../api_reference/device_control/index.md) for all available classes
 and methods.

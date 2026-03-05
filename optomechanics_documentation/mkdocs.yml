@@ -43,18 +43,37 @@ nav:
       - misc_equations: api_reference/data_analysis/misc_equations.md
       - utilities: api_reference/data_analysis/utilities.md
       - square_membrane: api_reference/data_analysis/square_membrane.md
+      - attenuation_accounter: api_reference/data_analysis/attenuation_accounter.md
+      - Plotting: api_reference/data_analysis/Plotting.md
+      - Temperature_Reader: api_reference/data_analysis/Temperature_Reader.md
+      - control_gui: api_reference/data_analysis/control_gui.md
       - fitting:
         - Overview: api_reference/data_analysis/fitting/index.md
         - S21: api_reference/data_analysis/fitting/S21.md
         - Sww: api_reference/data_analysis/fitting/Sww.md
+        - omit: api_reference/data_analysis/fitting/omit.md
     - device_control:
       - Overview: api_reference/device_control/index.md
       - Device_Visa_Super: api_reference/device_control/Device_Visa_Super.md
+      - Device_Visa_Super_rs: api_reference/device_control/Device_Visa_Super_rs.md
       - VNA: api_reference/device_control/VNA.md
+      - E5063A_VNA_Class_new: api_reference/device_control/E5063A_VNA_Class_new.md
+      - Rohde_Schwarz_Class: api_reference/device_control/Rohde_Schwarz_Class.md
+      - Rohde_Schwarz_Class_new: api_reference/device_control/Rohde_Schwarz_Class_new.md
+      - RS_FSL: api_reference/device_control/RS_FSL.md
+      - RS_FSW: api_reference/device_control/RS_FSW.md
+      - RS_FSW_new: api_reference/device_control/RS_FSW_new.md
+      - SMA100B: api_reference/device_control/SMA100B.md
+      - SPD3303XE: api_reference/device_control/SPD3303XE.md
+      - Tektronix_AFG1022: api_reference/device_control/Tektronix_AFG1022.md
+      - Yokogawa: api_reference/device_control/Yokogawa.md
+      - KeithleyDMM6500: api_reference/device_control/KeithleyDMM6500.md
+      - Lakeshore_372_AC_Res_Temp_Controller: api_reference/device_control/Lakeshore_372_AC_Res_Temp_Controller.md
     - data_management:
       - Overview: api_reference/data_management/index.md
       - data_management: api_reference/data_management/data_management.md
       - file_management: api_reference/data_management/file_management.md
+      - data_logger: api_reference/data_management/data_logger.md
   - Release Notes: release_notes.md
   - About: about.md
 

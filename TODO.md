@@ -330,16 +330,16 @@ Thorough review of all documentation pages from the perspective of a completely 
 ### Phase 14 — Unit test suite
 Add an explicit unit test base for the Python package. Tests should use defined inputs and expected outputs, be simple cases that run almost instantaneously, and cover each public module.
 
-- [ ] Create test file structure (one test file per subpackage or module)
-- [ ] Add unit tests for `data_analysis/unit_conversions.py` (all functions, defined input→output pairs)
-- [ ] Add unit tests for `data_analysis/misc_equations.py`
-- [ ] Add unit tests for `data_analysis/utilities.py`
-- [ ] Add unit tests for `data_analysis/square_membrane.py`
-- [ ] Add unit tests for `data_analysis/fitting/S21.py` (equation functions with known values)
-- [ ] Add unit tests for `data_analysis/fitting/Sww.py` (equation functions with known values)
-- [ ] Add unit tests for `data_management/data_management.py` (read/write round-trip, attenuation_object arithmetic)
-- [ ] Add unit tests for `data_management/file_management.py`
-- [ ] Run full test suite and confirm all tests pass
+- [x] Create test file structure (one test file per subpackage or module) — created `optomechanics/tests/` with 8 test files (f91d3d5)
+- [x] Add unit tests for `data_analysis/unit_conversions.py` (all functions, defined input→output pairs) — 39 tests added (f91d3d5)
+- [x] Add unit tests for `data_analysis/misc_equations.py` — 4 tests added (12b9c1a)
+- [x] Add unit tests for `data_analysis/utilities.py` — 17 tests added (77fecee)
+- [x] Add unit tests for `data_analysis/square_membrane.py` — 6 tests added (3059ee0)
+- [x] Add unit tests for `data_analysis/fitting/S21.py` (equation functions with known values) — 10 tests added (f67d823)
+- [x] Add unit tests for `data_analysis/fitting/Sww.py` (equation functions with known values) — 6 tests added (01c381b)
+- [x] Add unit tests for `data_management/data_management.py` (read/write round-trip, attenuation_object arithmetic) — 11 tests added (b434b8b)
+- [x] Add unit tests for `data_management/file_management.py` — 6 tests added (92d6dde)
+- [x] Run full test suite and confirm all tests pass — 99 tests pass in 1.40s (92d6dde)
 
 ---
 

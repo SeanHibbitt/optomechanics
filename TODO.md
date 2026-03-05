@@ -318,6 +318,29 @@ Add each new page to the `User Guide` section of `mkdocs.yml` nav.
 - [x] Review `getting_started/installation.md` — conda env setup and `pip install -e .` instructions accurate
 
 
+### Phase 13 — Documentation quality audit
+Thorough review of all documentation pages from the perspective of a completely new user. Is each page clear, accurate, and useful? Implement any improvements found.
+
+- [ ] Audit all user guide pages for clarity and completeness from a new-user perspective
+- [ ] Audit getting_started pages (installation, quickstart) for accuracy and ease of follow
+- [ ] Audit API reference index pages for accuracy and completeness
+- [ ] Implement any improvements identified by the audit
+- [ ] Verify `mkdocs build --strict` still passes after improvements
+
+### Phase 14 — Unit test suite
+Add an explicit unit test base for the Python package. Tests should use defined inputs and expected outputs, be simple cases that run almost instantaneously, and cover each public module.
+
+- [ ] Create test file structure (one test file per subpackage or module)
+- [ ] Add unit tests for `data_analysis/unit_conversions.py` (all functions, defined input→output pairs)
+- [ ] Add unit tests for `data_analysis/misc_equations.py`
+- [ ] Add unit tests for `data_analysis/utilities.py`
+- [ ] Add unit tests for `data_analysis/square_membrane.py`
+- [ ] Add unit tests for `data_analysis/fitting/S21.py` (equation functions with known values)
+- [ ] Add unit tests for `data_analysis/fitting/Sww.py` (equation functions with known values)
+- [ ] Add unit tests for `data_management/data_management.py` (read/write round-trip, attenuation_object arithmetic)
+- [ ] Add unit tests for `data_management/file_management.py`
+- [ ] Run full test suite and confirm all tests pass
+
 ---
 
 ## Code / Features

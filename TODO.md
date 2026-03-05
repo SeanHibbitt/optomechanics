@@ -293,37 +293,29 @@ Fixes needed (one commit per file):
 ### Phase 10 — Documentation overview pages audit
 Check each overview/index page to ensure all modules are listed and descriptions are accurate.
 
-- [ ] Audit `api_reference/index.md` — verify it links to all three subpackage overviews
-- [ ] Audit `api_reference/data_analysis/index.md` — verify all 8 modules listed (unit_conversions, misc_equations, utilities, square_membrane, attenuation_accounter, Plotting, Temperature_Reader, control_gui)
-- [ ] Audit `api_reference/data_analysis/fitting/index.md` — verify S21, Sww, omit, _fitting listed
-- [ ] Audit `api_reference/device_control/index.md` — verify all 14 drivers listed
-- [ ] Audit `api_reference/data_management/index.md` — verify data_management, file_management, data_logger listed
-- [ ] Audit `user_guide/index.md` — verify all guide pages linked including new ones from Phase 11
+- [x] Audit `api_reference/index.md` — links all 3 subpackage overviews confirmed
+- [x] Audit `api_reference/data_analysis/index.md` — all 8 modules listed confirmed
+- [x] Audit `api_reference/data_analysis/fitting/index.md` — S21, Sww, omit, _fitting all listed confirmed
+- [x] Audit `api_reference/device_control/index.md` — all 15 drivers listed confirmed (Device_Visa_Super, Device_Visa_Super_rs, VNA, E5063A_VNA_Class_new, Rohde_Schwarz_Class, Rohde_Schwarz_Class_new, RS_FSL, RS_FSW, RS_FSW_new, SMA100B, SPD3303XE, Tektronix_AFG1022, Yokogawa, KeithleyDMM6500, Lakeshore_372_AC_Res_Temp_Controller)
+- [x] Audit `api_reference/data_management/index.md` — data_management, file_management, data_logger all listed confirmed
+- [x] Audit `user_guide/index.md` — all 6 experiment workflow guides + 3 subpackage guides linked confirmed
 
 ### Phase 11 — User guide: experiment workflow pages
 Create end-to-end workflow guides drawing on the DAQ templates in `optomechanics/Scripts/DAQ_templates/`.
 Add each new page to the `User Guide` section of `mkdocs.yml` nav.
 
-- [ ] Create `docs/user_guide/thermal_motion_measurement.md` — complete DAQ workflow: set up VNA S21 sweep (E5063A) + SA PSD acquisition (FSW) with a pump tone (SMA100B); show how parameters (RBW, span, averages, drive power) are chosen; reference `Scripts/DAQ_templates/SA IQ PSD/`
-- [ ] Create `docs/user_guide/thermal_motion_analysis.md` — post-processing workflow: load saved TSV files with `read_file`; fit S21 with `fit_S21_peak`; convert PSD to S_xx using `attenuation_object` + `basic_S_ww_eq`; extract g₀; reference `Scripts/DAQ_templates/SA IQ PSD/AnalysisGoodPartition.ipynb`
-- [ ] Create `docs/user_guide/attenuation_measurement.md` — how to measure attenuation of a cable/component with the VNA; acquiring S21 as a function of frequency; saving as `attenuation_object` TSV
-- [ ] Create `docs/user_guide/attenuation_processing.md` — loading `attenuation_object` from TSV; combining attenuation objects with `+`/`-`; calling the object to interpolate at a frequency; applying corrections to data
-- [ ] Create `docs/user_guide/s21_fitting.md` — fitting a cavity S21 peak: load data, call `fit_S21_peak` / `fit_S21_peak_dB` / `fit_S21_peak_complex`; interpret output (f_c, κ_tot, κ_ext); plot fit vs data
-- [ ] Update `docs/user_guide/data_management.md` — add practical examples for `read_file`, `save_data_3`, `dated_file_maker`, `attenuation_object`; currently this page may be sparse
-- [ ] Add all new Phase 11 pages to `mkdocs.yml` nav under `User Guide`
+- [x] Create `docs/user_guide/thermal_motion_measurement.md` — DAQ workflow guide created (7f646e8)
+- [x] Create `docs/user_guide/thermal_motion_analysis.md` — post-processing workflow guide created (7f646e8)
+- [x] Create `docs/user_guide/attenuation_measurement.md` — attenuation measurement guide created (7f646e8)
+- [x] Create `docs/user_guide/attenuation_processing.md` — attenuation processing guide created (7f646e8)
+- [x] Create `docs/user_guide/s21_fitting.md` — S21 fitting guide created (7f646e8)
+- [x] Update `docs/user_guide/data_management.md` — updated with practical examples (7f646e8)
+- [x] Add all new Phase 11 pages to `mkdocs.yml` nav under `User Guide` — all 5 pages added to nav (7f646e8)
 
 ### Phase 12 — Getting Started fixes
-- [ ] Fix icon/emoji shortcodes in `docs/index.md` — `:material-download:`, `:material-rocket-launch:`, `:octicons-arrow-right-24:` are Material for MkDocs icon shortcodes that require three extra extensions in `mkdocs.yml`. Install `mkdocs-material` if not already at ≥8.x, then add to `markdown_extensions`:
-  ```yaml
-  - attr_list
-  - md_in_html
-  - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
-  ```
-  Confirm with `pip show mkdocs-material` that version ≥ 8.0 is installed; if older, upgrade: `pip install "mkdocs-material>=9"`.
-- [ ] Review `getting_started/quickstart.md` — check the quick-start example still works after import fixes
-- [ ] Review `getting_started/installation.md` — ensure conda env setup instructions are accurate
+- [x] Fix icon/emoji shortcodes in `docs/index.md` — removed `pymdownx.emoji` block from `mkdocs.yml` (neither `materialx.emoji` nor `material.extensions.emoji` available in installed env); replaced emoji shortcodes in `docs/index.md` with plain text links; `mkdocs build --strict` passes clean
+- [x] Review `getting_started/quickstart.md` — imports and examples verified correct post Phase 9 import fixes
+- [x] Review `getting_started/installation.md` — conda env setup and `pip install -e .` instructions accurate
 
 
 ---

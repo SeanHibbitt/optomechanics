@@ -341,6 +341,71 @@ Add an explicit unit test base for the Python package. Tests should use defined 
 - [x] Add unit tests for `data_management/file_management.py` — 6 tests added (92d6dde)
 - [x] Run full test suite and confirm all tests pass — 99 tests pass in 1.40s (92d6dde)
 
+### Phase 15 — Documentation accuracy fixes
+Findings from the Phase 13 deep-accuracy audit. All fixes are documentation-only (no source code changes).
+
+#### `dated_file_maker()` — wrong signature in examples
+The function takes **one argument** (`base_path`), but five doc examples call it with two.
+Correct usage: `dir_path = dated_file_maker("/base/path")` — returns a dated directory path.
+- [ ] Fix `docs/user_guide/data_management.md` lines 17 and 36 — remove second filename argument
+- [ ] Fix `docs/user_guide/thermal_motion_measurement.md` lines ~90, ~116, ~122 — same fix
+
+#### VNA convenience wrapper methods — do not exist in source
+`E5063A_VNA_Class_new.py` exposes low-level SCPI methods only (e.g. `sense_freq_start(channel, val)`).
+The following methods shown in the docs **do not exist** and will raise `AttributeError`:
+`set_start_frequency()`, `set_stop_frequency()`, `set_number_of_points()`, `set_IF_bandwidth()`,
+`set_measurement_parameter()`, `get_frequency_data()`, `get_formatted_data()`.
+Rewrite the affected examples to use the real SCPI methods with explicit channel parameters,
+or add an explanatory note that a thin wrapper layer is needed.
+- [ ] Fix `docs/user_guide/attenuation_measurement.md` — rewrite VNA setup/data-retrieval block (~lines 21–29)
+- [ ] Fix `docs/user_guide/thermal_motion_measurement.md` — rewrite VNA block (~lines 37–44)
+
+#### `save_data_3()` — wrong call signature in examples
+Actual signature: `save_data_3(data, file_name, file_location="", headers=None, meta_data={}, delimiter="\t")`
+Docs show a dict as first arg and `meta=` keyword — both wrong. Correct pattern:
+```python
+save_data_3(np.column_stack([freqs, s21_dB]), file_path, headers=["freq[Hz]", "S21[dB]"], meta_data={"key": val})
+```
+- [ ] Fix `docs/user_guide/data_management.md` lines ~38–42
+- [ ] Fix `docs/user_guide/thermal_motion_measurement.md` lines ~91–98, ~116–117, ~122–125
+
+#### RS_FSW_new — wrong method names in examples
+Actual method names differ from what docs show:
+- `set_cent_freq(val)` ← docs show `set_center_frequency(val)`
+- `set_bw(val)` ← docs show `set_rbw(val)`
+- Data retrieval: use `y_data_query()` — `get_trace_data()` and `get_frequency_data()` do not exist
+- [ ] Fix `docs/user_guide/thermal_motion_measurement.md` lines ~79–87 — correct all SA method names
+
+#### `fit_S_xx.__average_and_fit_S_xx__()` — dunder method exposed to users
+This is a dunder-named internal method that the docs instruct users to call directly.
+Add a note explaining what it does and that it is an internal entry point pending API refactor.
+- [ ] Fix `docs/user_guide/thermal_motion_analysis.md` lines ~88–97 — add explanatory note
+
+### Phase 16 — Extended test coverage
+Gaps identified by the Phase 14 coverage audit. Add tests for untested modules and functions.
+
+#### fitting/_fitting.py — 0% coverage (5 functions)
+- [ ] Add `tests/test_fitting.py` — test `ring_down_eq` (known exponential decay values), `tau_to_Q` (known Q factor calculation), `line_eq` (slope/intercept), `fit_ring_down` (synthetic data), `fit_linear` (synthetic slope recovery)
+
+#### fitting/omit.py — 0% coverage (3 functions)
+- [ ] Add `tests/test_omit.py` — test `OMIT_equation` with known lineshape values; test monotonicity/symmetry properties; leave `fit_OMIT` and `fit_OMIT_set_floor` for integration tests
+
+#### data_management/data_logger.py — 0% coverage
+- [ ] Add `tests/test_data_logger.py` — test `logger` and `dated_logger` creation, write/read a line, `format_data_line` output; use `tmp_path` fixture for all file I/O
+
+#### fitting/S21.py — fitting functions untested (3 functions)
+- [ ] Add tests for `fit_S21_peak_dB`, `fit_S21_peak_complex`, `fit_S21_peak` — generate a synthetic S21 curve with known parameters (f_0, κ_tot, κ_ext), run the fitter, assert recovery within tolerance
+
+#### fitting/Sww.py — 13 of 14 functions untested
+- [ ] Add tests for `basic_S_ww_eq_2`, `dBm_basic_S_ww_eq`, `S_ff_thermal`, `SHO_TF_sq`, `S_xx_thermal` with known on/off-resonance values; skip the experimental `S_hh_24_25_exp_14_4` for now
+
+#### File I/O tests
+- [ ] Add tests for `read_file` and `save_data_3` — write a TSV with known data, read it back, assert round-trip equality; use `tmp_path`
+- [ ] Add test for `dated_file_maker` — assert returned path contains year/month/day segments
+
+#### utilities.py — one missing test
+- [ ] Add test for `convert_anti_sym_linear_mag_voltage_error_to_sym` with a known asymmetric error pair; also test the `ValueError` path for invalid inputs
+
 ---
 
 ## Code / Features

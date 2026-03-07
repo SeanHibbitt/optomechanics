@@ -75,6 +75,14 @@ corrected_powers_dBm = (measured - path_atten).magnitude
 atten.save_to_tsv("output_attenuation.tsv")
 ```
 
+!!! warning "Not yet implemented"
+    `save_to_tsv()` is not yet implemented and will raise an exception at runtime.
+    As a workaround, use NumPy directly:
+    ```python
+    import numpy as np
+    np.savetxt("output.tsv", data, delimiter="\t", header="col1\tcol2")
+    ```
+
 ## See also
 
 - [API reference: `data_management`](../api_reference/data_management/data_management.md)

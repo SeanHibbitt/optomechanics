@@ -13,8 +13,8 @@ These examples will crash if copy-pasted — fix before writing any new content.
 #### `dated_file_maker()` — wrong signature in examples
 The function takes **one argument** (`base_path`), but five doc examples call it with two.
 Correct usage: `dir_path = dated_file_maker("/base/path")` — returns a dated directory path.
-- [ ] Fix `docs/user_guide/data_management.md` lines 17 and 36 — remove second filename argument
-- [ ] Fix `docs/user_guide/thermal_motion_measurement.md` lines ~90, ~116, ~122 — same fix
+- [x] Fix `docs/user_guide/data_management.md` lines 17 and 36 — removed second filename argument (9284406)
+- [x] Fix `docs/user_guide/thermal_motion_measurement.md` lines ~90, ~116, ~122 — removed second arg (b2441ce)
 
 #### VNA convenience wrapper methods — do not exist in source
 `E5063A_VNA_Class_new.py` exposes low-level SCPI methods only (e.g. `sense_freq_start(channel, val)`).
@@ -22,8 +22,8 @@ The following methods shown in the docs **do not exist** and will raise `Attribu
 `set_start_frequency()`, `set_stop_frequency()`, `set_number_of_points()`, `set_IF_bandwidth()`,
 `set_measurement_parameter()`, `get_frequency_data()`, `get_formatted_data()`.
 Rewrite the affected examples to use the real SCPI methods with explicit channel parameters.
-- [ ] Fix `docs/user_guide/attenuation_measurement.md` — rewrite VNA setup/data-retrieval block (~lines 21–29)
-- [ ] Fix `docs/user_guide/thermal_motion_measurement.md` — rewrite VNA block (~lines 37–44)
+- [x] Fix `docs/user_guide/attenuation_measurement.md` — rewrote VNA block to use real sweep() method (ec00222)
+- [x] Fix `docs/user_guide/thermal_motion_measurement.md` — rewrote VNA block with SCPI methods (5755060)
 
 #### `save_data_3()` — wrong call signature in examples
 Actual signature: `save_data_3(data, file_name, file_location="", headers=None, meta_data={}, delimiter="\t")`
@@ -31,24 +31,24 @@ Docs show a dict as first arg and `meta=` keyword — both wrong. Correct patter
 ```python
 save_data_3(np.column_stack([freqs, s21_dB]), file_path, headers=["freq[Hz]", "S21[dB]"], meta_data={"key": val})
 ```
-- [ ] Fix `docs/user_guide/data_management.md` lines ~38–42
-- [ ] Fix `docs/user_guide/thermal_motion_measurement.md` lines ~91–98, ~116–117, ~122–125
+- [x] Fix `docs/user_guide/data_management.md` lines ~38–42 — fixed save_data_3 signature (9284406)
+- [x] Fix `docs/user_guide/thermal_motion_measurement.md` lines ~91–98, ~116–117, ~122–125 — fixed save_data_3 calls (b2441ce)
 
 #### RS_FSW_new — wrong method names in examples
 Actual method names differ from what docs show:
 - `set_cent_freq(val)` ← docs show `set_center_frequency(val)`
 - `set_bw(val)` ← docs show `set_rbw(val)`
 - Data retrieval: use `y_data_query()` — `get_trace_data()` and `get_frequency_data()` do not exist
-- [ ] Fix `docs/user_guide/thermal_motion_measurement.md` lines ~79–87 — correct all SA method names
+- [x] Fix `docs/user_guide/thermal_motion_measurement.md` lines ~79–87 — corrected SA method names (5755060)
 
 #### `fit_S_xx.__average_and_fit_S_xx__()` — dunder method exposed to users
 This is a dunder-named internal method that the docs instruct users to call directly.
 Add a note explaining what it does and that it is an internal entry point pending API refactor.
-- [ ] Fix `docs/user_guide/thermal_motion_analysis.md` lines ~88–97 — add explanatory note
+- [x] Fix `docs/user_guide/thermal_motion_analysis.md` lines ~88–97 — added Internal API admonition (5755060)
 
 #### `save_to_tsv()` — not implemented
 `attenuation_object.save_to_tsv()` raises `Exception("not finished")` at runtime.
-- [ ] Add warning admonition to `docs/user_guide/attenuation_processing.md` noting it's unimplemented, with workaround
+- [x] Add warning admonition to `docs/user_guide/attenuation_processing.md` — added with numpy workaround (d50c59c)
 
 ---
 
@@ -57,26 +57,26 @@ Add a note explaining what it does and that it is an internal entry point pendin
 Gaps identified by the Phase 14 coverage audit.
 
 #### fitting/_fitting.py — 0% coverage (5 functions)
-- [ ] Add `tests/test_fitting.py` — test `ring_down_eq`, `tau_to_Q`, `line_eq`, `fit_ring_down`, `fit_linear`
+- [x] Add `tests/test_fitting.py` — 14 tests for ring_down_eq, tau_to_Q, line_eq, fit_ring_down, fit_linear (64efe3e)
 
 #### fitting/omit.py — 0% coverage (3 functions)
-- [ ] Add `tests/test_omit.py` — test `OMIT_equation` with known lineshape values; test monotonicity/symmetry
+- [x] Add `tests/test_omit.py` — 8 tests for OMIT_equation lineshape, symmetry, scaling (6be90a5)
 
 #### data_management/data_logger.py — 0% coverage
-- [ ] Add `tests/test_data_logger.py` — test `logger` and `dated_logger` creation, write/read, `format_data_line`; use `tmp_path`
+- [x] Add `tests/test_data_logger.py` — 12 tests for logger, dated_logger, format_data_line (1753792)
 
 #### fitting/S21.py — fitting functions untested
-- [ ] Add tests for `fit_S21_peak_dB`, `fit_S21_peak_complex`, `fit_S21_peak` with synthetic data
+- [x] Add tests for `fit_S21_peak_dB`, `fit_S21_peak_complex`, `fit_S21_peak` — 16 tests total (5f3e56a)
 
 #### fitting/Sww.py — 13 of 14 functions untested
-- [ ] Add tests for `basic_S_ww_eq_2`, `dBm_basic_S_ww_eq`, `S_ff_thermal`, `SHO_TF_sq`, `S_xx_thermal`
+- [x] Add tests for `basic_S_ww_eq_2`, `dBm_basic_S_ww_eq`, `S_ff_thermal`, `SHO_TF_sq`, `S_xx_thermal` — 22 tests (cc9bc62)
 
 #### File I/O tests
-- [ ] Add tests for `read_file` and `save_data_3` — round-trip equality with `tmp_path`
-- [ ] Add test for `dated_file_maker` — assert path contains year/month/day segments
+- [x] Add tests for `read_file` and `save_data_3` — round-trip tests with tmp_path (b955315)
+- [x] Add test for `dated_file_maker` — path contains year/day segments, trailing backslash (b955315)
 
 #### utilities.py — one missing test
-- [ ] Add test for `convert_anti_sym_linear_mag_voltage_error_to_sym` + `ValueError` path
+- [x] Add test for `convert_anti_sym_linear_mag_voltage_error_to_sym` + `ValueError` path (4e176d1)
 
 ---
 

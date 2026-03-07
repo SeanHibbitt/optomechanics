@@ -16,17 +16,27 @@ Connect the cable under test between VNA port 1 and port 2, then sweep:
 
 ```python
 from optomechanics.device_control.E5063A_VNA_Class_new import VNA
+import numpy as np
 
-with VNA("GPIB0::17::INSTR") as vna:
-    vna.set_start_frequency(1e6)       # 1 MHz
-    vna.set_stop_frequency(10e9)       # 10 GHz
-    vna.set_number_of_points(1601)
-    vna.set_IF_bandwidth(1000)         # 1 kHz IF BW
-    vna.set_measurement_parameter("S21")
-    vna.sweep()
+vna = VNA("GPIB0::17::INSTR")
 
-    freqs   = vna.get_frequency_data()
-    s21_dB  = vna.get_formatted_data()  # |S21| in dB
+channel = 1
+trace = 1
+
+# Configure and run a sweep; returns (DataFrame, meta_dict)
+data, meta = vna.sweep(
+    channel=channel,
+    Result="S21",
+    TraceName=trace,
+    freq_start=1e6,        # 1 MHz
+    freq_stop=10e9,        # 10 GHz
+    number_of_points=1601,
+    probe_power=-10,       # dBm
+    band_width=1000,       # 1 kHz IF BW
+)
+
+freqs  = vna.freq_data            # frequency array (Hz)
+s21_dB = vna.data_1               # |S21| in dB (log magnitude)
 ```
 
 ## Step 2 — Build the attenuation_object

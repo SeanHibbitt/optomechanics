@@ -14,8 +14,8 @@ specific experimental sessions.
 ```python
 from optomechanics.data_management.file_management import dated_file_maker
 
-file_path = dated_file_maker("/data/sweeps", "S21_run01")
-# → "/data/sweeps/2024-07-15/S21_run01.csv"  (example)
+file_path = dated_file_maker("/data/sweeps")
+# → "/data/sweeps/2024/July/15/"  (example)
 ```
 
 ### `data_management`
@@ -33,12 +33,15 @@ import numpy as np
 freqs  = np.linspace(6.99e9, 7.01e9, 801)
 s21_dB = np.random.randn(801)   # replace with real data
 
-file_path = dated_file_maker("/data/sweeps", "cavity_S21")
+file_path = dated_file_maker("/data/sweeps")
 
+data = np.array([freqs, s21_dB])
 save_data_3(
-    file_path,
-    {"freq[Hz]": freqs, "sweep_number_mag[dB]:1": s21_dB},
-    meta={"timestamp[s]": 1721000000, "IF_bandwidth": 300}
+    data,
+    "cavity_S21.tsv",
+    file_location=file_path,
+    headers="freq[Hz]\tsweep_number_mag[dB]:1",
+    meta_data={"timestamp[s]": 1721000000, "IF_bandwidth": 300}
 )
 ```
 

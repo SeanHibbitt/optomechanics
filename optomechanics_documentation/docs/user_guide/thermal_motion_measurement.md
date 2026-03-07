@@ -75,20 +75,21 @@ with Signal_Generator("GPIB0::20::INSTR") as sg:
 from optomechanics.device_control.RS_FSW_new import FSW
 from optomechanics.data_management.data_management import save_data_3
 from optomechanics.data_management.file_management import dated_file_maker
+import numpy as np
 
 rbw      = 10        # Hz — set ≈ Γ_m / 10
 span     = 2000      # Hz — set ≈ 5–10 × Γ_m
 averages = 100
 
 with FSW("TCPIP::192.168.0.10::INSTR") as sa:
-    sa.set_center_frequency(f_pump)
+    sa.set_cent_freq(f_pump)
     sa.set_span(span)
-    sa.set_rbw(rbw)
+    sa.set_bw(rbw)
     sa.set_sweep_count(averages)
     sa.sweep()
 
-    sa_freqs  = sa.get_frequency_data()
-    sa_powers = sa.get_trace_data()   # dBm
+    sa_freqs  = np.fromstring(sa.x_data_query(), dtype=float, sep=",")
+    sa_powers = np.fromstring(sa.y_data_query(), dtype=float, sep=",")  # dBm
 
 # Save alongside metadata
 file_path = dated_file_maker("/data/thermal_motion", "run01")
@@ -122,7 +123,7 @@ for P_dBm in drive_powers:
 
     # SA sweep → save
     sa.sweep()
-    sa_data = {"freq[Hz]": sa_freqs, "powers[dBm]": sa.get_trace_data()}
+    sa_data = np.column_stack([sa_freqs, np.fromstring(sa.y_data_query(), dtype=float, sep=",")])
     save_data_3(dated_file_maker(base, f"SA_P{P_dBm}"), sa_data,
                 meta={"timestamp[s]": time.time(), "drive_power": P_dBm,
                       "drive_freq": f_pump, "res_band_width": rbw,

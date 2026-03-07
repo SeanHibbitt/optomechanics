@@ -34,14 +34,18 @@ from optomechanics.data_analysis.fitting.S21 import fit_S21_peak_dB
 import numpy as np
 
 with VNA("GPIB0::17::INSTR") as vna:
-    vna.set_start_frequency(f_cavity - 5e6)
-    vna.set_stop_frequency(f_cavity + 5e6)
-    vna.set_number_of_points(801)
-    vna.set_IF_bandwidth(300)
-    vna.sweep()
+    channel = 1
+    trace   = 1
+    vna.sense_freq_start(channel, f_cavity - 5e6)
+    vna.sense_freq_stop(channel, f_cavity + 5e6)
+    vna.sense_sweep_points(channel, 801)
+    vna.sense_bandwidth_resolution(channel, 300)
+    vna.calculate_parameter_define(channel, trace, "S21")
+    vna.calculate_data_format(channel, trace, "MLOGarithmic")
+    vna.initiate_sweep(channel)
 
-    freqs  = vna.get_frequency_data()
-    s21_dB = vna.get_formatted_data()
+    freqs  = np.fromstring(vna.sense_freq_data(channel), sep=",")
+    s21_dB = np.fromstring(vna.calculate_data_fdata_query(channel, trace), sep=",")[0::2]
 
 popt, *_ = fit_S21_peak_dB(s21_dB, freqs)
 f0, k_tot, k_ext, *_ = popt

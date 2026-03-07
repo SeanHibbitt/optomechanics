@@ -97,6 +97,12 @@ result = fit_S_xx.__average_and_fit_S_xx__(
 )
 ```
 
+!!! note "Internal API"
+    `__average_and_fit_S_xx__` uses Python's dunder (double-underscore) naming convention,
+    which typically indicates a private method. Despite this, it is currently the intended
+    entry point for averaging and fitting spectral density data. The naming is a known API
+    issue and will be updated in a future refactor.
+
 ## Step 4 — Extract g₀
 
 ```python

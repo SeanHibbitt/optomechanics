@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-from optomechanics.data_analysis.utilities import find_closest_number, convert_error_dB_to_linear, convert_error_linear_to_dB, split_complex, split_complex_wrapper, complex_to_mag_phase
+from optomechanics.data_analysis.utilities import find_closest_number, convert_error_dB_to_linear, convert_error_linear_to_dB, convert_anti_sym_linear_mag_voltage_error_to_sym, split_complex, split_complex_wrapper, complex_to_mag_phase
 
 def test_find_closest_exact():
     arr = [1.0, 2.0, 3.0, 4.0]
@@ -94,3 +94,42 @@ def test_complex_to_mag_phase_known():
     mag, phase = complex_to_mag_phase(c)
     assert_allclose(mag, 5.0, rtol=1e-12)
     assert_allclose(phase, np.arctan2(4.0, 3.0), rtol=1e-12)
+
+
+# --- convert_anti_sym_linear_mag_voltage_error_to_sym tests ---
+
+def test_convert_anti_sym_raises_on_negative_value():
+    """Should raise ValueError when value contains non-positive elements."""
+    value = np.array([1.0, -0.5, 2.0])
+    upper = np.array([0.1, 0.1, 0.1])
+    lower = np.array([0.1, 0.1, 0.1])
+    with pytest.raises(ValueError, match="negative magnitude"):
+        convert_anti_sym_linear_mag_voltage_error_to_sym(value, upper, lower)
+
+def test_convert_anti_sym_raises_on_zero_value():
+    """Should raise ValueError when value contains zero."""
+    value = np.array([0.0, 1.0])
+    upper = np.array([0.1, 0.1])
+    lower = np.array([0.1, 0.1])
+    with pytest.raises(ValueError, match="negative magnitude"):
+        convert_anti_sym_linear_mag_voltage_error_to_sym(value, upper, lower)
+
+def test_convert_anti_sym_positive_values():
+    """With all positive values and errors larger than values, should return filtered values."""
+    value = np.array([1.0, 2.0, 3.0])
+    upper = np.array([0.5, 0.5, 0.5])
+    lower = np.array([0.5, 0.5, 0.5])
+    # error = mean(|upper|, |lower|) = 0.5
+    # Then value[value - error < 0] filters to values where value < 0.5 — none here
+    result = convert_anti_sym_linear_mag_voltage_error_to_sym(value, upper, lower)
+    assert isinstance(result, np.ndarray)
+
+def test_convert_anti_sym_with_large_error():
+    """When error exceeds some values, those values appear in the result."""
+    value = np.array([0.1, 2.0, 0.3])
+    upper = np.array([0.5, 0.5, 0.5])
+    lower = np.array([0.5, 0.5, 0.5])
+    # error = 0.5; value - error: [-0.4, 1.5, -0.2]
+    # value[value - error < 0] picks value[0]=0.1 and value[2]=0.3
+    result = convert_anti_sym_linear_mag_voltage_error_to_sym(value, upper, lower)
+    assert_allclose(result, np.array([0.1, 0.3]), atol=1e-12)

@@ -92,11 +92,13 @@ with FSW("TCPIP::192.168.0.10::INSTR") as sa:
     sa_powers = np.fromstring(sa.y_data_query(), dtype=float, sep=",")  # dBm
 
 # Save alongside metadata
-file_path = dated_file_maker("/data/thermal_motion", "run01")
+file_path = dated_file_maker("/data/thermal_motion")
 save_data_3(
-    file_path,
-    {"freq[Hz]": sa_freqs, "powers[dBm]": sa_powers},
-    meta={
+    np.column_stack([sa_freqs, sa_powers]),
+    "run01.tsv",
+    file_location=file_path,
+    headers="freq[Hz]\tpowers[dBm]",
+    meta_data={
         "drive_freq":    f_pump,
         "drive_power":   P_drive,
         "res_band_width": rbw,
@@ -117,17 +119,20 @@ for P_dBm in drive_powers:
 
     # VNA sweep → save
     vna.sweep()
-    vna_data = {"freq[Hz]": freqs, "sweep_number_mag[dB]:1": s21_dB}
-    save_data_3(dated_file_maker(base, f"S21_P{P_dBm}"), vna_data,
-                meta={"timestamp[s]": time.time(), ...})
+    vna_data = np.column_stack([freqs, s21_dB])
+    file_loc = dated_file_maker(base)
+    save_data_3(vna_data, f"S21_P{P_dBm}.tsv", file_location=file_loc,
+                headers="freq[Hz]\tsweep_number_mag[dB]:1",
+                meta_data={"timestamp[s]": time.time()})
 
     # SA sweep → save
     sa.sweep()
     sa_data = np.column_stack([sa_freqs, np.fromstring(sa.y_data_query(), dtype=float, sep=",")])
-    save_data_3(dated_file_maker(base, f"SA_P{P_dBm}"), sa_data,
-                meta={"timestamp[s]": time.time(), "drive_power": P_dBm,
-                      "drive_freq": f_pump, "res_band_width": rbw,
-                      "temperature_mc[k]": temp_controller.read_temp()})
+    save_data_3(sa_data, f"SA_P{P_dBm}.tsv", file_location=file_loc,
+                headers="freq[Hz]\tpowers[dBm]",
+                meta_data={"timestamp[s]": time.time(), "drive_power": P_dBm,
+                           "drive_freq": f_pump, "res_band_width": rbw,
+                           "temperature_mc[k]": temp_controller.read_temp()})
 ```
 
 ## See also

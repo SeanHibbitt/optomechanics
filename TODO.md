@@ -156,20 +156,12 @@ the measured PSD can be converted to a displacement spectral density $S_{xx}$, a
 temperature** $T_\text{eff}$ can be extracted from the area under the mechanical peak.
 This is the appropriate analysis when backaction cooling or an external drive is present.
 
-- [ ] Create `docs/user_guide/displacement_measurement.md` — explain the no-thermal-assumption path:
-  - Input: known $g_0$ / $G$ / $x_\text{zpf}$ (from prior thermal calibration)
-  - Convert measured PSD to $S_{xx}$ using known coupling
-  - Two methods for extracting $T_\text{eff}$ (document both, recommend fitting):
-    1. **Fitting method (recommended):** Fit $S_{xx}$ with the Lorentzian model (`basic_S_ww_eq`); with known $G$, the fit amplitude $A$ maps to $T_\text{eff}$ via $S_{FF}^\text{th} = 4 k_B T_\text{eff} m_\text{eff} \Gamma_m$. More robust — naturally separates peak from background and simultaneously extracts $\Gamma_m$.
-    2. **Integration method:** Integrate $S_{xx}$ over frequency to get $\langle x^2 \rangle$, then use equipartition $\frac{1}{2} m_\text{eff} \Omega_m^2 \langle x^2 \rangle = \frac{1}{2} k_B T_\text{eff}$. Simpler conceptually but sensitive to noise floor subtraction, frequency range, and nearby peaks.
-  - Contrast with thermal motion analysis (which assumes $T$ to extract $g_0$ — the inverse problem)
-  - Show code examples using existing Sww functions
-
-- [ ] Create `docs/user_guide/omit_analysis.md` — OMIT physics (interference between cavity and mechanical response), OMIT equation in LaTeX, fit workflow using `fit_OMIT`/`fit_OMIT_set_floor`, interpretation
-- [ ] Create `docs/user_guide/photon_number.md` — what $n_d$ is, equation, code example using `photon_number()`, detuning dependence
-- [ ] Create `docs/user_guide/cooperativity.md` — define $C = 4g_0^2 n_d / (\Gamma_m \kappa)$ and $C_0$, manual calculation from S21+Sww results, what $C > 1$ means
-- [ ] Create `docs/user_guide/end_to_end_workflow.md` — capstone guide linking all steps: calibrate attenuation → characterise cavity → set pump → acquire PSD → normalise → extract $g_0$ → calculate $C$ → verify
-- [ ] Add all new pages to `mkdocs.yml` nav
+- [x] Create `docs/user_guide/displacement_measurement.md` — no-thermal-assumption path, two T_eff extraction methods (fd49379)
+- [x] Create `docs/user_guide/omit_analysis.md` — OMIT physics, equation, fit workflow using `fit_OMIT`/`fit_OMIT_set_floor` (fd49379)
+- [x] Create `docs/user_guide/photon_number.md` — n_d equation, code example, detuning dependence (fd49379)
+- [x] Create `docs/user_guide/cooperativity.md` — C and C_0 definitions, manual calculation, physical significance (fd49379)
+- [x] Create `docs/user_guide/end_to_end_workflow.md` — capstone guide with parameter flow table (fd49379)
+- [x] Add all new pages to `mkdocs.yml` nav (fd49379)
 
 ---
 

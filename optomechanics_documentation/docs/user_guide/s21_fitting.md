@@ -1,11 +1,86 @@
-# S21 Fitting
+# Cavity Transmission (S21)
 
-This page explains how to fit a microwave cavity transmission (S21) peak using
-`optomechanics.data_analysis.fitting.S21`.
+This page explains the physics of microwave cavity transmission and how to fit
+an S21 peak using `optomechanics.data_analysis.fitting.S21`.
+
+## Physics background
+
+In a microwave optomechanics experiment the electromagnetic cavity is typically a
+lumped-element LC resonator coupled to a feedline through coupling capacitors.
+Measuring the forward transmission coefficient $S_{21}$ as a function of frequency
+reveals the cavity resonance as a Lorentzian peak.  The lineshape encodes three
+quantities that are essential for all subsequent analysis: the resonance frequency
+$f_0$, the total energy decay rate $\kappa_\text{tot}$, and the external coupling
+rate $\kappa_\text{ext}$.
+
+The Lorentzian arises because the cavity acts as a single-pole bandpass filter.
+Near resonance the transmitted amplitude is proportional to
+$\kappa_\text{ext} / (\kappa_\text{tot} + 2j \Delta)$, where
+$\Delta = f - f_0$ is the detuning.  Away from resonance the numerator is
+overwhelmed by the imaginary part of the denominator and the transmission falls.
+
+## Circuit model
+
+This code assumes a **two-port transmission** topology: two coupling capacitors in
+series with a parallel LCR resonator between them.  The S21 equation below is the
+transmission coefficient for this specific geometry.  Other topologies — notch
+(hanger) or reflection — give different functional forms and should not be fitted
+with this equation.
+
+## S21 equation
+
+The code computes (see `S21_eq` in `fitting/S21.py`):
+
+$$
+S_{21}(f) = \left| \frac{\kappa_\text{ext}}{\kappa_\text{tot} + 2j(f - f_0)} \right| + m \cdot f + c
+$$
+
+where $m$ and $c$ are a linear background.  Note that all frequencies are in Hz —
+the factors of $2\pi$ cancel between numerator and denominator.
+
+| LaTeX symbol | Code parameter | Description |
+|---|---|---|
+| $f_0$ | `f_0` / `p[0]` | Cavity resonance frequency (Hz) |
+| $\kappa_\text{tot}$ | `k_tot` / `p[1]` | Total cavity linewidth (Hz) |
+| $\kappa_\text{ext}$ | `k_ext` / `p[2]` | External coupling rate (Hz) |
+| $m$ | `att_m` / `p[3]` | Linear background slope |
+| $c$ | `att_c` / `p[4]` | Background offset |
+
+## Coupling regimes
+
+The ratio $\kappa_\text{ext} / \kappa_\text{tot}$ determines the coupling regime:
+
+- **Overcoupled** ($\kappa_\text{ext} > \kappa_\text{int}$): most energy leaves through
+  the ports.  On-resonance transmission is high.
+- **Critically coupled** ($\kappa_\text{ext} = \kappa_\text{int}$): maximum extinction
+  in reflection; transmission is exactly half.
+- **Undercoupled** ($\kappa_\text{ext} < \kappa_\text{int}$): internal losses dominate.
+  On-resonance transmission is low.
+
+Here $\kappa_\text{int} = \kappa_\text{tot} - \kappa_\text{ext}$ is the intrinsic
+(internal) loss rate.
+
+## References
+
+- "A Novel Architecture for room temperature microwave optomechanical experiments" —
+  source of the photon number equation used alongside S21 fits.
+- S. Kumar (2023) — thermal force PSD and SHO model.
+- X. Rojas et al. (2022-11-28) eqs. 3–5 — $g_0$ extraction from fitted $S_{ww}$.
+
+## Interpreting results
+
+| Parameter | Typical range | Notes |
+|---|---|---|
+| $f_0$ | 1–10 GHz | Set by cavity geometry |
+| $\kappa_\text{tot}$ | 10 kHz – 10 MHz | Narrower = higher Q |
+| $\kappa_\text{ext}/\kappa_\text{tot}$ | 0.3–0.7 | < 0.5 undercoupled, > 0.5 overcoupled |
+| `att_m` | small negative | Cable loss increasing with frequency |
+| `att_c` | ≈ 0 | Residual background level |
+
+---
 
 ## Overview
 
-A microwave cavity measured in transmission shows a Lorentzian peak in $|S_{21}|$.
 The fit extracts three physical parameters:
 
 | Parameter | Symbol | Meaning |
@@ -99,5 +174,6 @@ fig.show()
 
 ## See also
 
+- [Parameter Glossary](glossary.md) — definitions of all optomechanical parameters
 - [API reference: `fitting.S21`](../api_reference/data_analysis/fitting/S21.md)
 - [Device Control: VNA sweep example](device_control.md)

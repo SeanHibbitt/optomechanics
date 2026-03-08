@@ -9,29 +9,42 @@ example notebook.
 ## Physics background
 
 A mechanical resonator in thermal equilibrium at temperature $T$ is driven by
-Brownian (Langevin) force noise.  When $k_B T \gg \hbar\Omega_m$ — which is
+Brownian (Langevin) force noise.  When $k_B T \gg \hbar\omega_m$ — which is
 always true at room temperature for MHz-scale modes — the thermal force spectral
 density is white (frequency-independent):
 
 $$
-S_{FF}^\text{th} = 4\, k_B\, T\, m_\text{eff}\, \Gamma_m
+S_{FF}^\text{th} = 4\, k_B\, T\, m_\text{eff}\, \gamma_m
 $$
+
+where $\gamma_m = 2\pi\Gamma_m$ is the angular damping rate.
 
 The resulting displacement spectral density $S_{xx}$ is the product of this
-flat force spectrum and the mechanical susceptibility (a Lorentzian):
+flat force spectrum and the mechanical susceptibility:
 
 $$
-S_{xx}(f) = \frac{S_{FF}^\text{th}}{m_\text{eff}^2 \left[(2\pi f)^2 - \Omega_m^2\right]^2 + \Omega_m^2 \Gamma_m^2}
+S_{xx}(\omega) = \frac{S_{FF}^\text{th}}{m_\text{eff}^2
+\left[(\omega_m^2 - \omega^2)^2 + \gamma_m^2\,\omega^2\right]}
 $$
 
-Near resonance ($f \approx f_m$) the full susceptibility reduces to the
-simpler Lorentzian form used by `basic_S_ww_eq` in the code:
+where $\omega = 2\pi f$ and $\omega_m = 2\pi f_m$.
+This is the full mechanical susceptibility (see `basic_S_ww_eq_2` in `Sww.py`).
+
+Near resonance ($f \approx f_m$), the approximation
+$\omega_m^2 - \omega^2 \approx 2\omega_m(\omega_m - \omega)$ simplifies the
+susceptibility to the Lorentzian form used by `basic_S_ww_eq` and `SHO_TF_sq`:
 
 $$
-S_{ww}(f) = \frac{A}{\Gamma_m^2 + 4(f - f_m)^2} + n_f
+S_{ww}(\omega) = \frac{A}{\gamma_m^2 + 4(\omega - \omega_m)^2} + n_f
 $$
 
-where $A$ is the amplitude and $n_f$ is the noise floor (both in code units).
+where $A$ is the fitted amplitude and $n_f$ is the noise floor.
+
+!!! warning "Internal angular-frequency conversion"
+    `basic_S_ww_eq` accepts all inputs in **Hz** but converts to angular
+    frequency ($\times 2\pi$) internally before evaluating the equation above.
+    The fitted $A$ is therefore in angular-frequency units — do not plug Hz
+    values into the formula directly.
 
 ### The thermal assumption
 
@@ -50,25 +63,41 @@ $G^2 S_{xx}$ by dividing by a constant derived from the cavity parameters
 (see `__normalise_Sww_to_GGSxx__` in `Sww.py`):
 
 $$
-\text{normalisation} = \frac{\kappa_\text{ext}\, n_d}{\kappa_\text{tot}^2}\, \hbar\, \omega_c
+\text{normalisation} = \frac{\kappa_\text{ext}^\text{Hz}\, n_d}
+{\left(\kappa_\text{tot}^\text{Hz}\right)^2}\;
+\hbar\, \omega_c
 $$
+
+where $\kappa_\text{ext}^\text{Hz}$ and $\kappa_\text{tot}^\text{Hz}$ are in Hz
+(as returned by the S21 fitter) and $\omega_c = 2\pi f_c$ is in rad/s.
 
 This converts measured power to the dimensionless quantity $G^2 S_{xx}$, from which
 $G$ can be extracted via the fit amplitude $A$ and the thermal force relation.
 
-### $g_0$ extraction (Rojas et al. eqs. 3–5)
+### $g_0$ extraction
 
-From the fitted amplitude $A$ and the known cavity/mechanical parameters, the code
-computes (see `S_ww_constant_calculator`):
-
-$$
-G = \sqrt{A \cdot \frac{\kappa_\text{tot}^2}{\kappa_\text{ext}\, n_d\, \hbar\, \omega_c} \cdot \frac{m_\text{eff}\, \Omega_m^2}{4\, k_B\, T}}
-$$
+From the fitted amplitude $A$ of the $G^2 S_{xx}$ Lorentzian, the code extracts
+$G$ using the thermal force relation (see `__average_and_fit_S_xx__` in `Sww.py`,
+line 395):
 
 $$
-x_\text{zpf} = \sqrt{\frac{\hbar}{2\, m_\text{eff}\, \Omega_m}}, \qquad
+G = \sqrt{\frac{A \cdot m_\text{eff}\, \omega_m^2}
+{4\, k_B\, T\, \gamma_m}}
+$$
+
+where $\omega_m = 2\pi f_m$ and $\gamma_m = 2\pi\Gamma_m$ are in rad/s, and
+$A$ is the amplitude from fitting $G^2 S_{xx}$ (already normalised by the cavity
+parameters above).
+
+$$
+x_\text{zpf} = \sqrt{\frac{\hbar}{2\, m_\text{eff}\, \omega_m}}, \qquad
 g_0 = G \cdot x_\text{zpf}
 $$
+
+!!! note "Units of the returned values"
+    `__average_and_fit_S_xx__` returns $g_0$ and $G$ in **rad/s** (angular
+    frequency).  Divide by $2\pi$ to convert to Hz.  The separate function
+    `S_ww_constant_calculator` returns in **Hz** — do not confuse the two.
 
 ### Interpreting results
 
@@ -190,9 +219,9 @@ f_m, G_m, A, nf = popt_mech
 
 print(f"f_m  = {f_m:.1f} Hz")
 print(f"Γ_m  = {G_m:.3f} Hz")
-print(f"G    = {G/(2*3.14159):.1f} Hz/m")
+print(f"G    = {G/(2*np.pi):.1f} Hz/m")
 print(f"x_zpf = {x_zpf*1e15:.2f} fm")
-print(f"g₀   = {g_0/(2*3.14159):.1f} Hz")
+print(f"g₀   = {g_0/(2*np.pi):.1f} Hz")
 ```
 
 ## Step 5 — Plot
@@ -212,7 +241,7 @@ fig.add_scatter(x=freqs, y=GGSxx_fit, name="Fit", mode="lines",
 fig.update_layout(
     xaxis_title="Frequency offset (Hz)",
     yaxis_title="G²S_xx",
-    title=f"Mechanical PSD — g₀/(2π) = {g_0/(2*3.14159):.1f} Hz"
+    title=f"Mechanical PSD — g₀/(2π) = {g_0/(2*np.pi):.1f} Hz"
 )
 fig.show()
 ```

@@ -85,15 +85,15 @@ Gaps identified by the Phase 14 coverage audit.
 Create a single reference page defining every optomechanical parameter used in the codebase.
 All other pages will link to it. This is the foundation for all physics-enhanced documentation.
 
-- [ ] Create `docs/user_guide/glossary.md` with parameter table (symbol, name, units, typical values, description)
+- [x] Create `docs/user_guide/glossary.md` with parameter table (symbol, name, units, typical values, description) (bd72ca2)
   - Cavity: $\omega_\text{cav}$, $\kappa_\text{tot}$, $\kappa_\text{ext}$, $\kappa_\text{int}$, $Q$
   - Mechanical: $\Omega_m$, $\Gamma_m$, $Q_m$, $m_\text{eff}$, $x_\text{zpf}$
   - Optomechanical: $G$, $g_0$, $n_d$, $C$, $C_0$
   - Measurement: NENBW, ENBW, RBW, PSD
   - Notation conventions: Hz vs rad/s (code uses Hz inputs, converts internally)
   - Flag future parameters: $\Gamma_\text{opt}$, $\Omega_\text{opt}$, $n_\text{min}$ as "not yet implemented"
-- [ ] Add to `mkdocs.yml` nav under User Guide
-- [ ] Add glossary cross-references to all existing user guide pages
+- [x] Add to `mkdocs.yml` nav under User Guide (d3f7abc)
+- [x] Add glossary cross-references to all existing user guide pages (bb1df4d)
 
 ---
 
@@ -110,40 +110,38 @@ References already in source code:
 - X. Rojas et al. (2022-11-28) eqs. 3–5 (`Sww.py:758`)
 
 #### Cavity Transmission (S21) — rename and enhance `s21_fitting.md`
-- [ ] Rename page title to "Cavity Transmission (S21)"
-- [ ] Add the S21 equation in LaTeX: $S_{21}(f) = \left|\frac{\kappa_\text{ext}}{\kappa_\text{tot} + 2j(f - f_0)}\right| + m \cdot f + c$
-- [ ] Explain lumped-element circuit model (two coupling capacitors in series, parallel LCR between them) — this equation is configuration-specific
-- [ ] Explain overcoupled / undercoupled / critically coupled regimes
-- [ ] Add references to Kumar/Rojas papers
-- [ ] Add "Interpreting Results" section with typical parameter ranges
+- [x] Rename page title to "Cavity Transmission (S21)" (600e759)
+- [x] Add the S21 equation in LaTeX (600e759)
+- [x] Explain lumped-element circuit model (600e759)
+- [x] Explain overcoupled / undercoupled / critically coupled regimes (600e759)
+- [x] Add references to Kumar/Rojas papers (600e759)
+- [x] Add "Interpreting Results" section with typical parameter ranges (600e759)
 
 #### Thermal Motion Analysis — enhance `thermal_motion_analysis.md`
 The thermal motion analysis assumes the mechanical motion is **thermally driven** at a known temperature $T$.
 This allows extraction of $g_0$ from the measured PSD using $S_{FF}^\text{th} = 4 k_B T m_\text{eff} \Gamma_m$.
-- [ ] Add physics background (2–3 paragraphs): what thermal motion is, the thermal drive assumption, why known $T$ lets you extract $g_0$
-- [ ] Add S_ww Lorentzian equation in LaTeX, mapped to `basic_S_ww_eq` code arguments
-- [ ] Explain $G^2 S_{xx}$ normalisation: what it represents, why each step exists (cite "A Novel Architecture...")
-- [ ] Add $g_0$ extraction equations: $G$, $x_\text{zpf}$, $g_0 = G \cdot x_\text{zpf}$ (cite Rojas et al. eqs. 3–5)
-- [ ] Add "Interpreting Results" section: what $g_0$, $G$, $\Gamma_m$ values mean, how to sanity-check
-- [ ] Clearly state the thermal assumption and when it is valid (e.g. $k_B T \gg \hbar \Omega_m$, no significant backaction cooling)
+- [x] Add physics background (2–3 paragraphs): thermal motion, thermal drive assumption, g₀ extraction (bb1df4d)
+- [x] Add S_ww Lorentzian equation in LaTeX, mapped to `basic_S_ww_eq` code arguments (bb1df4d)
+- [x] Explain $G^2 S_{xx}$ normalisation with equation (bb1df4d)
+- [x] Add $g_0$ extraction equations: $G$, $x_\text{zpf}$, $g_0 = G \cdot x_\text{zpf}$ (Rojas et al. eqs. 3–5) (bb1df4d)
+- [x] Add "Interpreting Results" section with typical parameter ranges (bb1df4d)
+- [x] Clearly state the thermal assumption and when it is valid (bb1df4d)
 
 #### Thermal Motion Measurement — enhance `thermal_motion_measurement.md`
-- [ ] Add measurement scheme physics: pump tone creates intracavity photons, mechanical motion modulates cavity frequency, sidebands appear in transmitted signal
-- [ ] Explain red vs blue sideband detuning and sideband cooling
-- [ ] Add equations behind parameter table guidelines (why VNA span = 10 × $\kappa_\text{tot}$, etc.)
-- [ ] Cite Kumar (2023) for thermal force/SHO model
-- [ ] Note the two analysis paths from the same measurement data:
-  - **Thermal motion analysis** — assumes thermal drive at known $T$, extracts $g_0$ (see thermal_motion_analysis.md)
-  - **Displacement measurement** — requires known $g_0$/$G$, extracts $T_\text{eff}$ (see displacement_measurement.md)
+- [x] Add measurement scheme physics: pump tone, sidebands, modulation (6636cd5)
+- [x] Explain red vs blue sideband detuning and sideband cooling (6636cd5)
+- [x] Add equations behind parameter table guidelines (6636cd5)
+- [x] Cite Kumar (2023) for thermal force/SHO model (6636cd5)
+- [x] Note the two analysis paths from the same measurement data (6636cd5)
 
 #### Spectrum Analyser — enhance `spectrum_analyser.md`
-- [ ] Explain what a PSD is (power per unit frequency bandwidth)
-- [ ] Explain NENBW correction: why raw SA output is not a PSD, what the window function does, where 4.083 comes from
-- [ ] Add conversion equation in LaTeX
+- [x] Explain what a PSD is (power per unit frequency bandwidth) (6636cd5)
+- [x] Explain NENBW correction: window function, 4.083 origin, conversion equation (6636cd5)
+- [x] Add conversion equation in LaTeX (6636cd5)
 
 #### Data Analysis overview — enhance `data_analysis.md`
-- [ ] Expand Sww fitting section: what $S_{ww}$ is, what parameters it extracts, connection to $g_0$
-- [ ] Add the `basic_S_ww_eq` Lorentzian equation
+- [x] Expand Sww fitting section: what $S_{ww}$ is, parameters, connection to $g_0$ (6636cd5)
+- [x] Add the `basic_S_ww_eq` Lorentzian equation (6636cd5)
 
 ---
 

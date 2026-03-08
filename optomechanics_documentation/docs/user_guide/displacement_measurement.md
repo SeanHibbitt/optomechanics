@@ -47,21 +47,27 @@ Two methods can extract the effective temperature from $S_{xx}$.
 
 ### Method 1 — Lorentzian fit (recommended)
 
-Fit the displacement PSD with the Lorentzian model (`basic_S_ww_eq`):
+Fit the $G^2 S_{xx}$ spectrum with the Lorentzian model (`basic_S_ww_eq`):
 
 $$
-S_{xx}(f) = \frac{A}{\Gamma_m^2 + 4(f - f_m)^2} + n_f
+G^2 S_{xx}(\omega) = \frac{A}{\gamma_m^2 + 4(\omega - \omega_m)^2} + n_f
 $$
+
+where $\omega = 2\pi f$, $\omega_m = 2\pi f_m$, $\gamma_m = 2\pi\Gamma_m$
+(the code accepts Hz inputs and converts internally).
 
 The fit amplitude $A$ relates to the thermal force spectral density via the
 mechanical susceptibility.  With known $G$, the effective temperature is:
 
 $$
-T_\text{eff} = \frac{A \cdot m_\text{eff} \cdot \Omega_m^2}{4\, k_B\, G^2}
+T_\text{eff} = \frac{A \cdot m_\text{eff} \cdot \omega_m^2}
+{4\, k_B\, \gamma_m \cdot G^2}
 $$
 
-where the factor comes from inverting the thermal force relation
-$S_{FF}^\text{th} = 4\, k_B\, T_\text{eff}\, m_\text{eff}\, \Gamma_m$.
+This comes from inverting the relation
+$A = G^2 \cdot 4 k_B T_\text{eff}\, \gamma_m / (m_\text{eff}\, \omega_m^2)$
+which itself follows from the thermal force spectral density
+$S_{FF}^\text{th} = 4\, k_B\, T_\text{eff}\, m_\text{eff}\, \gamma_m$.
 
 **Advantages:** Naturally separates the mechanical peak from the noise floor $n_f$.
 Simultaneously extracts $\Gamma_m$ and $f_m$, which may change under backaction.

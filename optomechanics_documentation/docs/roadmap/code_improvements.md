@@ -4,35 +4,10 @@ The items below are known technical debt and packaging issues earmarked for a fu
 
 ---
 
-## 1. `setup.py` — Packaging Configuration
+## ~~1. `setup.py` — Packaging Configuration~~ (Fixed)
 
-The current `setup.py` uses:
-
-```python
-py_modules=['optomechanics']
-```
-
-This installs only a single top-level module file rather than the full package tree. The correct approach is:
-
-```python
-from setuptools import setup, find_packages
-
-setup(
-    name='optomechanics',
-    packages=find_packages(),
-    install_requires=[
-        # list dependencies here
-    ],
-)
-```
-
-**Workaround until fixed:** install in editable mode from the repository root:
-
-```bash
-pip install -e .
-```
-
-This makes the source directory itself importable, so the full package structure is available regardless of the `py_modules` misconfiguration.
+Fixed in commit 8e71471.  `setup.py` now uses `find_packages()` with an
+`install_requires` list.
 
 ---
 

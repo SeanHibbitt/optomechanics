@@ -87,6 +87,10 @@ nav:
       - data_management: api_reference/data_management/data_management.md
       - file_management: api_reference/data_management/file_management.md
       - data_logger: api_reference/data_management/data_logger.md
+  - Roadmap:
+    - roadmap/index.md
+    - Planned Physics: roadmap/planned_physics.md
+    - Code Improvements: roadmap/code_improvements.md
   - Release Notes: release_notes.md
   - About: about.md
 

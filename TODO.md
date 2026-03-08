@@ -182,13 +182,13 @@ For each planned feature: physics equation, what it would be used for, existing 
 Seven API pages are currently empty autodoc stubs (just `:::` directives).
 Add usage examples, context, and cross-references to each.
 
-- [ ] `docs/api_reference/data_analysis/unit_conversions.md` — add examples and context
-- [ ] `docs/api_reference/data_analysis/misc_equations.md` — add examples and context
-- [ ] `docs/api_reference/data_analysis/utilities.md` — add examples and context
-- [ ] `docs/api_reference/data_analysis/square_membrane.md` — add examples and context
-- [ ] `docs/api_reference/data_management/data_management.md` — add examples and context
-- [ ] `docs/api_reference/data_management/file_management.md` — add examples and context
-- [ ] `docs/api_reference/device_control/Device_Visa_Super.md` — add examples and context
+- [x] `docs/api_reference/data_analysis/unit_conversions.md` — intro + examples (1acbdfa)
+- [x] `docs/api_reference/data_analysis/misc_equations.md` — intro + photon_number example (92c4e82)
+- [x] `docs/api_reference/data_analysis/utilities.md` — intro + split_complex/find_closest examples (b6c661f)
+- [x] `docs/api_reference/data_analysis/square_membrane.md` — intro + membrane instantiation examples (5a82846)
+- [x] `docs/api_reference/data_management/data_management.md` — intro + attenuation_object example (f15edf7)
+- [x] `docs/api_reference/data_management/file_management.md` — intro + dated_file_maker + save_data_3 example (37e24b2)
+- [x] `docs/api_reference/device_control/Device_Visa_Super.md` — intro + with-block example (aabd494)
 
 ---
 

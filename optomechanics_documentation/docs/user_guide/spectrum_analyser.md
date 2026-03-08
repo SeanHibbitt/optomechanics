@@ -4,6 +4,37 @@ This page covers using the **R&S FSW** spectrum analyser driver (`RS_FSW.FSW`)
 for power-spectral-density (PSD) and IQ-domain measurements, which are the
 primary techniques used in thermal-motion and optomechanical sideband experiments.
 
+## What is a PSD?
+
+A **power spectral density** (PSD) measures how signal power is distributed
+across frequency.  It has units of power per unit bandwidth (W/Hz or dBm/Hz).
+A PSD is the correct quantity for characterising noise — unlike raw power, it
+is independent of the measurement bandwidth.
+
+## The NENBW correction
+
+A spectrum analyser applies a **window function** to each time segment before
+computing the FFT.  This window suppresses spectral leakage but broadens the
+effective bandwidth of each frequency bin beyond the nominal resolution
+bandwidth (RBW).
+
+The **Normalised Equivalent Noise Bandwidth** (NENBW) quantifies this
+broadening as a dimensionless ratio.  For the R&S FSW in its default
+(Gaussian) filter mode, NENBW ≈ 4.083.  The effective noise bandwidth is:
+
+$$
+\text{ENBW} = \text{NENBW} \times \text{RBW}
+$$
+
+To convert raw SA power (watts) to a true PSD (W/Hz), divide by ENBW:
+
+$$
+S(f) \;[\text{W/Hz}] = \frac{P_\text{SA}(f) \;[\text{W}]}{\text{ENBW} \;[\text{Hz}]}
+$$
+
+The NENBW value 4.083 is stored in the code as `RS_default_window_NENBW` in
+`_fitting.py`.
+
 !!! note
     Set the spectrum analyser to **PSD mode** (Watts/Hz or dBm/Hz) before
     acquiring data.  If a different mode is used, note the window function so

@@ -6,6 +6,30 @@ mechanical resonator using a VNA for cavity characterisation and a spectrum anal
 
 See `Scripts/DAQ_templates/SA IQ PSD/` for working template notebooks.
 
+## Measurement scheme
+
+A microwave pump tone at frequency $f_\text{pump}$ drives intracavity photons
+($n_d$).  The mechanical resonator's thermal motion modulates the cavity
+resonance frequency, which phase-modulates the intracavity field and creates
+sidebands at $f_\text{pump} \pm f_m$.  The spectrum analyser measures the
+power in these sidebands; their height encodes the mechanical displacement.
+
+**Red sideband** ($f_\text{pump} = f_0 - f_m$): the pump is detuned below
+resonance.  This enables sideband cooling — energy is extracted from the
+mechanics.  Used for backaction cooling experiments.
+
+**On resonance** ($f_\text{pump} = f_0$): maximises intracavity photon number
+for a given input power.  Used for thermal calibration measurements.
+
+### Two analysis paths from the same data
+
+The same PSD measurement supports two complementary analyses:
+
+1. **Thermal motion analysis** — assumes thermal drive at known $T$, extracts
+   $g_0$.  See [Thermal Motion Analysis](thermal_motion_analysis.md).
+2. **Displacement measurement** — requires known $g_0$/$G$ (from a prior
+   thermal calibration), extracts $T_\text{eff}$.
+
 ## Instruments required
 
 | Role | Driver |
@@ -25,6 +49,12 @@ See `Scripts/DAQ_templates/SA IQ PSD/` for working template notebooks.
 | SA span | 5–10 × $\Gamma_m$ | Resolve the mechanical peak |
 | SA RBW | $\Gamma_m / 10$ | At least 10 points across the peak |
 | SA averages | 50–200 | Reduce noise floor |
+
+The VNA span guideline ($10 \times \kappa_\text{tot}$) ensures the full
+Lorentzian lineshape is captured for a reliable fit.  The SA span
+($5\text{–}10 \times \Gamma_m$) captures the mechanical peak with sufficient
+baseline for noise floor estimation.  The RBW should be at least $\Gamma_m / 10$
+to place ≥10 points across the mechanical linewidth.
 
 ## Step 1 — Characterise the cavity with the VNA
 

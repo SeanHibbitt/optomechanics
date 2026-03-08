@@ -46,7 +46,21 @@ See [S21 API](../api_reference/data_analysis/fitting/S21.md).
 
 #### Sww fitting
 
-`fitting.Sww` fits the noise power spectral density $S_{ww}(f)$ of a mechanical resonator.
+`fitting.Sww` fits the noise power spectral density $S_{ww}(f)$ of a mechanical
+resonator.  The mechanical Brownian motion produces a Lorentzian peak in the PSD
+centred at $f_m$ with linewidth $\Gamma_m$.  The basic model (`basic_S_ww_eq`) is:
+
+$$
+S_{ww}(f) = \frac{A}{\Gamma_m^2 + 4(f - f_m)^2} + n_f
+$$
+
+where $A$ is the amplitude, $f_m$ the mechanical resonance frequency, $\Gamma_m$
+the damping rate, and $n_f$ the noise floor.  All frequencies are in Hz; the code
+converts internally to angular frequency ($\times 2\pi$).
+
+From the fitted parameters and the cavity S21 fit, the code extracts the
+vacuum optomechanical coupling rate $g_0$ — see
+[Thermal Motion Analysis](thermal_motion_analysis.md) for the full workflow.
 
 See [Sww API](../api_reference/data_analysis/fitting/Sww.md).
 

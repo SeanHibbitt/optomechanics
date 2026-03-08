@@ -31,8 +31,11 @@ Curve-fitting routines for cavity / resonator measurements.
 `fitting.S21` fits the transmission through a microwave cavity.  The model is:
 
 $$
-S_{21}(f) = \left| \frac{2\pi\kappa_\text{ext}}{2\pi\kappa_\text{tot} + 4\pi i(f - f_0)} \right| + \text{background}
+S_{21}(f) = \left| \frac{\kappa_\text{ext}}{\kappa_\text{tot} + 2j(f - f_0)} \right| + m\,f + c
 $$
+
+where all values are in Hz (the $2\pi$ factors cancel between numerator and
+denominator).
 
 Key functions:
 
@@ -51,12 +54,12 @@ resonator.  The mechanical Brownian motion produces a Lorentzian peak in the PSD
 centred at $f_m$ with linewidth $\Gamma_m$.  The basic model (`basic_S_ww_eq`) is:
 
 $$
-S_{ww}(f) = \frac{A}{\Gamma_m^2 + 4(f - f_m)^2} + n_f
+S_{ww}(\omega) = \frac{A}{\gamma_m^2 + 4(\omega - \omega_m)^2} + n_f
 $$
 
-where $A$ is the amplitude, $f_m$ the mechanical resonance frequency, $\Gamma_m$
-the damping rate, and $n_f$ the noise floor.  All frequencies are in Hz; the code
-converts internally to angular frequency ($\times 2\pi$).
+where $\omega = 2\pi f$, $\omega_m = 2\pi f_m$, $\gamma_m = 2\pi\Gamma_m$.
+The code accepts all frequencies in **Hz** and converts to angular frequency
+internally.  The fitted amplitude $A$ is in angular-frequency units.
 
 From the fitted parameters and the cavity S21 fit, the code extracts the
 vacuum optomechanical coupling rate $g_0$ — see

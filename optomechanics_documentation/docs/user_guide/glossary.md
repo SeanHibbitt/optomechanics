@@ -10,7 +10,10 @@ documentation.
 - Subscript conventions: `_tot` = total, `_ext` = external, `_int` = internal,
   `_m` = mechanical.
 - The code returns $g_0$ and $G$ in **Hz** (not rad/s) unless otherwise noted in
-  the function docstring.
+  the function docstring.  **Exception:** `__average_and_fit_S_xx__` returns
+  $g_0$ and $G$ in **rad/s** — divide by $2\pi$ to get Hz.
+- In the equations below, lowercase Greek ($\omega$, $\gamma$, $\kappa$) denotes
+  **angular frequency** (rad/s) and Latin letters ($f$, $\Gamma$) denote **Hz**.
 
 ## Cavity parameters
 
@@ -30,8 +33,8 @@ documentation.
 | $\Gamma_m$ | `G_m`, `gamma_m` | Hz | Mechanical linewidth (FWHM damping rate) |
 | $Q_m$ | — | dimensionless | Mechanical quality factor, $Q_m = f_m / \Gamma_m$ (also $Q = \pi f_m \tau$ via ring-down) |
 | $m_\text{eff}$ | `m_eff` | kg | Effective motional mass of the mechanical mode |
-| $x_\text{zpf}$ | `x_zpf` | m | Zero-point fluctuation amplitude, $x_\text{zpf} = \sqrt{\hbar / (2 m_\text{eff} \Omega_m)}$ |
-| $\tau$ | `tau` | s | Ring-down time constant, $\tau = 2Q_m / \Omega_m = 1/(\pi \Gamma_m)$ |
+| $x_\text{zpf}$ | `x_zpf` | m | Zero-point fluctuation amplitude, $x_\text{zpf} = \sqrt{\hbar / (2 m_\text{eff}\, \omega_m)}$ where $\omega_m = 2\pi f_m$ |
+| $\tau$ | `tau` | s | Ring-down time constant, $\tau = Q_m / (\pi f_m) = 1/(\pi \Gamma_m)$ |
 
 ## Optomechanical parameters
 
@@ -49,7 +52,7 @@ documentation.
 |--------|-----------|-------|-------------|
 | $A$ | `A` | varies | Amplitude scaling in `basic_S_ww_eq` Lorentzian fit |
 | $n_f$ | `nf` | varies | Noise floor offset in `basic_S_ww_eq` |
-| $S_{FF}^\text{th}$ | via `S_ff_thermal()` | N²/Hz | Thermal force spectral density, $S_{FF} = 4 k_B T m_\text{eff} \Gamma_m$ |
+| $S_{FF}^\text{th}$ | via `S_ff_thermal()` | N²/Hz | Thermal force spectral density, $S_{FF} = 4 k_B T m_\text{eff}\, \gamma_m$ where $\gamma_m = 2\pi\Gamma_m$ |
 | $|\chi_m|^2$ | via `SHO_TF_sq()` | m²/N² | Mechanical susceptibility (SHO transfer function squared) |
 | $S_{xx}$ | via `S_xx_thermal()` | m²/Hz | Displacement spectral density, $S_{xx} = |\chi_m|^2 S_{FF}$ |
 

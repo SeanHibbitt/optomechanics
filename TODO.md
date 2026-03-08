@@ -170,22 +170,10 @@ This is the appropriate analysis when backaction cooling or an external drive is
 New top-level nav section (same level as User Guide) documenting future module capabilities.
 For each planned feature: physics equation, what it would be used for, existing partial implementation.
 
-- [ ] Create `docs/roadmap/index.md` — overview of planned features
-- [ ] Create `docs/roadmap/planned_physics.md` — planned physics capabilities:
-  - $\Gamma_\text{opt}$, $\Omega_\text{opt}$ (dynamical backaction / optical spring effect)
-  - OMIA (only OMIT currently exists)
-  - Sideband resolution regime classification (resolved vs unresolved)
-  - Quantum ground state cooling ($n_\text{min}$, quantum threshold)
-  - Cooperativity functions ($C$, $C_0$ — currently manual calculation only)
-  - Standard quantum limit
-  - `account_for_attenuation()` implementation (currently a stub)
-  - `save_to_tsv()` implementation (currently raises exception)
-- [ ] Create `docs/roadmap/code_improvements.md` — technical debt:
-  - `setup.py` fix (`py_modules` → `find_packages()`)
-  - `__average_and_fit_S_xx__` dunder method renaming
-  - Parameter naming standardisation (`A`, `nf`, `kk_tot`, `height_of_sin`)
-  - Dead code cleanup in `data_management.py`
-- [ ] Add Roadmap section to `mkdocs.yml` nav
+- [x] Create `docs/roadmap/index.md` — overview of planned features (8d5d96f)
+- [x] Create `docs/roadmap/planned_physics.md` — 8 planned features with equations and status (8d5d96f)
+- [x] Create `docs/roadmap/code_improvements.md` — 4 technical debt items (8d5d96f)
+- [x] Add Roadmap section to `mkdocs.yml` nav (8d5d96f)
 
 ---
 

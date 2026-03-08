@@ -1,3 +1,9 @@
+"""
+Made by Claude. Mechanical power spectral density (Sww) fitting and normalisation.
+
+Provides Lorentzian lineshape models for the mechanical PSD, normalisation to
+G²S_xx, and g₀ extraction following Rojas et al. (2022) and Kumar (2023).
+"""
 import numpy as np
 from scipy.optimize import curve_fit
 import traceback

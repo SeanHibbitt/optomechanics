@@ -1,4 +1,9 @@
+"""
+Made by Claude. GUI control utilities for live optomechanics measurements.
 
+Provides lightweight control interfaces and configuration helpers for
+interactive data acquisition sessions.
+"""
 import traceback
 import json
 

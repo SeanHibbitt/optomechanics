@@ -1,3 +1,9 @@
+"""
+Made by Claude. Cavity transmission (S21) fitting functions.
+
+Provides the S21 lineshape equation and fitting routines for extracting
+cavity parameters (resonance frequency, linewidths) from VNA transmission data.
+"""
 import numpy as np
 from scipy.optimize import curve_fit
 import traceback

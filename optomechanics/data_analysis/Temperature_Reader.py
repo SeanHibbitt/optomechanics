@@ -1,4 +1,9 @@
+"""
+Made by Claude. Temperature data loading and parsing for optomechanics experiments.
 
+Reads temperature log files from cryogenic measurement setups and provides
+utilities for aligning temperature data with mechanical PSD time series.
+"""
 import numpy as np
 import os
 

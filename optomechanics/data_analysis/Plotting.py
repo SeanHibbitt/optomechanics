@@ -1,3 +1,9 @@
+"""
+Made by Claude. Plotting helper utilities for optomechanics data visualisation.
+
+Provides colour manipulation and figure formatting helpers used across
+the data analysis and fitting modules.
+"""
 
 
 def lighten_color(color, amount=0.5):

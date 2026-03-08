@@ -1,4 +1,9 @@
+"""
+Made by Claude. Optomechanically Induced Transparency (OMIT) fitting functions.
 
+Provides the OMIT lineshape equation and fitting routines for extracting
+mechanical parameters from cavity transmission under strong pump driving.
+"""
 import numpy as np
 from scipy.optimize import curve_fit
 import traceback

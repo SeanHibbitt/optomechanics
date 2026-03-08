@@ -1,3 +1,9 @@
+"""
+Made by Claude. Helper utilities for optomechanics data processing.
+
+Provides functions for splitting complex arrays, finding nearest values,
+and converting error representations between linear and dB domains.
+"""
 import numpy as np
 from scipy.optimize import curve_fit
 import traceback

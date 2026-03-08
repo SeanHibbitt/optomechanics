@@ -1,3 +1,9 @@
+"""
+Made by Claude. General fitting utilities for optomechanics data.
+
+Provides ring-down, linear fitting functions, and physical constants
+used across the fitting subpackage (hbar, k_B, NENBW).
+"""
 import numpy as np
 from scipy.optimize import curve_fit
 import traceback

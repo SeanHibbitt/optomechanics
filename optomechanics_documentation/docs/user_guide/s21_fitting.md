@@ -79,20 +79,6 @@ Here $\kappa_\text{int} = \kappa_\text{tot} - \kappa_\text{ext}$ is the intrinsi
 
 ---
 
-## Overview
-
-The fit extracts three physical parameters:
-
-| Parameter | Symbol | Meaning |
-|---|---|---|
-| Resonance frequency | $f_0$ | Centre of the cavity resonance (Hz) |
-| Total linewidth | $\kappa_\text{tot}$ | Full linewidth at half maximum (Hz) |
-| External coupling | $\kappa_\text{ext}$ | Coupling rate to the feedline (Hz) |
-
-From these you can derive the internal coupling rate
-$\kappa_\text{int} = \kappa_\text{tot} - \kappa_\text{ext}$
-and the loaded quality factor $Q = f_0 / \kappa_\text{tot}$.
-
 ## Fitting from dB data
 
 The most common case: your VNA returns $|S_{21}|$ in dB.

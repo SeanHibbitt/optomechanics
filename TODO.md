@@ -197,8 +197,8 @@ Add usage examples, context, and cross-references to each.
 ~15 source files lack a module-level docstring (used as page header by mkdocstrings).
 These are documentation-only edits — a single docstring at the top of each file, no logic changes.
 
-- [ ] Add module-level docstrings to: `utilities.py`, `Plotting.py`, `Temperature_Reader.py`, `control_gui.py`, `fitting/S21.py`, `fitting/Sww.py`, `fitting/omit.py`, `fitting/_fitting.py`, `data_management.py`, `file_management.py`, `data_logger.py`, `Device_Visa_Super.py`, `VNA.py`, and instrument driver files
-- [ ] Fix `setup.py` — replace `py_modules=['optomechanics']` with `packages=find_packages()` and add `install_requires`
+- [x] Add module-level docstrings to: `utilities.py`, `Plotting.py`, `Temperature_Reader.py`, `control_gui.py`, `fitting/S21.py`, `fitting/Sww.py`, `fitting/omit.py`, `fitting/_fitting.py`, `data_management.py`, `file_management.py`, `data_logger.py`, `Device_Visa_Super.py` (4484912, f0c8bb2)
+- [x] Fix `setup.py` — replaced `py_modules=['optomechanics']` with `packages=find_packages()` and added `install_requires` (8e71471)
 
 ---
 

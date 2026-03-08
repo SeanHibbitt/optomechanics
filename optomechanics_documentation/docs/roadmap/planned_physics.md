@@ -8,19 +8,26 @@ The table below lists physical effects and analysis routines that are planned fo
 
 Radiation pressure from a cavity drive shifts and damps the mechanical mode. Two effects arise:
 
-**Optical spring** — the cavity field modifies the effective mechanical frequency:
+**Optical spring** — the cavity field shifts the effective mechanical frequency:
 
 $$
-\Omega_\text{eff}^2 = \Omega_m^2 + g_0^2 n_d \cdot [\text{detuning-dependent terms}]
+\delta\Omega_m = g_0^2 n_d \left[
+\frac{\Delta + \Omega_m}{(\Delta + \Omega_m)^2 + (\kappa/2)^2}
++ \frac{\Delta - \Omega_m}{(\Delta - \Omega_m)^2 + (\kappa/2)^2}
+\right]
 $$
 
 **Optical damping** — the cavity field adds (or removes) damping:
 
 $$
-\Gamma_\text{opt} = g_0^2 n_d \cdot [\text{detuning-dependent terms}]
+\Gamma_\text{opt} = g_0^2 n_d \left[
+\frac{\kappa}{(\Delta + \Omega_m)^2 + (\kappa/2)^2}
+- \frac{\kappa}{(\Delta - \Omega_m)^2 + (\kappa/2)^2}
+\right]
 $$
 
-where $g_0$ is the single-photon coupling rate and $n_d$ is the intracavity photon number.
+where $\Delta = \omega_d - \omega_c$ is the drive detuning, $\kappa = \kappa_\text{tot}$,
+and all quantities are in angular frequency (Aspelmeyer et al., Rev. Mod. Phys. 86, 1391 (2014), eqs. 28–29).
 
 **Status:** Not yet implemented.
 

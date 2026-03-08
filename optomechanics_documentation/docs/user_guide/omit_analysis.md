@@ -22,11 +22,12 @@ cooperativity $C$.
 The code implements the OMIT lineshape in `OMIT_equation`:
 
 $$
-\text{OMIT}(f) = \text{floor} \times \left(1 + A \left|\frac{1}{(\omega_m^2 - \omega^2 - i\Gamma_m\omega)(\kappa_\text{tot} - 2i\omega)}\right|\right)
+\text{OMIT}(f) = \text{floor} \times \left(1 + A \left|\frac{1}{(\omega_m^2 - \omega^2 - i\gamma_m\omega)(\kappa - 2i\omega)}\right|\right)
 $$
 
-where $\omega = 2\pi f$, $\omega_m = 2\pi f_m$, $\Gamma_m = 2\pi g_m$, and
-$\kappa_\text{tot} = 2\pi \cdot \texttt{kk\_tot}$.
+where $\omega = 2\pi f$, $\omega_m = 2\pi f_m$, $\gamma_m = 2\pi\,$`g_m`,
+and $\kappa = 2\pi\,$`kk_tot`.  All code inputs are in **Hz**; the conversion
+to angular frequency happens internally.
 
 The parameters `A` and `floor` encode the cavity and optomechanical properties:
 

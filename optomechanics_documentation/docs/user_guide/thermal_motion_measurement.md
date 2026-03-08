@@ -141,3 +141,4 @@ for P_dBm in drive_powers:
 - [Spectrum Analyser (IQ/PSD)](spectrum_analyser.md) — IQ capture and PSD details
 - [S21 Fitting](s21_fitting.md) — fitting the cavity response
 - [API reference: `device_control`](../api_reference/device_control/index.md)
+- [Parameter Glossary](glossary.md)

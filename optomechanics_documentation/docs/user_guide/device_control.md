@@ -125,3 +125,7 @@ with Signal_Generator('TCPIP::192.168.0.2::INSTR') as sg, \
 
 See the [API Reference](../api_reference/device_control/index.md) for all available classes
 and methods.
+
+## See also
+
+- [Parameter Glossary](glossary.md)

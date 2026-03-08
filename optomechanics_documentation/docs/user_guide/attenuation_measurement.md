@@ -97,3 +97,4 @@ total_path.save_to_tsv("total_path.tsv")
 - [Attenuation Processing](attenuation_processing.md) — using `attenuation_object` in analysis
 - [API reference: `data_management`](../api_reference/data_management/data_management.md)
 - [Device Control: VNA examples](device_control.md)
+- [Parameter Glossary](glossary.md)

@@ -134,3 +134,4 @@ rel_frequencies = frequencies - pump_freq
 - [RS_FSW_new API reference](../api_reference/device_control/RS_FSW_new.md)
 - [Device Control user guide](device_control.md) — `with`-block patterns for all instruments
 - [Sww fitting API reference](../api_reference/data_analysis/fitting/Sww.md) — functions for fitting mechanical PSDs
+- [Parameter Glossary](glossary.md)

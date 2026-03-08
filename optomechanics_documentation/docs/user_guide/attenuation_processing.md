@@ -87,3 +87,4 @@ atten.save_to_tsv("output_attenuation.tsv")
 
 - [API reference: `data_management`](../api_reference/data_management/data_management.md)
 - [Attenuation Measurement](attenuation_measurement.md) — how to measure cable attenuation with the VNA
+- [Parameter Glossary](glossary.md)

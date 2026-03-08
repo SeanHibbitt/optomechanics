@@ -132,3 +132,4 @@ See the [Attenuation Processing](attenuation_processing.md) guide for more detai
 - [API Reference: `data_management`](../api_reference/data_management/index.md)
 - [Attenuation Measurement](attenuation_measurement.md)
 - [Attenuation Processing](attenuation_processing.md)
+- [Parameter Glossary](glossary.md)

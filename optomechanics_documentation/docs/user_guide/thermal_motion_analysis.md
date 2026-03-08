@@ -6,6 +6,81 @@ measurement to extract the vacuum optomechanical coupling rate $g_0$.
 See `Scripts/DAQ_templates/SA IQ PSD/AnalysisGoodPartition.ipynb` for a working
 example notebook.
 
+## Physics background
+
+A mechanical resonator in thermal equilibrium at temperature $T$ is driven by
+Brownian (Langevin) force noise.  When $k_B T \gg \hbar\Omega_m$ — which is
+always true at room temperature for MHz-scale modes — the thermal force spectral
+density is white (frequency-independent):
+
+$$
+S_{FF}^\text{th} = 4\, k_B\, T\, m_\text{eff}\, \Gamma_m
+$$
+
+The resulting displacement spectral density $S_{xx}$ is the product of this
+flat force spectrum and the mechanical susceptibility (a Lorentzian):
+
+$$
+S_{xx}(f) = \frac{S_{FF}^\text{th}}{m_\text{eff}^2 \left[(2\pi f)^2 - \Omega_m^2\right]^2 + \Omega_m^2 \Gamma_m^2}
+$$
+
+Near resonance ($f \approx f_m$) the full susceptibility reduces to the
+simpler Lorentzian form used by `basic_S_ww_eq` in the code:
+
+$$
+S_{ww}(f) = \frac{A}{\Gamma_m^2 + 4(f - f_m)^2} + n_f
+$$
+
+where $A$ is the amplitude and $n_f$ is the noise floor (both in code units).
+
+### The thermal assumption
+
+This analysis **assumes** the mechanical motion is purely thermally driven at
+a **known** temperature $T$.  This lets you extract $g_0$ from the measured PSD
+amplitude.  The assumption is valid when:
+
+- $k_B T \gg \hbar\Omega_m$ (classical limit — always true at room temperature)
+- There is no significant optomechanical backaction cooling ($n_d$ not too high)
+- No external drive is applied to the mechanics
+
+### $G^2 S_{xx}$ normalisation
+
+The raw spectrum analyser output is in dBm (or watts).  The code normalises it to
+$G^2 S_{xx}$ by dividing by a constant derived from the cavity parameters
+(see `__normalise_Sww_to_GGSxx__` in `Sww.py`):
+
+$$
+\text{normalisation} = \frac{\kappa_\text{ext}\, n_d}{\kappa_\text{tot}^2}\, \hbar\, \omega_c
+$$
+
+This converts measured power to the dimensionless quantity $G^2 S_{xx}$, from which
+$G$ can be extracted via the fit amplitude $A$ and the thermal force relation.
+
+### $g_0$ extraction (Rojas et al. eqs. 3–5)
+
+From the fitted amplitude $A$ and the known cavity/mechanical parameters, the code
+computes (see `S_ww_constant_calculator`):
+
+$$
+G = \sqrt{A \cdot \frac{\kappa_\text{tot}^2}{\kappa_\text{ext}\, n_d\, \hbar\, \omega_c} \cdot \frac{m_\text{eff}\, \Omega_m^2}{4\, k_B\, T}}
+$$
+
+$$
+x_\text{zpf} = \sqrt{\frac{\hbar}{2\, m_\text{eff}\, \Omega_m}}, \qquad
+g_0 = G \cdot x_\text{zpf}
+$$
+
+### Interpreting results
+
+| Parameter | Typical range | What it tells you |
+|---|---|---|
+| $f_m$ | 100 kHz – 10 MHz | Mechanical mode frequency |
+| $\Gamma_m$ | 0.1 – 100 Hz | Mechanical damping (narrower = higher $Q_m$) |
+| $G/(2\pi)$ | $10^{12}$ – $10^{15}$ Hz/m | Frequency pull — larger means stronger coupling geometry |
+| $g_0/(2\pi)$ | 0.01 – 100 Hz | Vacuum coupling rate — the key figure of merit |
+
+---
+
 ## Overview
 
 The analysis pipeline is:
@@ -147,3 +222,4 @@ fig.show()
 - [Thermal Motion Measurement](thermal_motion_measurement.md) — DAQ setup
 - [Attenuation Processing](attenuation_processing.md) — building attenuation objects
 - [API reference: `fitting.Sww`](../api_reference/data_analysis/fitting/Sww.md)
+- [Parameter Glossary](glossary.md)

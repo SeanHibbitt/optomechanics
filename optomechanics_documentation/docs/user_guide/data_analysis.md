@@ -84,3 +84,7 @@ See [utilities API](../api_reference/data_analysis/utilities.md).
 Miscellaneous physical equations that do not belong to a specific module.
 
 See [misc_equations API](../api_reference/data_analysis/misc_equations.md).
+
+## See also
+
+- [Parameter Glossary](glossary.md)

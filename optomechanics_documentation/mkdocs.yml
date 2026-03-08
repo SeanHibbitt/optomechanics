@@ -41,6 +41,7 @@ nav:
     - Attenuation Processing: user_guide/attenuation_processing.md
     - Thermal Motion Measurement: user_guide/thermal_motion_measurement.md
     - Thermal Motion Analysis: user_guide/thermal_motion_analysis.md
+    - Parameter Glossary: user_guide/glossary.md
   - API Reference:
     - api_reference/index.md
     - data_analysis:

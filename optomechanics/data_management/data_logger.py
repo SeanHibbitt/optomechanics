@@ -1,3 +1,9 @@
+"""
+Made by Claude. Incremental data logging for long-running measurements.
+
+Provides logger and dated_logger classes for appending rows to CSV/TSV files
+during live data acquisition, with configurable delimiters and headings.
+"""
 from .file_management import make_path, dated_file_maker
 import pandas
 from datetime import datetime

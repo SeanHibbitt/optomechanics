@@ -1,3 +1,9 @@
+"""
+Made by Claude. Data I/O and attenuation management for optomechanics experiments.
+
+Provides file reading/writing utilities, the attenuation_object class for
+managing microwave attenuation chains, and save_data_3 for structured data export.
+"""
 import numpy as np
 import pandas
 from optomechanics.data_analysis.unit_conversions import *

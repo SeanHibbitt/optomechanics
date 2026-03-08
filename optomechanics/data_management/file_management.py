@@ -1,3 +1,9 @@
+"""
+Made by Claude. File and directory management utilities for experiment data.
+
+Provides dated directory creation (dated_file_maker), path construction (make_path),
+and helper utilities for organising measurement data on disk.
+"""
 import os
 import matplotlib.pyplot as plt
 from datetime import datetime

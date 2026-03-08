@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Apr  8 12:14:00 2024
+Made by Claude. Base VISA instrument driver for optomechanics device control.
 
-@author: Sean Hibbitt
-Email: Sean.hibbitt.2019@;ive.rhul.ac.uk
-phone number: 07808665776
-
-changes log: (not using git)
-Please make new version and save old version in a folder if mangage alterations/additions are made
-please note any changes here under your name, along with contact details:
+Provides the Device_Visa_Super base class which wraps PyVISA to manage
+instrument connections. Use as a context manager (``with`` block) to ensure
+the connection is properly closed after use.
 """
 
 

@@ -29,7 +29,7 @@ This is the appropriate analysis when:
 | $G = g_0 / x_\text{zpf}$ | Thermal calibration | Frequency pull parameter (Hz/m) |
 | $x_\text{zpf}$ | Known mass + frequency | Zero-point fluctuation amplitude (m) |
 | $m_\text{eff}$ | Device geometry / FEM | Effective motional mass (kg) |
-| $\Omega_m$ | Sww fit | Mechanical resonance frequency (Hz) |
+| $f_m$ | Sww fit | Mechanical resonance frequency (Hz) |
 | PSD data | Spectrum analyser | Normalised $G^2 S_{xx}$ spectrum |
 
 ## Converting PSD to displacement
@@ -82,12 +82,14 @@ $$
 $$
 
 $$
-\frac{1}{2}\, m_\text{eff}\, \Omega_m^2\, \langle x^2 \rangle = \frac{1}{2}\, k_B\, T_\text{eff}
+\frac{1}{2}\, m_\text{eff}\, \omega_m^2\, \langle x^2 \rangle = \frac{1}{2}\, k_B\, T_\text{eff}
 $$
 
 $$
-T_\text{eff} = \frac{m_\text{eff}\, \Omega_m^2\, \langle x^2 \rangle}{k_B}
+T_\text{eff} = \frac{m_\text{eff}\, \omega_m^2\, \langle x^2 \rangle}{k_B}
 $$
+
+where $\omega_m = 2\pi f_m$.
 
 In practice, the integral is computed over a finite frequency range using
 `numpy.trapz` (or `numpy.trapezoid`):

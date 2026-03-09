@@ -52,7 +52,7 @@ This analysis **assumes** the mechanical motion is purely thermally driven at
 a **known** temperature $T$.  This lets you extract $g_0$ from the measured PSD
 amplitude.  The assumption is valid when:
 
-- $k_B T \gg \hbar\Omega_m$ (classical limit — always true at room temperature)
+- $k_B T \gg \hbar\omega_m$ (classical limit — always true at room temperature)
 - There is no significant optomechanical backaction cooling ($n_d$ not too high)
 - No external drive is applied to the mechanics
 

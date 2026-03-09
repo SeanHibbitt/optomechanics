@@ -29,7 +29,7 @@ documentation.
 
 | Symbol | Code name | Units | Description |
 |--------|-----------|-------|-------------|
-| $f_m$ / $\Omega_m$ | `f_m`, `omega_m` | Hz | Mechanical resonance frequency |
+| $f_m$ | `f_m`, `omega_m` | Hz | Mechanical resonance frequency (code parameter `omega_m` takes Hz despite the name) |
 | $\Gamma_m$ | `G_m`, `gamma_m` | Hz | Mechanical linewidth (FWHM damping rate) |
 | $Q_m$ | — | dimensionless | Mechanical quality factor, $Q_m = f_m / \Gamma_m$ (also $Q = \pi f_m \tau$ via ring-down) |
 | $m_\text{eff}$ | `m_eff` | kg | Effective motional mass of the mechanical mode |

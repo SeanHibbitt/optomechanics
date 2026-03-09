@@ -80,6 +80,8 @@ $$
 C_0 = \frac{4 g_0^2}{\kappa_\text{tot}\,\Gamma_m}, \qquad C = C_0\,n_d
 $$
 
+where all quantities are in angular frequency (rad/s), consistent with the notation conventions in the [Parameter Glossary](../user_guide/glossary.md).
+
 Manual calculation is described in the [Cooperativity user guide](../user_guide/cooperativity.md), but no dedicated helper functions exist in the package yet.
 
 **Status:** No helper functions yet; planned.

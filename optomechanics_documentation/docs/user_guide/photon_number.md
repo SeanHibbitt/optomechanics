@@ -81,7 +81,7 @@ The intracavity photon number appears throughout the optomechanical analysis:
 
 - **$G^2 S_{xx}$ normalisation** — the thermal-motion PSD is normalised by a
   factor proportional to $n_d$ (see `__normalise_Sww_to_GGSxx__` in `Sww.py`).
-- **Cooperativity** — $C = 4 g_0^2\, n_d / (\Gamma_m\, \kappa_\text{tot})$.
+- **Cooperativity** — $C = 4 g_0^2\, n_d / (\Gamma_m\, \kappa_\text{tot})$ (all quantities in consistent units, rad/s or Hz).
 - **OMIT amplitude** — the optomechanically induced transparency window depth
   depends on $n_d$ through the cooperativity.
 

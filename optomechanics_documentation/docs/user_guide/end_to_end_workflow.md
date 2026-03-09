@@ -117,7 +117,7 @@ consumed downstream.
 | Attenuation objects | Attenuation measurement | PSD normalisation |
 | $f_0$, $\kappa_\text{tot}$, $\kappa_\text{ext}$ | S21 fit | $n_d$ calculation, PSD normalisation |
 | $n_d$ | `photon_number()` | PSD normalisation, cooperativity |
-| $f_m$, $\Gamma_m$ | Sww fit | Cooperativity, quality factor |
+| $f_m$, $\Gamma_m / 2\pi$ | Sww fit | Cooperativity, quality factor |
 | $g_0$ | Thermal motion analysis | Cooperativity, displacement measurement |
 | $C$ | Manual calculation | Assess coupling strength |
 

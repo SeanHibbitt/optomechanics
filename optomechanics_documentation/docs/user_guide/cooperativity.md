@@ -15,6 +15,9 @@ $$
 C = \frac{4\, g_0^2\, n_d}{\Gamma_m\, \kappa_\text{tot}}
 $$
 
+where all quantities ($g_0$, $\Gamma_m$, $\kappa_\text{tot}$) are in consistent
+units (either all in rad/s or all in Hz).
+
 ### Single-photon cooperativity
 
 Sets the scale without any driving field:
@@ -31,7 +34,7 @@ $$
 |---------------------|----------------------------|-------|-----------------------------------------------------|
 | $g_0$               | Vacuum coupling rate       | Hz    | Thermal motion analysis (`fit_S_xx` result)         |
 | $n_d$               | Intracavity photon number  | —     | `photon_number()` in `misc_equations.py`            |
-| $\Gamma_m$          | Mechanical linewidth       | Hz    | Sww fit                                             |
+| $\Gamma_m / 2\pi$   | Mechanical linewidth       | Hz    | Sww fit                                             |
 | $\kappa_\text{tot}$ | Total cavity linewidth     | Hz    | S21 fit                                             |
 
 ---
@@ -49,7 +52,7 @@ k_tot = 1e6    # Hz
 
 # From Sww fit
 g_0 = 10       # Hz (vacuum coupling rate)
-G_m = 1.0      # Hz (mechanical linewidth)
+G_m = 1.0      # Hz (= Γ_m/(2π), mechanical linewidth)
 
 # From photon_number()
 n_d = 1e6      # intracavity photons

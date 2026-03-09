@@ -104,7 +104,7 @@ $$
 | Parameter | Typical range | What it tells you |
 |---|---|---|
 | $f_m$ | 100 kHz – 10 MHz | Mechanical mode frequency |
-| $\Gamma_m$ | 0.1 – 100 Hz | Mechanical damping (narrower = higher $Q_m$) |
+| $\Gamma_m / 2\pi$ | 0.1 – 100 Hz | Mechanical damping (narrower = higher $Q_m$) |
 | $G/(2\pi)$ | $10^{12}$ – $10^{15}$ Hz/m | Frequency pull — larger means stronger coupling geometry |
 | $g_0/(2\pi)$ | 0.01 – 100 Hz | Vacuum coupling rate — the key figure of merit |
 
@@ -218,7 +218,7 @@ popt_mech = result["popt_S_xx"]
 f_m, G_m, A, nf = popt_mech
 
 print(f"f_m  = {f_m:.1f} Hz")
-print(f"Γ_m  = {G_m:.3f} Hz")
+print(f"Γ_m/(2π) = {G_m:.3f} Hz")
 print(f"G    = {G/(2*np.pi):.1f} Hz/m")
 print(f"x_zpf = {x_zpf*1e15:.2f} fm")
 print(f"g₀   = {g_0/(2*np.pi):.1f} Hz")

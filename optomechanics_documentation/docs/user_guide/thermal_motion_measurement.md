@@ -46,15 +46,15 @@ The same PSD measurement supports two complementary analyses:
 | VNA span | 10 × $\kappa_\text{tot}$ | Resolve the full cavity lineshape |
 | VNA IF BW | 100–1000 Hz | Narrow for low noise, wide for speed |
 | SA centre | pump frequency | Measure sidebands in the lab frame |
-| SA span | 5–10 × $\Gamma_m$ | Resolve the mechanical peak |
-| SA RBW | $\Gamma_m / 10$ | At least 10 points across the peak |
+| SA span | $5\text{–}10 \times \Gamma_m / 2\pi$ | Resolve the mechanical peak |
+| SA RBW | $\Gamma_m / (20\pi)$ | At least 10 points across the peak |
 | SA averages | 50–200 | Reduce noise floor |
 
 The VNA span guideline ($10 \times \kappa_\text{tot}$) ensures the full
 Lorentzian lineshape is captured for a reliable fit.  The SA span
-($5\text{–}10 \times \Gamma_m$) captures the mechanical peak with sufficient
-baseline for noise floor estimation.  The RBW should be at least $\Gamma_m / 10$
-to place ≥10 points across the mechanical linewidth.
+($5\text{–}10 \times \Gamma_m / 2\pi$) captures the mechanical peak with sufficient
+baseline for noise floor estimation.  The RBW should be at least $\Gamma_m / (20\pi)$
+to place at least 10 points across the mechanical linewidth.
 
 ## Step 1 — Characterise the cavity with the VNA
 

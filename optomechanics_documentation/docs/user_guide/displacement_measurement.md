@@ -70,7 +70,7 @@ which itself follows from the thermal force spectral density
 $S_{FF}^\text{th} = 4\, k_B\, T_\text{eff}\, m_\text{eff}\, \gamma_m$.
 
 **Advantages:** Naturally separates the mechanical peak from the noise floor $n_f$.
-Simultaneously extracts $\Gamma_m$ and $f_m$, which may change under backaction.
+Simultaneously extracts $\Gamma_m / 2\pi$ and $f_m$, which may change under backaction.
 
 ### Method 2 — Integration (equipartition)
 

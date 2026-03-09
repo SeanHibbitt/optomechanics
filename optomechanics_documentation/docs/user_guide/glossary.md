@@ -12,8 +12,9 @@ documentation.
 - The code returns $g_0$ and $G$ in **Hz** (not rad/s) unless otherwise noted in
   the function docstring.  **Exception:** `__average_and_fit_S_xx__` returns
   $g_0$ and $G$ in **rad/s** — divide by $2\pi$ to get Hz.
-- In the equations below, lowercase Greek ($\omega$, $\gamma$, $\kappa$) denotes
-  **angular frequency** (rad/s) and Latin letters ($f$, $\Gamma$) denote **Hz**.
+- In the equations below, Greek letters ($\omega$, $\Omega$, $\gamma$, $\Gamma$, $\kappa$)
+  denote **angular frequency** (rad/s).  The Latin letter $f$ denotes ordinary frequency
+  (Hz).  Code parameters accept values in Hz (i.e. the angular quantity divided by $2\pi$).
 
 ## Cavity parameters
 
@@ -30,11 +31,11 @@ documentation.
 | Symbol | Code name | Units | Description |
 |--------|-----------|-------|-------------|
 | $f_m$ | `f_m`, `omega_m` | Hz | Mechanical resonance frequency (code parameter `omega_m` takes Hz despite the name) |
-| $\Gamma_m$ | `G_m`, `gamma_m` | Hz | Mechanical linewidth (FWHM damping rate) |
-| $Q_m$ | — | dimensionless | Mechanical quality factor, $Q_m = f_m / \Gamma_m$ (also $Q = \pi f_m \tau$ via ring-down) |
+| $\Gamma_m$ | `G_m`, `gamma_m` | rad/s | Mechanical damping rate (FWHM). Code parameters accept $\Gamma_m / 2\pi$ in Hz. |
+| $Q_m$ | — | dimensionless | Mechanical quality factor, $Q_m = \omega_m / \Gamma_m = 2\pi f_m / \Gamma_m$ (also $Q = \pi f_m \tau$ via ring-down) |
 | $m_\text{eff}$ | `m_eff` | kg | Effective motional mass of the mechanical mode |
 | $x_\text{zpf}$ | `x_zpf` | m | Zero-point fluctuation amplitude, $x_\text{zpf} = \sqrt{\hbar / (2 m_\text{eff}\, \omega_m)}$ where $\omega_m = 2\pi f_m$ |
-| $\tau$ | `tau` | s | Ring-down time constant, $\tau = Q_m / (\pi f_m) = 1/(\pi \Gamma_m)$ |
+| $\tau$ | `tau` | s | Ring-down time constant, $\tau = Q_m / (\pi f_m) = 2 / \Gamma_m$ |
 
 ## Optomechanical parameters
 
@@ -43,8 +44,8 @@ documentation.
 | $G$ | `G` | Hz/m | Frequency pull parameter, $G = d\omega_\text{cav}/dx$ |
 | $g_0$ | `g_0` | Hz | Vacuum optomechanical coupling rate, $g_0 = G \cdot x_\text{zpf}$ |
 | $n_d$ | `n_d` | dimensionless | Intracavity photon number (from `photon_number()` in `misc_equations.py`) |
-| $C$ | — | dimensionless | Optomechanical cooperativity, $C = 4g_0^2 n_d / (\Gamma_m \kappa_\text{tot})$ *(not yet in code)* |
-| $C_0$ | — | dimensionless | Single-photon cooperativity, $C_0 = 4g_0^2 / (\Gamma_m \kappa_\text{tot})$ *(not yet in code)* |
+| $C$ | — | dimensionless | Optomechanical cooperativity, $C = 4g_0^2 n_d / (\Gamma_m \kappa_\text{tot})$ (all in rad/s) *(not yet in code)* |
+| $C_0$ | — | dimensionless | Single-photon cooperativity, $C_0 = 4g_0^2 / (\Gamma_m \kappa_\text{tot})$ (all in rad/s) *(not yet in code)* |
 
 ## Spectral density parameters
 
@@ -52,7 +53,7 @@ documentation.
 |--------|-----------|-------|-------------|
 | $A$ | `A` | varies | Amplitude scaling in `basic_S_ww_eq` Lorentzian fit |
 | $n_f$ | `nf` | varies | Noise floor offset in `basic_S_ww_eq` |
-| $S_{FF}^\text{th}$ | via `S_ff_thermal()` | N²/Hz | Thermal force spectral density, $S_{FF} = 4 k_B T m_\text{eff}\, \gamma_m$ where $\gamma_m = 2\pi\Gamma_m$ |
+| $S_{FF}^\text{th}$ | via `S_ff_thermal()` | N²/Hz | Thermal force spectral density, $S_{FF} = 4 k_B T m_\text{eff}\, \Gamma_m$ (with $\Gamma_m$ in rad/s) |
 | $|\chi_m|^2$ | via `SHO_TF_sq()` | m²/N² | Mechanical susceptibility (SHO transfer function squared) |
 | $S_{xx}$ | via `S_xx_thermal()` | m²/Hz | Displacement spectral density, $S_{xx} = |\chi_m|^2 S_{FF}$ |
 

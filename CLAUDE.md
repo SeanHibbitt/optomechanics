@@ -16,6 +16,16 @@
   """Docstring by Claude. Short one-line summary."""
   ```
 
+## Documentation
+
+- **Always run `mkdocs build` after editing any documentation files** to check for build errors before committing.
+  ```bash
+  cd optomechanics_documentation && /c/Users/seanh/miniconda3/envs/exp/python.exe -m mkdocs build 2>&1 | grep -E "ERROR|WARNING|INFO.*done"
+  ```
+- Fix all `ERROR` lines before committing. `WARNING` lines may be acceptable but should be reviewed.
+- **Do not use `:::` mkdocstrings autodoc directives** for modules that have broken imports,
+  missing dependencies (e.g. PyQt5, zhinst), or no `__init__.py`. Use manual documentation instead.
+
 ## TODO.md
 
 - **Never delete or remove items** from `TODO.md`.

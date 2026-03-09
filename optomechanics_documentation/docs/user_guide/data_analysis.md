@@ -67,6 +67,28 @@ vacuum optomechanical coupling rate $g_0$ — see
 
 See [Sww API](../api_reference/data_analysis/fitting/Sww.md).
 
+#### OMIT / OMIA fitting
+
+`fitting.omit` fits the OMIT/OMIA lineshape — a narrow transparency window (or absorption
+dip) in cavity transmission caused by optomechanical interference when a strong pump tone
+drives the cavity.  The model is:
+
+$$
+\text{OMIT}(f) = \text{floor} \times \left(1 + A \left|\frac{1}{(\omega_m^2 - \omega^2 - i\Gamma_m\omega)(\kappa - 2i\omega)}\right|\right)
+$$
+
+where $\omega = 2\pi f$, $\omega_m = 2\pi f_m$, $\Gamma_m = 2\pi\,$`g_m`,
+$\kappa = 2\pi\,$`kk_tot`.  Positive $A$ fits a transparency peak (OMIT); negative $A$
+fits an absorption dip (OMIA).
+
+Key functions:
+
+- `OMIT_equation` — evaluate the lineshape at given frequencies
+- `fit_OMIT` — fit all four parameters ($f_m$, `g_m`, $A$, `floor`)
+- `fit_OMIT_set_floor` — fit with fixed background floor
+
+See [OMIT / OMIA Analysis](omit_analysis.md) | [omit API](../api_reference/data_analysis/fitting/omit.md).
+
 ---
 
 ### `square_membrane`

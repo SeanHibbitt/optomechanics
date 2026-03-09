@@ -47,6 +47,7 @@ nav:
     - Cooperativity: user_guide/cooperativity.md
     - End-to-End Workflow: user_guide/end_to_end_workflow.md
     - Parameter Glossary: user_guide/glossary.md
+    - Temperature Control GUI: user_guide/gui_temperature_control.md
   - API Reference:
     - api_reference/index.md
     - data_analysis:
@@ -87,10 +88,20 @@ nav:
       - data_management: api_reference/data_management/data_management.md
       - file_management: api_reference/data_management/file_management.md
       - data_logger: api_reference/data_management/data_logger.md
+    - gui:
+      - Overview: api_reference/gui/index.md
+      - Temp_Controller: api_reference/gui/temp_controller.md
+    - misc:
+      - Overview: api_reference/misc/index.md
+    - zurich:
+      - Overview: api_reference/zurich/index.md
+      - Device_Zurich_Super: api_reference/zurich/device_zurich_super.md
   - Roadmap:
     - roadmap/index.md
     - Planned Physics: roadmap/planned_physics.md
     - Code Improvements: roadmap/code_improvements.md
+  - Development:
+    - Testing: development/testing.md
   - Release Notes: release_notes.md
   - About: about.md
 

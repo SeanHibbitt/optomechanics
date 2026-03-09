@@ -122,7 +122,6 @@ def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
 
 
 
-    f_m_guess, g_m_guess, A_guess, floor = guesses
     #guesses:
     if guesses == False:
         amplitude_linear_voltage_guess = np.abs(amplitude_linear_voltage)
@@ -137,9 +136,9 @@ def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
         
         guesses_temp = f_m_guess, g_m_guess, A_guess, floor_guess
 
-        guesses[guesses == False] = guesses_temp[guesses == False]
+        #guesses[guesses == False] = guesses_temp[guesses == False]
 
-        guesses = [f_m_guess, g_m_guess, A_guess, floor]
+        guesses = [f_m_guess, g_m_guess, A_guess, floor_guess]
 
     f_m_guess, g_m_guess, A_guess, floor = guesses
 
@@ -208,6 +207,7 @@ def fit_OMIT_set_floor(rel_freqs, mags_dB, k_tot, floor, guesses = False):
         guesses[guesses == False] = guesses_temp[guesses == False]
 
     guesses = [f_m_guess, g_m_guess, A_guess]
+    f_m_guess, g_m_guess, A_guess = guesses
 
     OMIT_equation_reduced = lambda f, f_m, g_m, A: OMIT_equation(f, f_m, g_m, A, floor, k_tot)
 

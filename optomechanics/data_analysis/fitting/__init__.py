@@ -1,5 +1,5 @@
 """
-Made by Claude. Spectral fitting sub-package for the optomechanics data-analysis suite.
+Docstring by Claude. Spectral fitting sub-package for the optomechanics data-analysis suite.
 
 Provides functions and classes for fitting resonance spectra and spectral
 densities.  Key modules include:

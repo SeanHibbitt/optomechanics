@@ -9,7 +9,7 @@ import numpy as np
 
 def watts_ratio_to_dB(watts_ratio: float):
     """
-    Made by Claude. Convert a linear power ratio to decibels.
+    Docstring by Claude. Convert a linear power ratio to decibels.
 
     Parameters
     ----------
@@ -25,7 +25,7 @@ def watts_ratio_to_dB(watts_ratio: float):
 
 def dB_to_watts_ratio(dB):
     """
-    Made by Claude. Convert a power value in decibels to a linear watts ratio.
+    Docstring by Claude. Convert a power value in decibels to a linear watts ratio.
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ def dB_to_watts_ratio(dB):
 
 def dB_to_linear_voltage(powers_dB):
     """
-    Made by Claude. Convert a value in decibels to a linear voltage ratio.
+    Docstring by Claude. Convert a value in decibels to a linear voltage ratio.
 
     Parameters
     ----------
@@ -57,7 +57,7 @@ def dB_to_linear_voltage(powers_dB):
 
 def linear_voltage_to_dB(voltage_ratio):
     """
-    Made by Claude. Convert a linear voltage ratio to decibels.
+    Docstring by Claude. Convert a linear voltage ratio to decibels.
 
     Parameters
     ----------
@@ -73,7 +73,7 @@ def linear_voltage_to_dB(voltage_ratio):
 
 def Vpp_to_Vrms(V_pp):
     """
-    Made by Claude. Convert peak-to-peak voltage to RMS voltage.
+    Docstring by Claude. Convert peak-to-peak voltage to RMS voltage.
 
     Parameters
     ----------
@@ -90,7 +90,7 @@ def Vpp_to_Vrms(V_pp):
 
 def Vp_to_Vrms(V_pp):
     """
-    Made by Claude. Convert peak voltage to RMS voltage.
+    Docstring by Claude. Convert peak voltage to RMS voltage.
 
     Parameters
     ----------
@@ -107,7 +107,7 @@ def Vp_to_Vrms(V_pp):
 
 def Vrms_to_Vpp(Vrms):
     """
-    Made by Claude. Convert RMS voltage to peak-to-peak voltage.
+    Docstring by Claude. Convert RMS voltage to peak-to-peak voltage.
 
     Parameters
     ----------
@@ -124,7 +124,7 @@ def Vrms_to_Vpp(Vrms):
 
 def Vrms_to_Vp(Vrms):
     """
-    Made by Claude. Convert RMS voltage to peak voltage.
+    Docstring by Claude. Convert RMS voltage to peak voltage.
 
     Parameters
     ----------
@@ -141,7 +141,7 @@ def Vrms_to_Vp(Vrms):
 
 def Vrms_to_watts(Vrms, Z_0 = 50):
     """
-    Made by Claude. Convert RMS voltage to power in watts.
+    Docstring by Claude. Convert RMS voltage to power in watts.
 
     Parameters
     ----------
@@ -159,7 +159,7 @@ def Vrms_to_watts(Vrms, Z_0 = 50):
 
 def watts_to_dBw(watts):
     """
-    Made by Claude. Convert power in watts to dBW.
+    Docstring by Claude. Convert power in watts to dBW.
 
     Parameters
     ----------
@@ -175,7 +175,7 @@ def watts_to_dBw(watts):
 
 def RMS_to_dBw(Vrms, Z_0 = 50):
     """
-    Made by Claude. Convert RMS voltage to power in dBW.
+    Docstring by Claude. Convert RMS voltage to power in dBW.
 
     Parameters
     ----------
@@ -194,7 +194,7 @@ def RMS_to_dBw(Vrms, Z_0 = 50):
 
 def RMS_to_dBm(Vrms, Z_0 = 50):
     """
-    Made by Claude. Convert RMS voltage to power in dBm.
+    Docstring by Claude. Convert RMS voltage to power in dBm.
 
     Parameters
     ----------
@@ -212,7 +212,7 @@ def RMS_to_dBm(Vrms, Z_0 = 50):
 
 def dBw_to_watts(dBw):
     """
-    Made by Claude. Convert power in dBW to watts.
+    Docstring by Claude. Convert power in dBW to watts.
 
     Parameters
     ----------
@@ -228,7 +228,7 @@ def dBw_to_watts(dBw):
 
 def dBm_to_dBw(dBm):
     """
-    Made by Claude. Convert power in dBm to dBW.
+    Docstring by Claude. Convert power in dBm to dBW.
 
     Parameters
     ----------
@@ -244,7 +244,7 @@ def dBm_to_dBw(dBm):
 
 def dBm_to_RMS(dBm, Z_0 = 50):
     """
-    Made by Claude. Convert power in dBm to RMS voltage.
+    Docstring by Claude. Convert power in dBm to RMS voltage.
 
     Parameters
     ----------
@@ -265,7 +265,7 @@ def dBm_to_RMS(dBm, Z_0 = 50):
 
 def watts_to_dBm(watts):
     """
-    Made by Claude. Convert power in watts to dBm.
+    Docstring by Claude. Convert power in watts to dBm.
 
     Parameters
     ----------
@@ -282,7 +282,7 @@ def watts_to_dBm(watts):
 
 def dBm_to_watts(dBm):
     """
-    Made by Claude. Convert power in dBm to watts.
+    Docstring by Claude. Convert power in dBm to watts.
 
     Parameters
     ----------
@@ -300,7 +300,7 @@ def dBm_to_watts(dBm):
 
 def Vrms_squared_to_watts(Vrms_squared,Z_0 = 50):
     """
-    Made by Claude. Convert Vrms squared to power in watts.
+    Docstring by Claude. Convert Vrms squared to power in watts.
 
     Parameters
     ----------

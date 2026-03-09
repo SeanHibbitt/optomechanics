@@ -81,7 +81,7 @@ def OMIT_equation(f, f_m, g_m, A, floor, kk_tot):
 def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
 
     """
-    Made by Claude. Fit the OMIT equation to a measured transmission spectrum.
+    Docstring by Claude. Fit the OMIT equation to a measured transmission spectrum.
 
     Converts the input dB magnitudes to linear voltage, then fits
     :func:`OMIT_equation` using ``scipy.optimize.curve_fit``.  The ``floor``
@@ -151,7 +151,7 @@ def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
 def fit_OMIT_set_floor(rel_freqs, mags_dB, k_tot, floor, guesses = False):
 
     """
-    Made by Claude. Fit the OMIT equation with a fixed background floor.
+    Docstring by Claude. Fit the OMIT equation with a fixed background floor.
 
     Identical to :func:`fit_OMIT` except that ``floor`` is held fixed at the
     supplied value rather than being a free fit parameter.  This reduces the

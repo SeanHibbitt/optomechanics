@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Made by Claude. Base VISA instrument driver for optomechanics device control.
+Docstring by Claude. Base VISA instrument driver for optomechanics device control.
 
 Provides the Device_Visa_Super base class which wraps PyVISA to manage
 instrument connections. Use as a context manager (``with`` block) to ensure
@@ -19,7 +19,7 @@ from optomechanics.data_management.data_management import save_data_3 as save_da
 #%%Define Class
 class Device():
     """
-    Made by Claude. VISA super-class providing IEEE 488.2 / SCPI commands and device management.
+    Docstring by Claude. VISA super-class providing IEEE 488.2 / SCPI commands and device management.
 
     Wraps pyvisa to provide SCPI commands common to all Rohde & Schwarz (and
     compatible) instruments.  Subclass this to add instrument-specific methods.
@@ -61,7 +61,7 @@ class Device():
     
     def __init__(self, address, baud_rate = 9600, query_delay = 0, timeout = 10000  ):
         """
-        Made by Claude. Initialise the resource manager and store connection parameters.
+        Docstring by Claude. Initialise the resource manager and store connection parameters.
 
         The connection is not opened here; call `open` (or use the ``with``
         statement) to establish communication with the instrument.
@@ -80,7 +80,7 @@ class Device():
 
     def open(self):
         """
-        Made by Claude. Open the VISA resource and configure communication parameters.
+        Docstring by Claude. Open the VISA resource and configure communication parameters.
 
         Returns
         -------
@@ -99,7 +99,7 @@ class Device():
 
     def __enter__(self):
         """
-        Made by Claude. Enter the context manager by opening the VISA resource.
+        Docstring by Claude. Enter the context manager by opening the VISA resource.
 
         Calls `open` and returns ``self``, enabling use in ``with`` blocks::
 
@@ -117,7 +117,7 @@ class Device():
         
     def __exit__(self, exc_type, exc_value, exc_tb):
         """
-        Made by Claude. Exit the context manager by closing the VISA resource.
+        Docstring by Claude. Exit the context manager by closing the VISA resource.
 
         Calls `close` on exit.  If an ``IndexError`` was raised inside the
         ``with`` block it is caught, printed, and suppressed.
@@ -147,7 +147,7 @@ class Device():
     @staticmethod
     def connected_devices():
         """
-        Made by Claude. List all VISA resources currently visible to the system.
+        Docstring by Claude. List all VISA resources currently visible to the system.
 
         Creates a temporary resource manager, enumerates all resources, and
         returns the result.
@@ -166,7 +166,7 @@ class Device():
         
     def query(self, cmd,):
         """
-        Made by Claude. Send a SCPI query command and return the response string.
+        Docstring by Claude. Send a SCPI query command and return the response string.
 
         Parameters
         ----------
@@ -182,7 +182,7 @@ class Device():
     
     def write(self, cmd):
         """
-        Made by Claude. Send a SCPI write command with no response expected.
+        Docstring by Claude. Send a SCPI write command with no response expected.
 
         Parameters
         ----------
@@ -199,7 +199,7 @@ class Device():
         
     def read_bytes(self, bits):
         """
-        Made by Claude. Read a fixed number of bytes from the instrument.
+        Docstring by Claude. Read a fixed number of bytes from the instrument.
 
         Parameters
         ----------
@@ -215,7 +215,7 @@ class Device():
     
     def close(self,):
         """
-        Made by Claude. Close the VISA resource manager and print a confirmation message.
+        Docstring by Claude. Close the VISA resource manager and print a confirmation message.
         """
         self.rm.close()
         print("device closed")
@@ -226,7 +226,7 @@ class Device():
     ##### write commands:
     def CLS(self,):
         """
-        Made by Claude. Send the ``*CLS`` (Clear Status) SCPI command.
+        Docstring by Claude. Send the ``*CLS`` (Clear Status) SCPI command.
 
         Clears the status byte (STB), the standard event register (ESR), and the
         EVENt part of the QUEStionable and OPERation registers to zero.  Does not
@@ -241,7 +241,7 @@ class Device():
     
     def OPC(self,):
         """
-        Made by Claude. Send the ``*OPC`` (Operation Complete) SCPI command.
+        Docstring by Claude. Send the ``*OPC`` (Operation Complete) SCPI command.
 
         Sets bit 0 in the event status register when all preceding commands have
         been executed.  This bit can be used to initiate a service request.
@@ -256,7 +256,7 @@ class Device():
 
     def PCB(self,Address):
         """
-        Made by Claude. Send the ``*PCB`` (Pass Control Back) SCPI command.
+        Docstring by Claude. Send the ``*PCB`` (Pass Control Back) SCPI command.
 
         Indicates the controller address to which remote control is returned
         after termination of the triggered action.
@@ -275,7 +275,7 @@ class Device():
     
     def PRE(self, Value):
         """
-        Made by Claude. Send the ``*PRE`` (Parallel Poll Register Enable) SCPI command.
+        Docstring by Claude. Send the ``*PRE`` (Parallel Poll Register Enable) SCPI command.
 
         Sets the parallel poll enable register to the indicated value.
 
@@ -293,7 +293,7 @@ class Device():
     
     def PSC(self, Action):
         """
-        Made by Claude. Send the ``*PSC`` (Power On Status Clear) SCPI command.
+        Docstring by Claude. Send the ``*PSC`` (Power On Status Clear) SCPI command.
 
         Determines whether the contents of the ENABle registers are preserved or
         reset when the instrument is switched on.  A service request can be
@@ -316,7 +316,7 @@ class Device():
     
     def RST(self, ):
         """
-        Made by Claude. Send the ``*RST`` (Reset) SCPI command.
+        Docstring by Claude. Send the ``*RST`` (Reset) SCPI command.
 
         Sets the instrument to its defined default state.  Equivalent to
         ``SYSTem:PRESet[:DUMMy]``.
@@ -330,7 +330,7 @@ class Device():
     
     def SRE(self, Contents):
         """
-        Made by Claude. Send the ``*SRE`` (Service Request Enable) SCPI command.
+        Docstring by Claude. Send the ``*SRE`` (Service Request Enable) SCPI command.
 
         Sets the service request enable register to the specified value.
         Bit 6 (MSS mask bit) always remains 0.
@@ -350,7 +350,7 @@ class Device():
     
     def TRG(self,):
         """
-        Made by Claude. Send the ``*TRG`` (Trigger) SCPI command.
+        Docstring by Claude. Send the ``*TRG`` (Trigger) SCPI command.
 
         Triggers all actions waiting for a trigger event and generates a manual
         trigger signal.
@@ -364,7 +364,7 @@ class Device():
     
     def WAI(self,):
         """
-        Made by Claude. Send the ``*WAI`` (Wait to Continue) SCPI command.
+        Docstring by Claude. Send the ``*WAI`` (Wait to Continue) SCPI command.
 
         Prevents execution of subsequent commands until all preceding commands
         have been executed and all signals have settled.
@@ -378,7 +378,7 @@ class Device():
     
     def ESE(self, value):
         """
-        Made by Claude. Send the ``*ESE`` (Event Status Enable) SCPI command.
+        Docstring by Claude. Send the ``*ESE`` (Event Status Enable) SCPI command.
 
         Sets the event status enable register to the specified value.
 
@@ -398,7 +398,7 @@ class Device():
     
     def ESE_query(self):
         """
-        Made by Claude. Query the event status enable register (``*ESE?``).
+        Docstring by Claude. Query the event status enable register (``*ESE?``).
 
         Returns
         -------
@@ -410,7 +410,7 @@ class Device():
     
     def ESR_query(self):
         """
-        Made by Claude. Query and clear the event status register (``*ESR?``).
+        Docstring by Claude. Query and clear the event status register (``*ESR?``).
 
         Returns the contents of the event status register in decimal form and
         then sets the register to zero.  Bit 0 (OPC bit) indicates whether
@@ -425,7 +425,7 @@ class Device():
         
     def IDN_query(self,):
         """
-        Made by Claude. Query the instrument identification string (``*IDN?``).
+        Docstring by Claude. Query the instrument identification string (``*IDN?``).
 
         Returns the manufacturer, instrument type, serial number, and software
         revision.
@@ -440,7 +440,7 @@ class Device():
     
     def IST_query(self, ):
         """
-        Made by Claude. Query the individual status flag (``*IST?``).
+        Docstring by Claude. Query the individual status flag (``*IST?``).
 
         Returns the contents of the IST flag, which is the status bit sent
         during a parallel poll.
@@ -454,7 +454,7 @@ class Device():
     
     def OPT_query(self, ):
         """
-        Made by Claude. Query the list of installed options (``*OPT?``).
+        Docstring by Claude. Query the list of installed options (``*OPT?``).
 
         Returns a comma-separated string of installed options at fixed positions;
         a zero is returned for options that are not installed.
@@ -468,7 +468,7 @@ class Device():
     
     def STB_query(self, ):
         """
-        Made by Claude. Query the status byte register (``*STB?``).
+        Docstring by Claude. Query the status byte register (``*STB?``).
 
         Returns
         -------
@@ -479,7 +479,7 @@ class Device():
     
     def TST_query(self,):
         """
-        Made by Claude. Perform a self-test and return the result (``*TST?``).
+        Docstring by Claude. Perform a self-test and return the result (``*TST?``).
 
         Returns
         -------
@@ -492,7 +492,7 @@ class Device():
     
     def OPC_query(self,):
         """
-        Made by Claude. Send the ``*OPC?`` (Operation Complete Query) command.
+        Docstring by Claude. Send the ``*OPC?`` (Operation Complete Query) command.
 
         Writes ``*OPC?`` to the instrument; the instrument places ``'1'`` in the
         output buffer when all preceding operations are complete.
@@ -509,7 +509,7 @@ class Device():
     
     def check_OPC_event(self):
         """
-        Made by Claude. Read the event status register and extract the first binary digit.
+        Docstring by Claude. Read the event status register and extract the first binary digit.
 
         Reads the event status register via `ESR_query`, converts the decimal
         string to an integer, and returns the first character of the resulting
@@ -527,7 +527,7 @@ class Device():
     
     def wait_on_OPC(self, wait_time = 60, timeout = None, updates = True, function = None, **function_kwargs):
         """
-        Made by Claude. Poll the instrument until the OPC (Operation Complete) bit is set.
+        Docstring by Claude. Poll the instrument until the OPC (Operation Complete) bit is set.
 
         Enables the ESE register for OPC events, sends ``*OPC``, then loops
         until `check_OPC_event` indicates completion.  Optionally calls
@@ -573,7 +573,7 @@ class Device():
     
     def save_data(self, datas, freqs, file_name, file_location = "", headers = None, meta_data = "", delimiter = "\t"):
         """
-        Made by Claude. Save paired data and frequency arrays to a delimited text file.
+        Docstring by Claude. Save paired data and frequency arrays to a delimited text file.
 
         Writes one row per data-frequency pair.  An optional metadata line and
         header line are written before the data rows.
@@ -606,7 +606,7 @@ class Device():
 
     def save_data_2(self, data, file_name, file_location = "", headers = None, meta_data = "", delimiter = "\t"):
         """
-        Made by Claude. Save a 2-D array to a delimited text file, written column-major.
+        Docstring by Claude. Save a 2-D array to a delimited text file, written column-major.
 
         Writes the array column by column: each output row contains one element
         from each row of `data` at the same column index.
@@ -641,7 +641,7 @@ class Device():
 
     def save_data_3(self, data, file_name, file_location = "", headers = None, meta_data = {}, delimiter = "\t"):
         """
-        Made by Claude. Save an array to a delimited text file with key-value metadata lines.
+        Docstring by Claude. Save an array to a delimited text file with key-value metadata lines.
 
         Writes metadata as ``#\\tkey\\tvalue`` comment lines, then an optional
         header line, then the data.  For 2-D arrays the output is column-major

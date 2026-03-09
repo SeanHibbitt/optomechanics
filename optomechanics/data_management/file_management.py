@@ -1,5 +1,5 @@
 """
-Made by Claude. File and directory management utilities for experiment data.
+Docstring by Claude. File and directory management utilities for experiment data.
 
 Provides dated directory creation (dated_file_maker), path construction (make_path),
 and helper utilities for organising measurement data on disk.
@@ -12,7 +12,7 @@ from datetime import datetime
 
 def make_path(folders):
     """
-    Made by Claude. Build a backslash-separated path string from an ordered list of folder names.
+    Docstring by Claude. Build a backslash-separated path string from an ordered list of folder names.
 
     Parameters
     ----------
@@ -34,7 +34,7 @@ def make_path(folders):
 
 def dated_file_maker(base_path):
     """
-    Made by Claude. Create a year/month/day directory hierarchy under a base path.
+    Docstring by Claude. Create a year/month/day directory hierarchy under a base path.
 
     Appends the current date (``year\\month_name\\day``) to `base_path` and
     creates any missing directories in the hierarchy.  Only the day folder is

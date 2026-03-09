@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Made by Claude. Attenuation correction utilities for the optomechanics suite.
+Docstring by Claude. Attenuation correction utilities for the optomechanics suite.
 
 Provides helpers for compensating measured dB data for known cable or
 component attenuation.  Key functions:
@@ -12,7 +12,7 @@ component attenuation.  Key functions:
 
 def account_for_attenuation(data, attenuation_data):
     """
-    Made by Claude. Subtract attenuation from measured dB data.
+    Docstring by Claude. Subtract attenuation from measured dB data.
 
     Both ``data`` and ``attenuation_data`` are assumed to be in dB.
     Subtracting the attenuation (in dB) from the measured data corrects for

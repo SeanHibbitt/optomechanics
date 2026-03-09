@@ -1,5 +1,5 @@
 """
-Made by Claude. General fitting utilities for optomechanics data.
+Docstring by Claude. General fitting utilities for optomechanics data.
 
 Provides ring-down, linear fitting functions, and physical constants
 used across the fitting subpackage (hbar, k_B, NENBW).
@@ -38,7 +38,7 @@ RS_default_window_NENBW = 4.082911856792962
 
 def ring_down_eq(t, A_0, tau, V_0 ):
     """
-    Made by Claude. Exponential ring-down decay equation.
+    Docstring by Claude. Exponential ring-down decay equation.
 
     Models the time-domain envelope of a freely decaying mechanical oscillator
     as a decaying exponential plus a constant offset.  Following DeLorenzo
@@ -66,7 +66,7 @@ def ring_down_eq(t, A_0, tau, V_0 ):
 
 def tau_to_Q(tau, f_m):
     """
-    Made by Claude. Convert ring-down time constant to mechanical quality factor.
+    Docstring by Claude. Convert ring-down time constant to mechanical quality factor.
 
     Uses the relation from DeLorenzo (2016 thesis): ``tau = 2Q / omega_m``,
     which rearranges to ``Q = tau * omega_m / 2 = tau * f_m * pi``.
@@ -88,7 +88,7 @@ def tau_to_Q(tau, f_m):
 
 def fit_ring_down(t, A):
     """
-    Made by Claude. Fit an exponential ring-down decay to time-domain data.
+    Docstring by Claude. Fit an exponential ring-down decay to time-domain data.
 
     Auto-generates initial parameter guesses and fits :func:`ring_down_eq`
     using ``scipy.optimize.curve_fit``.
@@ -124,7 +124,7 @@ def fit_ring_down(t, A):
 
 def line_eq(x, m, c):
     """
-    Made by Claude. Straight-line equation ``y = m*x + c``.
+    Docstring by Claude. Straight-line equation ``y = m*x + c``.
 
     Parameters
     ----------
@@ -145,7 +145,7 @@ def line_eq(x, m, c):
 
 def fit_linear(x, y, errors = 1, ):
     """
-    Made by Claude. Fit a straight line to data using ``scipy.optimize.curve_fit``.
+    Docstring by Claude. Fit a straight line to data using ``scipy.optimize.curve_fit``.
 
     Parameters
     ----------

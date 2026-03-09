@@ -20,7 +20,7 @@ from optomechanics.data_analysis.unit_conversions import watts_ratio_to_dB, dB_t
 
 def photon_number(f_d, f_c, k_extHz, k_totHz, P_in ):
     """
-    Made by Claude. Calculate the intracavity photon number for a driven microwave cavity.
+    Docstring by Claude. Calculate the intracavity photon number for a driven microwave cavity.
 
     From "A Novel Architecture for room temperature microwave optomechanical experiments"
     eq. 3. Should be re-derived for new architecture.

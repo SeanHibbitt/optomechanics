@@ -1,5 +1,5 @@
 """
-Made by Claude. Device control sub-package for the optomechanics suite.
+Docstring by Claude. Device control sub-package for the optomechanics suite.
 
 Provides VISA-based instrument drivers for signal generators, spectrum
 analysers, VNAs, and auxiliary lab equipment.  Key modules include:

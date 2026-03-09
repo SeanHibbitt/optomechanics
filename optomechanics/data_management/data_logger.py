@@ -1,5 +1,5 @@
 """
-Made by Claude. Incremental data logging for long-running measurements.
+Docstring by Claude. Incremental data logging for long-running measurements.
 
 Provides logger and dated_logger classes for appending rows to CSV/TSV files
 during live data acquisition, with configurable delimiters and headings.
@@ -14,7 +14,7 @@ from datetime import datetime
 
 class logger():
     """
-    Made by Claude. Append-mode CSV data logger backed by a pandas DataFrame.
+    Docstring by Claude. Append-mode CSV data logger backed by a pandas DataFrame.
 
     Creates the log file on instantiation if it does not already exist, writes
     a header row, and provides methods for appending new rows and reading the
@@ -52,7 +52,7 @@ class logger():
 
     def __init__(self, file_name, file_path = "", headings = [""], deliminator = ",", read_file = True):
         """
-        Made by Claude. Initialise the logger and create the log file if it does not exist.
+        Docstring by Claude. Initialise the logger and create the log file if it does not exist.
 
         Parameters
         ----------
@@ -84,7 +84,7 @@ class logger():
 
     def create(self):
         """
-        Made by Claude. Create the log file and write the heading row.
+        Docstring by Claude. Create the log file and write the heading row.
 
         Attempts to create ``self.file_path + self.file_name`` in exclusive
         creation mode.  If the file already exists, calls :meth:`read`
@@ -114,7 +114,7 @@ class logger():
 
     def read(self):
         """
-        Made by Claude. Read the log file into ``self.data`` as a pandas DataFrame.
+        Docstring by Claude. Read the log file into ``self.data`` as a pandas DataFrame.
 
         Uses ``self.deliminator`` as the separator and treats the first row as
         the header.  The result is stored in ``self.data``.
@@ -133,7 +133,7 @@ class logger():
 
     def format_data_line(self, data_list):
         """
-        Made by Claude. Format a list of values into a delimited string.
+        Docstring by Claude. Format a list of values into a delimited string.
 
         Joins each element of ``data_list`` with ``self.deliminator`` and
         strips the trailing delimiter character.
@@ -158,7 +158,7 @@ class logger():
 
     def write_line(self, data):
         """
-        Made by Claude. Append a single delimited row to the log file.
+        Docstring by Claude. Append a single delimited row to the log file.
 
         Formats ``data`` with :meth:`format_data_line` and appends the
         resulting string followed by a newline character to the log file.
@@ -180,7 +180,7 @@ class logger():
 
     def __call__(self, data):
         """
-        Made by Claude. Alias for :meth:`write_line` — append a row by calling the instance.
+        Docstring by Claude. Alias for :meth:`write_line` — append a row by calling the instance.
 
         Parameters
         ----------
@@ -197,7 +197,7 @@ class logger():
 
 class dated_logger(logger):
     """
-    Made by Claude. Date-partitioned logger that rolls over to a new file each day.
+    Docstring by Claude. Date-partitioned logger that rolls over to a new file each day.
 
     Extends :class:`logger` by organising log files under a date-based
     directory hierarchy (via :func:`~optomechanics.data_management.file_management.dated_file_maker`).
@@ -225,7 +225,7 @@ class dated_logger(logger):
     
     def __init__(self, base_path, *args,  **kwargs):
         """
-        Made by Claude. Initialise the dated logger and create the first day's log file.
+        Docstring by Claude. Initialise the dated logger and create the first day's log file.
 
         Calls the parent :class:`logger` ``__init__``, sets ``base_path``,
         records the current date, and calls :meth:`update_file_path` to
@@ -256,7 +256,7 @@ class dated_logger(logger):
 
     def update_file_path(self):
         """
-        Made by Claude. Create a new dated directory and log file for the current day.
+        Docstring by Claude. Create a new dated directory and log file for the current day.
 
         Calls :func:`~optomechanics.data_management.file_management.dated_file_maker`
         to build the dated directory under ``self.base_path``, updates
@@ -275,7 +275,7 @@ class dated_logger(logger):
 
     def check_update_file_path(self):
         """
-        Made by Claude. Roll over to a new log file if the calendar day has changed.
+        Docstring by Claude. Roll over to a new log file if the calendar day has changed.
 
         Compares ``self.current_date.day`` with the current day.  If they
         differ, calls :meth:`update_file_path` to create a new dated
@@ -290,7 +290,7 @@ class dated_logger(logger):
 
     def __call__(self, *args, **kwargs):
         """
-        Made by Claude. Append a row, rolling over to a new file if the day has changed.
+        Docstring by Claude. Append a row, rolling over to a new file if the day has changed.
 
         Calls :meth:`check_update_file_path` before delegating to the parent
         :meth:`~logger.__call__` to write the row.

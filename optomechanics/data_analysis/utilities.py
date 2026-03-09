@@ -1,5 +1,5 @@
 """
-Made by Claude. Helper utilities for optomechanics data processing.
+Docstring by Claude. Helper utilities for optomechanics data processing.
 
 Provides functions for splitting complex arrays, finding nearest values,
 and converting error representations between linear and dB domains.
@@ -22,7 +22,7 @@ from optomechanics.data_analysis.unit_conversions import watts_ratio_to_dB, dB_t
 
 def find_closest_number(array, value):
     """
-    Made by Claude. Find the index of the closest value in an array.
+    Docstring by Claude. Find the index of the closest value in an array.
 
     Parameters
     ----------
@@ -45,7 +45,7 @@ def find_closest_number(array, value):
 
 def convert_error_dB_to_linear(value, upper_error, lower_error,):
     """
-    Made by Claude. Convert an asymmetric error from dB to linear voltage ratio scale.
+    Docstring by Claude. Convert an asymmetric error from dB to linear voltage ratio scale.
 
     Errors must be magnitudes (both positive values). The value and errors are
     given in dB.
@@ -81,7 +81,7 @@ def convert_error_dB_to_linear(value, upper_error, lower_error,):
 
 def convert_error_linear_to_dB(value_linear, upper_error, lower_error,):
     """
-    Made by Claude. Convert an asymmetric error from linear voltage ratio scale to dB.
+    Docstring by Claude. Convert an asymmetric error from linear voltage ratio scale to dB.
 
     Errors must be magnitudes (not signed). The value and errors are given as
     linear voltage ratios.
@@ -119,7 +119,7 @@ def convert_error_linear_to_dB(value_linear, upper_error, lower_error,):
 
 def convert_anti_sym_linear_mag_voltage_error_to_sym(value, upper_error, lower_error):
     """
-    Made by Claude. Convert asymmetric linear magnitude voltage errors to a symmetric error.
+    Docstring by Claude. Convert asymmetric linear magnitude voltage errors to a symmetric error.
 
     Computes a single symmetric error by averaging the absolute upper and lower
     error magnitudes. Raises a ValueError if any `value` is non-positive.
@@ -154,7 +154,7 @@ def convert_anti_sym_linear_mag_voltage_error_to_sym(value, upper_error, lower_e
 
 def split_complex(complex_data):
     """
-    Made by Claude. Split a complex array into a real concatenation of its real and imaginary parts.
+    Docstring by Claude. Split a complex array into a real concatenation of its real and imaginary parts.
 
     Parameters
     ----------
@@ -171,7 +171,7 @@ def split_complex(complex_data):
 
 def split_complex_wrapper(func):
     """
-    Made by Claude. Wrap a complex-valued function to return real-concatenated output for scipy optimisation.
+    Docstring by Claude. Wrap a complex-valued function to return real-concatenated output for scipy optimisation.
 
     Returns a new function that calls `func` and then concatenates the real
     and imaginary parts of the result into a single real array.  This makes
@@ -198,7 +198,7 @@ def split_complex_wrapper(func):
 
 def complex_to_mag_phase(c: complex):
     """
-    Made by Claude. Convert a complex number or array to magnitude and phase.
+    Docstring by Claude. Convert a complex number or array to magnitude and phase.
 
     Parameters
     ----------

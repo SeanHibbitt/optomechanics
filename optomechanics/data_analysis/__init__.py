@@ -1,5 +1,5 @@
 """
-Made by Claude. Data analysis sub-package for the optomechanics suite.
+Docstring by Claude. Data analysis sub-package for the optomechanics suite.
 
 Contains modules for unit conversion, spectral fitting, signal processing,
 and resonator physics calculations.  Key modules include:

@@ -1,5 +1,5 @@
 """
-Made by Claude. Data management sub-package for the optomechanics suite.
+Docstring by Claude. Data management sub-package for the optomechanics suite.
 
 Provides file I/O, metadata handling, and attenuation bookkeeping.  Key
 modules include:

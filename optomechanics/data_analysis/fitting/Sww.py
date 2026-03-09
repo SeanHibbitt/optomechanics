@@ -1,5 +1,5 @@
 """
-Made by Claude. Mechanical power spectral density (Sww) fitting and normalisation.
+Docstring by Claude. Mechanical power spectral density (Sww) fitting and normalisation.
 
 Provides Lorentzian lineshape models for the mechanical PSD, normalisation to
 G²S_xx, and g₀ extraction following Rojas et al. (2022) and Kumar (2023).
@@ -26,7 +26,7 @@ from optomechanics.data_analysis.misc_equations import photon_number
 
 def basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
     """
-    Made by Claude. Lorentzian approximation of the mechanical displacement spectral density.
+    Docstring by Claude. Lorentzian approximation of the mechanical displacement spectral density.
 
     Parameters
     ----------
@@ -58,7 +58,7 @@ def basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
 
 class fit_S_xx:
     """
-    Made by Claude. High-level fitter for the mechanical displacement spectral density S_xx.
+    Docstring by Claude. High-level fitter for the mechanical displacement spectral density S_xx.
 
     Normalises raw spectrum analyser (SA) power data to the dimensionless
     quantity G²S_xx using a simultaneously acquired VNA S21 trace, then
@@ -75,7 +75,7 @@ class fit_S_xx:
     @staticmethod
     def __normalise_Sww_to_GGSxx__(index, row, S21_df, VNA_S21_extra_atten, SG_cavity_to_SA_atten, SG_to_cavity_atten, NENBW = RS_default_window_NENBW, S21_eq = S21_eq, signal_applied = True):
         """
-        Made by Claude. Normalise a single SA sweep to G²S_xx using the nearest S21 measurement.
+        Docstring by Claude. Normalise a single SA sweep to G²S_xx using the nearest S21 measurement.
 
         Expects a row and index from a pandas DataFrame. Applies attenuation
         corrections, fits S21 to extract cavity parameters, and normalises the
@@ -216,7 +216,7 @@ class fit_S_xx:
     @staticmethod
     def __average_and_fit_S_xx__(SA_df, select, m_eff, S21_df, VNA_S21_extra_atten, SG_cavity_to_SA_atten, SG_to_cavity_atten, basic_S_ww_eq = basic_S_ww_eq, NENBW = RS_default_window_NENBW, S21_eq = S21_eq, ):
         """
-        Made by Claude. Average multiple SA sweeps and fit for g_0 and G.
+        Docstring by Claude. Average multiple SA sweeps and fit for g_0 and G.
 
         Iterates over `SA_df`, selects rows matching `select`, normalises each
         to G²S_xx via `__normalise_Sww_to_GGSxx__`, averages, and fits
@@ -437,7 +437,7 @@ class fit_S_xx:
 
 def basic_S_ww_eq_2(freqs, omega_m, G_m, A, nf):
     """
-    Made by Claude. Full mechanical displacement spectral density without the Lorentzian approximation.
+    Docstring by Claude. Full mechanical displacement spectral density without the Lorentzian approximation.
 
     Uses the exact susceptibility form taken from the gravitational-wave
     (GW) textbook, rather than the near-resonance Lorentzian approximation
@@ -474,7 +474,7 @@ def basic_S_ww_eq_2(freqs, omega_m, G_m, A, nf):
 
 def dBm_basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
     """
-    Made by Claude. Lorentzian mechanical spectral density in dBm.
+    Docstring by Claude. Lorentzian mechanical spectral density in dBm.
 
     Wrapper around `basic_S_ww_eq` that converts the output to dBm.
 
@@ -501,7 +501,7 @@ def dBm_basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
 
 def S_ff_thermal(freqs, m_eff, G_m, T):
     """
-    Made by Claude. Thermal force spectral density.
+    Docstring by Claude. Thermal force spectral density.
 
     As defined in Maggiore (GW textbook) eq. 8.123. All frequency inputs
     must be in Hz.
@@ -530,7 +530,7 @@ def S_ff_thermal(freqs, m_eff, G_m, T):
 
 def SHO_TF_sq(freqs, m_eff, f_m, G_m ):
     """
-    Made by Claude. Squared magnitude of the simple harmonic oscillator transfer function.
+    Docstring by Claude. Squared magnitude of the simple harmonic oscillator transfer function.
 
     Derived from S. Kumar (2023) eq. 5 and consistent with the thermal force
     spectral density in `S_ff_thermal`.
@@ -559,7 +559,7 @@ def SHO_TF_sq(freqs, m_eff, f_m, G_m ):
 
 def S_xx_thermal(freqs, m_eff, T, f_m, G_m ):
     """
-    Made by Claude. Thermal displacement spectral density of a mechanical resonator.
+    Docstring by Claude. Thermal displacement spectral density of a mechanical resonator.
 
     Product of the squared SHO transfer function and the thermal force
     spectral density.
@@ -587,7 +587,7 @@ def S_xx_thermal(freqs, m_eff, T, f_m, G_m ):
 
 def S_hh_24_25_exp_14_4(S_xx_freqs,  f_m, G_m, S_xx, q_yy = None, q_xx = None, mu = None):
     """
-    Made by Claude. Thin-film re-entrant cavity S_hh transfer function.
+    Docstring by Claude. Thin-film re-entrant cavity S_hh transfer function.
 
     Computes the cavity gap spectral density S_hh from the mechanical
     displacement spectral density S_xx using the transfer function of a
@@ -644,7 +644,7 @@ def S_hh_24_25_exp_14_4(S_xx_freqs,  f_m, G_m, S_xx, q_yy = None, q_xx = None, m
 
 def S_xx_impre(freqs, f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity, G):
     """
-    Made by Claude. Imprecision noise spectral density of the displacement measurement.
+    Docstring by Claude. Imprecision noise spectral density of the displacement measurement.
 
     Eq. 69 of Aspelmeyer (2014) review. All frequency inputs must be in Hz,
     not rad/Hz.
@@ -681,7 +681,7 @@ def S_xx_impre(freqs, f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity, G):
 
 def S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
     """
-    Made by Claude. Radiation-pressure backaction force spectral density.
+    Docstring by Claude. Radiation-pressure backaction force spectral density.
 
     Eq. 70 of Aspelmeyer (2014) review. All frequency inputs must be in Hz.
 
@@ -717,7 +717,7 @@ def S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
 
 def S_xx_back(freqs, m_eff, f_m, G_m, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
     """
-    Made by Claude. Backaction displacement spectral density.
+    Docstring by Claude. Backaction displacement spectral density.
 
     Product of the squared SHO transfer function and the backaction force
     spectral density.
@@ -759,7 +759,7 @@ def S_xx_back(freqs, m_eff, f_m, G_m, f_d, G, f_c, k_ext, k_tot, linear_drive_po
 
 def S_ww_constant_calculator(f_m, G_m, A, f_c, k_tot, k_ext, incident_pump_power, T, m_eff, drive_freq ):
     """
-    Made by Claude. Calculate g_0, G, and photon number from spectral density fit parameters.
+    Docstring by Claude. Calculate g_0, G, and photon number from spectral density fit parameters.
 
     Equation from X. Rojas et al. (2022-11-28), eqs. 3–5.
 
@@ -819,7 +819,7 @@ def S_ww_constant_calculator(f_m, G_m, A, f_c, k_tot, k_ext, incident_pump_power
 
 def fit_basic_S_ww_eq_linear_power(freqs_minus_pump_freq:np.array, linear_power:np.array, guesses:list, sig = None):
     """
-    Made by Claude. Fit the basic S_ww equation to data given in linear (watts) power.
+    Docstring by Claude. Fit the basic S_ww equation to data given in linear (watts) power.
 
     Converts `linear_power` to dBm and delegates to `fit_basic_S_ww_eq`.
 
@@ -849,7 +849,7 @@ def fit_basic_S_ww_eq_linear_power(freqs_minus_pump_freq:np.array, linear_power:
 
 def fit_basic_S_ww_eq(freqs_minus_pump_freq:np.array, dBm_mag:np.array, guesses:list, sig = None):
     """
-    Made by Claude. Fit the basic S_ww Lorentzian equation to a power spectrum in dBm.
+    Docstring by Claude. Fit the basic S_ww Lorentzian equation to a power spectrum in dBm.
 
     Converts `dBm_mag` to watts and fits `basic_S_ww_eq` using
     ``scipy.optimize.curve_fit``.  If the fit fails with a ``RuntimeError``,
@@ -893,7 +893,7 @@ def fit_basic_S_ww_eq(freqs_minus_pump_freq:np.array, dBm_mag:np.array, guesses:
 
 def FWHM_guesser(freqs, magnitude, resonance_guess):
     """
-    Made by Claude. Estimate S_ww fit parameters from FWHM and fit the spectrum.
+    Docstring by Claude. Estimate S_ww fit parameters from FWHM and fit the spectrum.
 
     Walks away from the resonance position to find the half-power point,
     computes initial guesses for ``[f_m, G_m, A, nf]``, then calls

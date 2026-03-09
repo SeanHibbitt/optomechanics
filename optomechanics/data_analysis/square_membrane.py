@@ -2,7 +2,7 @@ import numpy as np
 
 class membrane:
     """
-    Made by Claude. Resonance frequency calculator for a pre-stressed square membrane resonator
+    Docstring by Claude. Resonance frequency calculator for a pre-stressed square membrane resonator
     with an optional thin-film deposition.
 
     Parameters
@@ -70,7 +70,7 @@ class membrane:
 
     def fm(self, m_x, n_y):
         """
-        Made by Claude. Calculate the resonance frequency for mode (m_x, n_y).
+        Docstring by Claude. Calculate the resonance frequency for mode (m_x, n_y).
 
         Computes the bare membrane frequency f_m and the mass-loaded frequency
         reduced_f_m that accounts for the additional mass of the thin-film

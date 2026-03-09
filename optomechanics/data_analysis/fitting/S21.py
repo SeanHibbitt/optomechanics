@@ -1,5 +1,5 @@
 """
-Made by Claude. Cavity transmission (S21) fitting functions.
+Docstring by Claude. Cavity transmission (S21) fitting functions.
 
 Provides the S21 lineshape equation and fitting routines for extracting
 cavity parameters (resonance frequency, linewidths) from VNA transmission data.
@@ -28,7 +28,7 @@ from optomechanics.data_analysis.utilities import split_complex_wrapper, split_c
 
 def S21_eq(freq,*p):
     """
-    Made by Claude. S21 transmission model for a cavity in linear voltage ratio.
+    Docstring by Claude. S21 transmission model for a cavity in linear voltage ratio.
 
     Parameters
     ----------
@@ -58,7 +58,7 @@ def S21_eq(freq,*p):
 
 def S21_eq_complex(freq,*p):
     """
-    Made by Claude. Complex S21 transmission model for a cavity with linear background.
+    Docstring by Claude. Complex S21 transmission model for a cavity with linear background.
 
     Returns the complex-valued S21 as a linear voltage ratio, including both real and
     imaginary linear background terms.
@@ -97,7 +97,7 @@ def S21_eq_complex(freq,*p):
 
 def S21_eq_phase(freq,*p):
     """
-    Made by Claude. Phase of the S21 cavity transmission model.
+    Docstring by Claude. Phase of the S21 cavity transmission model.
 
     Parameters
     ----------
@@ -127,7 +127,7 @@ def S21_eq_phase(freq,*p):
 
 def S21_eq_dB(freq,*p):
     """
-    Made by Claude. S21 transmission model for a cavity in dB.
+    Docstring by Claude. S21 transmission model for a cavity in dB.
 
     Parameters
     ----------
@@ -160,7 +160,7 @@ def S21_eq_dB(freq,*p):
 
 def fit_S21_peak_dB(powers_dB, frequencies, guesses = False, signal_applied = False, errors = None, equation = S21_eq_dB ):
     """
-    Made by Claude. Fit the S21 cavity model to power data in dB.
+    Docstring by Claude. Fit the S21 cavity model to power data in dB.
 
     Wrapper around `fit_S21_peak` that accepts dB input and uses `S21_eq_dB`.
 
@@ -202,7 +202,7 @@ def fit_S21_peak_dB(powers_dB, frequencies, guesses = False, signal_applied = Fa
 
 def fit_S21_peak_complex(complex_data, frequencies, guesses = False, signal_applied = False, equation = S21_eq_complex ):
     """
-    Made by Claude. Fit the S21 cavity model to complex linear voltage ratio data.
+    Docstring by Claude. Fit the S21 cavity model to complex linear voltage ratio data.
 
     Fits real and imaginary parts simultaneously using ``split_complex_wrapper``
     with ``S21_eq_complex``.
@@ -308,7 +308,7 @@ def fit_S21_peak_complex(complex_data, frequencies, guesses = False, signal_appl
 
 def fit_S21_peak(powers_dB, frequencies, guesses = False, signal_applied = False, errors = None, equation = S21_eq ):
     """
-    Made by Claude. Fit the S21 cavity model to power data in linear voltage ratio.
+    Docstring by Claude. Fit the S21 cavity model to power data in linear voltage ratio.
 
     Accepts powers in dB, converts to linear voltage ratio internally, then
     fits with `S21_eq` (or a supplied `equation`).

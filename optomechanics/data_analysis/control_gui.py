@@ -1,5 +1,5 @@
 """
-Made by Claude. GUI control utilities for live optomechanics measurements.
+Docstring by Claude. GUI control utilities for live optomechanics measurements.
 
 Provides lightweight control interfaces and configuration helpers for
 interactive data acquisition sessions.
@@ -11,7 +11,7 @@ import json
 
 def Control_PID(pid_settings = {}, file = r"C:\Users\RoomTemp\Documents\Python\remote_control.json", update = True):
     """
-    Made by Claude. Update PID controller settings via a shared JSON configuration file.
+    Docstring by Claude. Update PID controller settings via a shared JSON configuration file.
 
     Opens ``file``, merges the key-value pairs in ``pid_settings`` into the
     ``Remote_Control`` section, optionally sets the ``update`` flag to

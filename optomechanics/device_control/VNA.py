@@ -12,7 +12,7 @@ from ..data_analysis.fitting._fitting import dBm_to_watts, watts_to_dBm, watts_r
 
 class Vector_Network_Analyser():
     """
-    Made by Claude. Software pseudo-VNA built from a signal generator and spectrum analyser.
+    Docstring by Claude. Software pseudo-VNA built from a signal generator and spectrum analyser.
 
     Combines an arbitrary signal-generation function and a spectrum-analysis
     function to emulate a one-port VNA S21 sweep.  Only one S-parameter can
@@ -41,7 +41,7 @@ class Vector_Network_Analyser():
     def __init__(self, signal_generator, signal_analyser,):
         
         """
-        Made by Claude. Store the signal-generator and spectrum-analyser callables.
+        Docstring by Claude. Store the signal-generator and spectrum-analyser callables.
         """
         
         self.SG = signal_generator
@@ -49,7 +49,7 @@ class Vector_Network_Analyser():
 
     def sweep(self, central_frequency, span, sweep_points, power, band_width, extra_meta = {}, save_location = None, file_name = ""):
         """
-        Made by Claude. Perform a pseudo-VNA S21 frequency sweep.
+        Docstring by Claude. Perform a pseudo-VNA S21 frequency sweep.
 
         Steps the signal generator across a frequency range, acquires a
         spectrum at each step using the spectrum analyser, and computes the

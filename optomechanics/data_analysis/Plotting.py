@@ -1,5 +1,5 @@
 """
-Made by Claude. Plotting helper utilities for optomechanics data visualisation.
+Docstring by Claude. Plotting helper utilities for optomechanics data visualisation.
 
 Provides colour manipulation and figure formatting helpers used across
 the data analysis and fitting modules.
@@ -8,7 +8,7 @@ the data analysis and fitting modules.
 
 def lighten_color(color, amount=0.5):
     """
-    Made by Claude. Lighten a colour by a given fraction.
+    Docstring by Claude. Lighten a colour by a given fraction.
 
     Converts the colour to HLS space, scales the luminosity towards 1, then
     converts back to RGB.  Adapted from a Stack Exchange snippet.
@@ -45,7 +45,7 @@ def lighten_color(color, amount=0.5):
 
 def update_plotly_layout(fig, xaxis_title, yaxis_title, xaxis_range=None, yaxis_range=None, title_name=None, tick_format = ('n', '.2f'),):
     """
-    Made by Claude. Apply standard layout settings to a Plotly figure.
+    Docstring by Claude. Apply standard layout settings to a Plotly figure.
 
     Sets axis titles, tick formatting, grid lines, font, and optional axis
     ranges using the ``plotly_white`` template.  Modifies ``fig`` in-place.

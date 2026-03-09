@@ -120,10 +120,11 @@ def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
     #organise variables
     amplitude_linear_voltage = dB_to_linear_voltage(mags_dB)
 
-    f_m_guess, g_m_guess, A_guess, floor = guesses
 
+
+    f_m_guess, g_m_guess, A_guess, floor = guesses
     #guesses:
-    if np.any(guesses) == False:
+    if guesses == False:
         amplitude_linear_voltage_guess = np.abs(amplitude_linear_voltage)
         max_value = np.max(amplitude_linear_voltage_guess)
         f_m_guess = rel_freqs[np.argmax(amplitude_linear_voltage_guess)]
@@ -138,7 +139,9 @@ def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
 
         guesses[guesses == False] = guesses_temp[guesses == False]
 
-    guesses = [f_m_guess, g_m_guess, A_guess, floor]
+        guesses = [f_m_guess, g_m_guess, A_guess, floor]
+
+    f_m_guess, g_m_guess, A_guess, floor = guesses
 
     OMIT_equation_reduced = lambda f, f_m, g_m, A, floor,: OMIT_equation(f, f_m, g_m, A, floor, k_tot)
 

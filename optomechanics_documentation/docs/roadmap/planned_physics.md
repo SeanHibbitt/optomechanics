@@ -37,9 +37,11 @@ and all quantities are in angular frequency (Aspelmeyer et al., Rev. Mod. Phys. 
 
 OMIA is the absorption counterpart to OMIT (Optomechanically Induced Transparency). It occurs at the opposite sign of detuning and produces a dip in cavity transmission rather than a transparency window.
 
-OMIT fitting is already implemented via the `omit` module. OMIA requires a separate model or sign-flip in detuning with appropriate lineshape handling.
+The existing `OMIT_equation` function handles OMIA via a negative amplitude parameter `A`.
+Both `fit_OMIT` and `fit_OMIT_set_floor` support OMIA fits — the auto-guess logic detects
+whether the feature is a peak or dip and sets the sign of `A` accordingly.
 
-**Status:** OMIT is implemented; OMIA is not yet implemented.
+**Status:** Implemented (via negative `A` in `fitting.omit`). See [OMIT / OMIA Analysis](../user_guide/omit_analysis.md).
 
 ---
 

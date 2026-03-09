@@ -1,8 +1,10 @@
 """
-Made by Claude. Optomechanically Induced Transparency (OMIT) fitting functions.
+Docstring by Claude. Optomechanically Induced Transparency / Absorption (OMIT/OMIA) fitting functions.
 
-Provides the OMIT lineshape equation and fitting routines for extracting
+Provides the OMIT/OMIA lineshape equation and fitting routines for extracting
 mechanical parameters from cavity transmission under strong pump driving.
+The same equation handles both OMIT (transparency peak, ``A > 0``) and
+OMIA (absorption dip, ``A < 0``) via the sign of the amplitude parameter.
 """
 import numpy as np
 from scipy.optimize import curve_fit
@@ -30,9 +32,11 @@ from optomechanics.data_analysis.fitting.S21 import S21_eq, fit_S21_peak
 def OMIT_equation(f, f_m, g_m, A, floor, kk_tot):
 
     """
-    Made by Claude. Optomechanically induced transparency (OMIT) lineshape equation.
+    Docstring by Claude. OMIT/OMIA lineshape equation for optomechanically induced transparency or absorption.
 
-    Computes the OMIT transmission amplitude as a function of frequency.
+    Computes the OMIT/OMIA transmission amplitude as a function of frequency.
+    Positive ``A`` produces a transparency peak (OMIT); negative ``A`` produces
+    an absorption dip (OMIA).
     The amplitude parameter ``A`` and background ``floor`` are defined as::
 
         A     = (k_ext * 4 * omega_m * g_0**2 * n_d)
@@ -47,9 +51,10 @@ def OMIT_equation(f, f_m, g_m, A, floor, kk_tot):
     f_m : float
         Mechanical resonance frequency (Hz).
     g_m : float
-        Mechanical linewidth / damping rate (Hz).
+        Mechanical linewidth / damping rate, $\\Gamma_m / 2\\pi$ (Hz).
     A : float
-        OMIT peak amplitude (linear voltage units).
+        OMIT/OMIA amplitude (linear voltage units). Positive for
+        transparency peak (OMIT), negative for absorption dip (OMIA).
     floor : float
         Background transmission level (linear voltage units).
     kk_tot : float

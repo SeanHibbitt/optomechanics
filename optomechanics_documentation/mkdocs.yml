@@ -42,7 +42,7 @@ nav:
     - Thermal Motion Measurement: user_guide/thermal_motion_measurement.md
     - Thermal Motion Analysis: user_guide/thermal_motion_analysis.md
     - Displacement Measurement: user_guide/displacement_measurement.md
-    - OMIT Analysis: user_guide/omit_analysis.md
+    - OMIT / OMIA Analysis: user_guide/omit_analysis.md
     - Intracavity Photon Number: user_guide/photon_number.md
     - Cooperativity: user_guide/cooperativity.md
     - End-to-End Workflow: user_guide/end_to_end_workflow.md

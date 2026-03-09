@@ -11,9 +11,9 @@
 
 ## Docstrings
 
-- When rewriting a docstring, begin the summary line with `Made by Claude.` — e.g.:
+- When rewriting a docstring, begin the summary line with `Docstring by Claude.` — e.g.:
   ```python
-  """Made by Claude. Short one-line summary."""
+  """Docstring by Claude. Short one-line summary."""
   ```
 
 ## TODO.md

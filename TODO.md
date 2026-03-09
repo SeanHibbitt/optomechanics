@@ -202,6 +202,72 @@ These are documentation-only edits — a single docstring at the top of each fil
 
 ---
 
+## Phase 23 — Documentation accuracy audit & corrections
+
+Findings from an independent audit benchmarked against NumPy/GWPY standards.
+See `ImplementationPlans/Report_of_Phases_23.md` for the full report and
+`ImplementationPlans/implementation_plan_Phase_23.md` for detailed steps.
+
+#### OMIT/OMIA documentation (Issue 1)
+- [x] Fix false claim that OMIA is not implemented — equation handles both via sign of A (`ddee648`)
+- [x] Update `omit.py` docstrings, `omit_analysis.md`, `planned_physics.md`, `mkdocs.yml` nav, API ref page (`ddee648`)
+
+#### Missing OMIT section in data_analysis.md (Issue 2)
+- [x] Add `#### OMIT / OMIA fitting` subsection to `data_analysis.md` (`a03ced2`)
+
+#### Gamma_m unit convention (Issue 3)
+- [x] Fix glossary notation, Gamma_m entry, Q_m formula, tau formula, S_FF formula (`96972dc`)
+- [x] Fix omit_analysis.md, cooperativity.md, thermal_motion_analysis.md, thermal_motion_measurement.md, end_to_end_workflow.md, displacement_measurement.md, photon_number.md, planned_physics.md (`96972dc`)
+- [x] Fix `omit.py` g_m docstring to say Gamma_m/(2pi) (`96972dc`)
+
+#### "Made by Claude" phrasing (Issue 4)
+- [x] Replace 206 instances of "Made by Claude." with "Docstring by Claude." across 25 source files (`f21fcf3`)
+
+#### data_analysis/__init__.py missing OMIT (Issue 5)
+- [x] Add OMIT/OMIA to fitting description in `__init__.py` (`9d9c5aa`)
+
+#### Enhanced OMIT documentation (Issue 6)
+- [x] Add assumptions admonition, synthetic data tutorial, OMIA example, initial guess guidance, troubleshooting table, cross-validation section, academic references (`ddee648`)
+
+#### CLAUDE.md docstring prefix
+- [x] Update CLAUDE.md instruction from "Made by Claude" to "Docstring by Claude" (`9d9c5aa`)
+
+---
+
+## Phase 24 — Test quality & bug fixes
+
+Remaining items from the Phase 23 audit report (Issues 7 and 8b).
+See `ImplementationPlans/implementation_plan_Phase_24.md` for detailed steps.
+
+#### Sub-phase 24a: Fix fit_OMIT guess-handling bug (Issue 8b)
+- [x] `optomechanics/data_analysis/fitting/omit.py` — move `guesses` check before tuple unpacking in `fit_OMIT` and `fit_OMIT_set_floor` (4de5dc1)
+
+#### Sub-phase 24b: Create test data infrastructure (Issue 7b, 7c)
+- [x] Verify/run `tests/data/generate_omit_test_vectors.py` to produce `.npz` files (405f57d)
+- [x] Create `tests/data/README.md` documenting test data files (405f57d)
+
+#### Sub-phase 24c: Improve test_omit.py (Issues 7a–7f)
+- [x] Add module docstring documenting test parameter choices and physical justification (3bd8923)
+- [x] Add exact-value tests using `.npz` data files (peak and dip) (3bd8923)
+- [x] Add negative-A (OMIA) property tests (3bd8923)
+- [x] Add `fit_OMIT` fitting round-trip test (3bd8923)
+- [x] Add `fit_OMIT_set_floor` fitting round-trip test (3bd8923)
+- [x] Add `fit_OMIT` auto-guess test (verifies 24a bug fix) (3bd8923)
+
+#### Sub-phase 24d (new): GUI, Misc, Zurich, and development documentation
+- [x] Create `docs/user_guide/gui_temperature_control.md` — GUI purpose, architecture, known bugs (9427a87)
+- [x] Create `docs/api_reference/gui/`, `misc/`, `zurich/` stubs with known-issue admonitions (9427a87)
+- [x] Create `docs/development/testing.md` — test coverage map, 176 tests, coverage gaps (9427a87)
+- [x] Add all new pages to `mkdocs.yml` nav (9427a87)
+
+#### Sub-phase 24e: Housekeeping
+- [x] Update TODO.md with completion status
+- [x] Update auto-memory MEMORY.md
+- [x] Run full test suite — 176/176 passed
+- [x] Verify no "Made by Claude" remains in source (confirmed)
+
+---
+
 ## Code / Features
 
 *(Add items here)*

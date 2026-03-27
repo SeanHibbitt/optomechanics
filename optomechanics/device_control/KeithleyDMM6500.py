@@ -5,7 +5,7 @@ Created on Tue Apr 23 14:57:25 2024
 @author: seanh
 """
 
-from Optomechanics import Device
+from optomechanics import Device
 import pyvisa
 import numpy as np
 

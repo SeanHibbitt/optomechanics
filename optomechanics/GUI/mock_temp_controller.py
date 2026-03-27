@@ -72,30 +72,25 @@ import pyvisa as _pyvisa
 _pyvisa.ResourceManager = _MockResourceManager
 
 # ---------------------------------------------------------------------------
-# 2.  Mock dated_logger so we don't need D:\Experiment Data to exist
+# 2.  Redirect dated_logger to test_data/ instead of D:\Experiment Data
 # ---------------------------------------------------------------------------
 
-import pandas as pd
-
-
-class _MockDatedLogger:
-    """Minimal stand-in for dated_logger — stores rows in memory only."""
-
-    def __init__(self, *args, **kwargs):
-        self.data = pd.DataFrame()        # empty: Worker will skip pre-load
-
-    def __call__(self, row):
-        pass                              # silently discard each data row
-
-
-def _mock_dated_logger(*args, **kwargs):
-    print('[MOCK] dated_logger: logging to memory only (no file written)')
-    return _MockDatedLogger(*args, **kwargs)
-
-
-# Patch it inside the data_management module before Temp_Controller loads
 import optomechanics.data_management.data_logger as _dl_mod
-_dl_mod.dated_logger = _mock_dated_logger
+
+_TEST_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data')
+os.makedirs(_TEST_DATA_DIR, exist_ok=True)
+
+_real_dated_logger = _dl_mod.dated_logger
+
+
+def _redirected_dated_logger(*args, **kwargs):
+    """Use real dated_logger but always write to test_data/."""
+    kwargs.pop('base_path', None)
+    print(f'[MOCK] dated_logger: redirecting output to {_TEST_DATA_DIR}')
+    return _real_dated_logger(*args, base_path=_TEST_DATA_DIR, **kwargs)
+
+
+_dl_mod.dated_logger = _redirected_dated_logger
 
 # ---------------------------------------------------------------------------
 # 3.  Load Temp_Controller as a module (skips the __main__ block)

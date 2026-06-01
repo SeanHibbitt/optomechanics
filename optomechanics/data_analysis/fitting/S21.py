@@ -196,7 +196,7 @@ def fit_S21_peak_dB(powers_dB, frequencies, guesses = False, signal_applied = Fa
     errors : array-like or None
         Errors used for fitting.
     """
-    return fit_S21_peak(powers_dB, frequencies, guesses, signal_applied, errors, equation = S21_eq_dB)
+    return fit_S21_peak(powers_dB, frequencies, guesses, signal_applied, errors, equation)
 
 
 

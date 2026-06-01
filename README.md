@@ -43,6 +43,7 @@ CMD: git clone "git@OptomechanicsGithub:SeanHibbitt/Optomechanics.git"
    - matplotlib
    - rsinstrument
    - simple-pid
+   - scipy
    - pandas?
   Extra General modules used in lab:
    - pyqt(6)

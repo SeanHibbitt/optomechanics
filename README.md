@@ -37,6 +37,17 @@ CMD: git clone "git@OptomechanicsGithub:SeanHibbitt/Optomechanics.git"
   Then run the following command to generate, make sure you're in the correct folder:
     conda env export > ExperimentsEnvironment.yml
 
+  Current modules required for optomechanics:
+   - pyvisa
+   - numpy
+   - matplotlib
+   - rsinstrument
+   - simple-pid
+   - pandas?
+  Extra General modules used in lab:
+   - pyqt(6)
+   - 
+
 
 ---
 

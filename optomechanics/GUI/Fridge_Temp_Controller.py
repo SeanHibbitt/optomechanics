@@ -993,6 +993,12 @@ class HeaterControlGroup(QGroupBox):
         self.output = output
         self.worker = worker
 
+        #: Set once the editable boxes have been filled from the instrument's
+        #: own settings, which happens on the first successful heater read.
+        #: After that the boxes belong to the user and are never overwritten
+        #: automatically.
+        self.initialised_from_instrument = False
+
         layout = QVBoxLayout()
 
         # --- live readback, not editable -----------------------------------
@@ -1075,6 +1081,16 @@ class HeaterControlGroup(QGroupBox):
             f"{show(f'D_out{output}', 2)}"
         )
 
+        # On start-up the editable boxes should show what the Lakeshore is
+        # actually set to, not be empty and not be some target's defaults.
+        # This runs once, on the first read that returns a complete set; from
+        # then on the boxes are the user's and are left alone.
+        if not self.initialised_from_instrument:
+            if self.fill_inputs(readings):
+                self.initialised_from_instrument = True
+                print(f"{HEATERS[self.output]['name']}: boxes initialised from "
+                      f"the instrument's current settings.")
+
     def load_defaults(self, target_temperature):
         """
         Made by Claude. Fill the editable boxes with the default settings for a target temperature.
@@ -1106,27 +1122,66 @@ class HeaterControlGroup(QGroupBox):
               f"{target_temperature} K -- P={p}, I={i}, D={d}, range={heater_range}. "
               f"Nothing sent to the instrument yet.")
 
+    def fill_inputs(self, readings):
+        """
+        Made by Claude. Fill the editable boxes with the instrument's own current settings.
+
+        Only fills if every one of the five values is available, so that a
+        partial read cannot leave a half-populated set of settings sitting in
+        the boxes ready to be applied.
+
+        Parameters
+        ----------
+        readings : dict
+            Readings as produced by :meth:`Worker.poll_heaters`.
+
+        Returns
+        -------
+        bool
+            ``True`` if the boxes were filled, ``False`` if any value was
+            missing or unreadable.
+        """
+        output = self.output
+        keys = {
+            "p": f"P_out{output}",
+            "i": f"I_out{output}",
+            "d": f"D_out{output}",
+            "setpoint": f"SETP_out{output}",
+            "range": f"RANGE_out{output}",
+        }
+
+        values = {}
+        for name, key in keys.items():
+            value = readings.get(key)
+            if value is None or (isinstance(value, float) and np.isnan(value)):
+                return False
+            values[name] = value
+
+        self.p_input.setText(str(values["p"]))
+        self.i_input.setText(str(values["i"]))
+        self.d_input.setText(str(values["d"]))
+        self.setpoint_input.setText(str(values["setpoint"]))
+        # The range is an index, so show it as a whole number.
+        self.range_input.setText(str(int(values["range"])))
+        return True
+
     def copy_from_instrument(self):
         """
-        Made by Claude. Copy the values currently read back from the instrument into the boxes.
+        Made by Claude. Copy the instrument's current settings into the editable boxes.
+
+        Discards whatever is in the boxes and replaces it with what the
+        Lakeshore is actually set to.  Used by the "Copy from instrument"
+        button, and automatically on start-up.
 
         Returns
         -------
         None
         """
-        readings = self.worker.latest
-        output = self.output
-
-        def put(box, key):
-            value = readings.get(key)
-            if value is not None and not (isinstance(value, float) and np.isnan(value)):
-                box.setText(str(value))
-
-        put(self.p_input, f"P_out{output}")
-        put(self.i_input, f"I_out{output}")
-        put(self.d_input, f"D_out{output}")
-        put(self.setpoint_input, f"SETP_out{output}")
-        put(self.range_input, f"RANGE_out{output}")
+        if not self.fill_inputs(self.worker.latest):
+            QMessageBox.warning(
+                self, "Nothing to copy",
+                f"The settings of the {HEATERS[self.output]['name']} could not "
+                "be read from the Lakeshore, so the boxes were left alone.")
 
     # --- control ------------------------------------------------------------
 

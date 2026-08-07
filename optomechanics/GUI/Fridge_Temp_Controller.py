@@ -105,11 +105,20 @@ SAFE_MODE = True
 ADDRESS = 'GPIB0::12::INSTR'
 
 #: Seconds between thermometer readings.
+#:
+#: One cycle reads 3 thermometers x 3 quantities = 9 GPIB queries, then sleeps
+#: for this long, so a row is written roughly every SAMPLE_INTERVAL plus the
+#: query time (a few hundred ms on GPIB).  Every row is flushed to disk as it
+#: is written.
 SAMPLE_INTERVAL = 1.0
 
 #: Heater / PID state is slow to change and slow to query, so it is only read
 #: every Nth cycle.  In between, the last known values are reused.
-HEATER_POLL_EVERY = 10
+#:
+#: With SAMPLE_INTERVAL = 1 s this means the heater readbacks refresh about
+#: every 5 s.  Pressing "Apply to instrument" does not wait for that: it forces
+#: an immediate re-read so the readback confirms the change straight away.
+HEATER_POLL_EVERY = 5
 
 #: Where the CSV log is written.  ``dated_logger`` creates a dated sub-folder
 #: here and rolls over to a new file at midnight.
@@ -452,6 +461,7 @@ class Worker(QObject):
     finished = pyqtSignal()
     plot_data_updated = pyqtSignal(list)
     readings_updated = pyqtSignal(dict)
+    status_updated = pyqtSignal(str, bool)
 
     def __init__(self):
         super().__init__()
@@ -460,6 +470,11 @@ class Worker(QObject):
         self.running = True
         self.instrument = None
         self.lock = threading.Lock()
+        #: Full path of the CSV currently being written, shown in the GUI.
+        self.log_file_path = ""
+        #: Set by the GUI after a settings change to force an immediate
+        #: heater re-read, instead of waiting for the next scheduled poll.
+        self.force_heater_poll = False
 
     # --- helpers -----------------------------------------------------------
 
@@ -683,6 +698,9 @@ class Worker(QObject):
                 self.instrument.SetSetpoint(output, setpoint)
                 # Range last: never energise the heater before the loop is set up.
                 sent = self.instrument.SetHeaterRange(output, heater_range)
+                # Refresh the readback now rather than waiting for the next
+                # scheduled heater poll, so the user sees the change land.
+                self.force_heater_poll = True
                 return sent
             except Exception as e:
                 print(f"[WRITE FAIL] applying settings to {info['name']}: {e}")
@@ -709,7 +727,9 @@ class Worker(QObject):
                 print("Cannot switch heater off: not connected to the Lakeshore.")
                 return False
             try:
-                return self.instrument.SetHeaterRange(output, 0)
+                sent = self.instrument.SetHeaterRange(output, 0)
+                self.force_heater_poll = True
+                return sent
             except Exception as e:
                 print(f"[WRITE FAIL] switching off output {output}: {e}")
                 return False
@@ -738,9 +758,23 @@ class Worker(QObject):
             print("=" * 70)
 
         headers = self.build_headers()
+
+        # ``logger.__init__`` creates the file straight away, before
+        # ``dated_logger`` has worked out the dated sub-folder.  Passing
+        # file_path here keeps that first, empty, throwaway file inside
+        # DATA_BASE_PATH instead of dropping it in whatever directory the
+        # program happened to be launched from.
+        os.makedirs(DATA_BASE_PATH, exist_ok=True)
         temp_logger = dated_logger(base_path=DATA_BASE_PATH,
                                    file_name=DATA_FILE_NAME,
+                                   file_path=DATA_BASE_PATH + os.sep,
                                    headings=headers)
+
+        self.log_file_path = os.path.join(temp_logger.file_path,
+                                          temp_logger.file_name)
+        print("=" * 70)
+        print(f"SAVING DATA TO: {self.log_file_path}")
+        print("=" * 70)
 
         # Recover today's data so the plot is not empty on restart.
         dataframe = temp_logger.data
@@ -755,10 +789,12 @@ class Worker(QObject):
             # Outer loop: (re)connect to the instrument.
             try:
                 print(f"Connecting to Lakeshore 372 at {ADDRESS} ...")
+                self.status_updated.emit(f"Connecting to {ADDRESS} ...", False)
                 with Fridge_Controller(ADDRESS) as instrument:
                     with self.lock:
                         self.instrument = instrument
                     print("Connected.")
+                    self.status_updated.emit(f"Connected to {ADDRESS}", True)
 
                     while self.running:
                         cycle += 1
@@ -773,12 +809,29 @@ class Worker(QObject):
                         with self.lock:
                             readings = self.poll_thermometers()
                             # Heater state changes slowly and is slow to
-                            # query, so reuse the last values in between.
-                            if cycle % HEATER_POLL_EVERY == 1 or not heater_readings:
+                            # query, so reuse the last values in between,
+                            # unless the GUI has just changed something.
+                            if (cycle % HEATER_POLL_EVERY == 1
+                                    or not heater_readings
+                                    or self.force_heater_poll):
                                 heater_readings = self.poll_heaters()
+                                self.force_heater_poll = False
 
                         readings.update(heater_readings)
                         self.latest = readings
+
+                        # Tell the user whether the instrument is actually
+                        # answering, so a blank plot is never a mystery.
+                        live = sum(1 for channel in THERMOMETERS
+                                   if not np.isnan(readings.get(f"T_ch{channel}",
+                                                                float('nan'))))
+                        if live == 0:
+                            self.status_updated.emit(
+                                "Connected, but NO thermometer is responding", False)
+                        else:
+                            self.status_updated.emit(
+                                f"Reading {live} of {len(THERMOMETERS)} thermometers "
+                                f"| row {len(self.data) + 1}", True)
 
                         # Write and flush immediately: a crash costs at most
                         # the reading currently in progress.
@@ -806,6 +859,8 @@ class Worker(QObject):
                 with self.lock:
                     self.instrument = None
                 if self.running:
+                    self.status_updated.emit(
+                        f"NOT CONNECTED ({e}) -- retrying in 5 s", False)
                     print("Retrying in 5 s.  Logging will resume automatically.")
                     time.sleep(5)
 
@@ -1192,6 +1247,21 @@ class MainWindow(QMainWindow):
             safe_label.setStyleSheet("color: white; background-color: #b00000; padding: 6px;")
             self.left_layout.addWidget(safe_label)
 
+        # Connection status: makes it obvious whether the blank plot means
+        # "nothing has happened yet" or "the instrument is not answering".
+        self.status_label = QLabel("Starting ...")
+        self.status_label.setAlignment(Qt.AlignCenter)
+        self.status_label.setFont(QFont('Arial', 10, QFont.Bold))
+        self.status_label.setStyleSheet("color: white; background-color: grey; padding: 4px;")
+        self.left_layout.addWidget(self.status_label)
+
+        # Where the data is going, so it never has to be hunted for.
+        self.file_label = QLabel("Log file: (opening ...)")
+        self.file_label.setWordWrap(True)
+        self.file_label.setStyleSheet("color: #303030; font-size: 10px;")
+        self.file_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.left_layout.addWidget(self.file_label)
+
         self.left_layout.addWidget(self.build_thermometer_box())
         self.left_layout.addWidget(self.build_target_box())
 
@@ -1240,6 +1310,7 @@ class MainWindow(QMainWindow):
 
         self.worker.plot_data_updated.connect(self.update_plot)
         self.worker.readings_updated.connect(self.update_readings)
+        self.worker.status_updated.connect(self.update_status)
 
         self.setup_menubar()
         self.show()
@@ -1363,6 +1434,30 @@ class MainWindow(QMainWindow):
             "heater boxes.\n\nNothing has been sent to the Lakeshore. "
             "Edit the values if you want to, then press 'Apply to "
             "instrument'.")
+
+    def update_status(self, message, healthy):
+        """
+        Made by Claude. Update the connection-status banner and the log-file path.
+
+        Parameters
+        ----------
+        message : str
+            Status text to display.
+        healthy : bool
+            ``True`` if the instrument is answering, which shows the banner
+            in green; ``False`` shows it in red.
+
+        Returns
+        -------
+        None
+        """
+        self.status_label.setText(message)
+        colour = "#006000" if healthy else "#b00000"
+        self.status_label.setStyleSheet(
+            f"color: white; background-color: {colour}; padding: 4px;")
+
+        if self.worker.log_file_path:
+            self.file_label.setText(f"Log file: {self.worker.log_file_path}")
 
     def update_readings(self, readings):
         """

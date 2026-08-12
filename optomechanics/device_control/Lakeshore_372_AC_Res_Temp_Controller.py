@@ -601,3 +601,241 @@ class Temp_Controller(Device):
             Output level as a percentage of full scale.
         """
         return self.query(f"AOUT?{output}")
+
+    # --- input configuration --------------------------------------------
+
+    def ReadInputChannelParameter(self, channel):
+        """Docstring by Claude. Read a channel's scanning parameters (``INSET?``, p.157).
+
+        Returns the fields written by :meth:`WriteInputChannelParameter`,
+        including the autoscan dwell time; see that method for their meaning.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, or ``1``-``16`` for a measurement
+            channel.
+
+        Returns
+        -------
+        str
+            ``<enabled>,<dwell>,<pause>,<curve number>,<tempco>``.
+        """
+        return self.query(f"INSET?{channel}")
+
+    def WriteInputChannelParameter(self, channel, enabled, dwell, pause,
+                                   curve_number, tempco):
+        """Docstring by Claude. Set a channel's scanning parameters (``INSET``, p.157).
+
+        These are the per-thermometer settings that govern how the scanner
+        treats the channel. The dwell time is how long the instrument sits on
+        this channel during an autoscan, and the pause time is how long it
+        waits after switching to it before believing the reading — both need
+        to be long enough for the measurement to settle, which at millikelvin
+        temperatures and high resistances can be many seconds.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, ``1``-``16`` for a measurement
+            channel, or ``0`` to apply the settings to all measurement
+            channels at once.
+        enabled : int
+            ``0`` channel disabled (skipped by autoscan), ``1`` enabled. At
+            least one measurement channel must remain enabled; if all are
+            disabled the instrument forces channel 1 back on.
+        dwell : int
+            Autoscan dwell time in seconds, 1 to 200. Not applicable to the
+            control input ``A``.
+        pause : int
+            Change-pause time in seconds, 3 to 200.
+        curve_number : int
+            Curve used to convert resistance to temperature: ``0`` for none,
+            or ``1``-``59`` for a standard or user curve.
+        tempco : int
+            Temperature coefficient used when no curve is selected, which
+            tells the instrument which way resistance moves with temperature:
+            ``1`` negative, ``2`` positive.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(
+            f"INSET {channel},{enabled},{dwell},{pause},{curve_number},"
+            f"{tempco}"
+        )
+
+    def WriteInputSetup(self, channel, mode, excitation, autorange,
+                        resistance_range, cs_shunt, units):
+        """Docstring by Claude. Set a channel's measurement setup (``INTYPE``, pp.158-160).
+
+        Controls how hard the channel is driven and on what range. Excitation
+        is the key thermometry trade-off: too much and the sensor self-heats
+        away from the stage temperature, too little and the reading is noisy.
+        See :meth:`ReadInputSetup` for the query form and
+        :meth:`ReadExcitationPower` to check the resulting dissipation.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, ``1``-``16`` for a measurement
+            channel, or ``0`` for all measurement channels.
+        mode : int
+            Excitation mode: ``0`` voltage excitation, ``1`` current
+            excitation.
+        excitation : int
+            Excitation range index, ``1``-``22``. The meaning depends on
+            ``mode``: for voltage excitation ``1`` = 2.00 uV up to ``22`` =
+            632 mV, for current excitation ``1`` = 1.00 pA up to ``22`` =
+            31.6 mA, in decade-and-a-half steps. See TABLE 6-8 in the manual
+            for the full listing.
+        autorange : int
+            ``0`` off (fixed range), ``1`` autorange, ``2`` ROX 102B
+            autorange.
+        resistance_range : int
+            Resistance range index, ``1`` = 2.00 mohm up to ``22`` = 63.2
+            Mohm. Ignored when ``autorange`` is enabled.
+        cs_shunt : int
+            Current-source shunt: ``0`` current source not shunted (excitation
+            on), ``1`` current source shunted (excitation off).
+        units : int
+            Preferred display and control units: ``1`` kelvin, ``2`` ohms.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(
+            f"INTYPE {channel},{mode},{excitation},{autorange},"
+            f"{resistance_range},{cs_shunt},{units}"
+        )
+
+    def ReadFilter(self, channel):
+        """Docstring by Claude. Read a channel's filter settings (``FILTER?``, p.154).
+
+        Returns the fields written by :meth:`WriteFilter`.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, or ``1``-``16`` for a measurement
+            channel.
+
+        Returns
+        -------
+        str
+            ``<off/on>,<settle time>,<window>``.
+        """
+        return self.query(f"FILTER?{channel}")
+
+    def WriteFilter(self, channel, state, settle_time, window):
+        """Docstring by Claude. Configure a channel's reading filter (``FILTER``, p.154).
+
+        The filter averages readings to reduce noise, at the cost of response
+        time. The window is an escape hatch: a change larger than the window
+        is treated as a real step rather than noise, and the filter restarts
+        instead of slewing slowly to the new value.
+
+        Note that filtering only affects control if the output is told to use
+        the filtered reading — see the ``use_filter`` argument of
+        :meth:`WriteOutputMode`.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, ``1``-``16`` for a measurement
+            channel, or ``0`` for all measurement channels.
+        state : int
+            ``0`` filter off, ``1`` filter on.
+        settle_time : int
+            Filter settle time in seconds, 1 to 200.
+        window : int
+            Window as a percentage of full scale, 1 to 80. Readings that jump
+            by more than this restart the filter.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(
+            f"FILTER {channel},{state},{settle_time},{window}"
+        )
+
+    def ReadInputName(self, channel):
+        """Docstring by Claude. Read a channel's user-assigned name (``INNAME?``, p.157).
+
+        Parameters
+        ----------
+        channel : int
+            Measurement channel, ``1``-``16``.
+
+        Returns
+        -------
+        str
+            The channel name.
+        """
+        return self.query(f"INNAME?{channel}")
+
+    def WriteInputName(self, channel, name):
+        """Docstring by Claude. Set a channel's name (``INNAME``, p.157).
+
+        Naming channels after the stage they measure ("MC", "Still", "50K")
+        makes the front panel and logs readable. The name is quoted when sent,
+        so spaces and commas are safe.
+
+        Parameters
+        ----------
+        channel : int
+            Measurement channel, ``1``-``16``.
+        name : str
+            Name to assign, up to 15 characters.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f'INNAME {channel},"{name}"')
+
+    def ReadInputCurveNumber(self, channel):
+        """Docstring by Claude. Read a channel's curve number (``INCRV?``, p.156).
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, or ``1``-``16`` for a measurement
+            channel.
+
+        Returns
+        -------
+        str
+            Curve number, ``0`` if no curve is assigned.
+        """
+        return self.query(f"INCRV?{channel}")
+
+    def WriteInputCurveNumber(self, channel, curve_number):
+        """Docstring by Claude. Assign a calibration curve to a channel (``INCRV``, p.156).
+
+        The curve is what turns measured resistance into temperature, so a
+        channel with no curve can only report ohms. The curve's format must
+        match the sensor type on the channel, or the instrument rejects the
+        assignment.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, or ``1``-``16`` for a measurement
+            channel.
+        curve_number : int
+            ``0`` for no curve, ``1``-``59`` for a standard or user curve.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f"INCRV {channel},{curve_number}")

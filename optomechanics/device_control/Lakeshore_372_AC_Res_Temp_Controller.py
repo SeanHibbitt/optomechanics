@@ -947,3 +947,298 @@ class Temp_Controller(Device):
             ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
         """
         return self.safe_write(f"CMR {state}")
+
+    # --- outputs and control --------------------------------------------
+
+    def ReadHeaterSetup(self, output):
+        """Docstring by Claude. Read a heater's setup (``HTRSET?``, p.155).
+
+        Returns the fields written by :meth:`WriteHeaterSetup`.
+
+        Parameters
+        ----------
+        output : int
+            Output number: ``0`` sample heater or ``1`` warm-up heater.
+
+        Returns
+        -------
+        str
+            ``<resistance>,<max current>,<max user current>,<current/power>``.
+        """
+        return self.query(f"HTRSET?{output}")
+
+    def WriteHeaterSetup(self, output, resistance, max_current,
+                         max_user_current, display):
+        """Docstring by Claude. Configure a heater output (``HTRSET``, p.155).
+
+        Tells the instrument what is physically wired to the output, so it can
+        convert between current and power correctly and refuse to exceed the
+        heater's rating. The maximum current is a hardware protection setting:
+        get it wrong in the permissive direction and the heater can be
+        overdriven, so it should match the actual resistor.
+
+        Parameters
+        ----------
+        output : int
+            Output number: ``0`` sample heater or ``1`` warm-up heater.
+        resistance : float
+            Heater resistance in ohms, 1 to 2000.
+        max_current : int
+            Maximum current selection: ``0`` user-specified (use
+            ``max_user_current``), ``1`` 0.45 A, ``2`` 0.63 A, ``3`` 0.89 A,
+            ``4`` 1.12 A.
+        max_user_current : float
+            User-specified maximum current in amps, up to 1.732 A. Only used
+            when ``max_current`` is ``0``.
+        display : int
+            Units the heater output is displayed and commanded in: ``1``
+            current, ``2`` power.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(
+            f"HTRSET {output},{resistance},{max_current},"
+            f"{max_user_current},{display}"
+        )
+
+    def ReadRamp(self, output):
+        """Docstring by Claude. Read the setpoint ramp settings (``RAMP?``, p.165).
+
+        Parameters
+        ----------
+        output : int
+            Output number: ``0`` sample heater or ``1`` warm-up heater.
+
+        Returns
+        -------
+        str
+            ``<off/on>,<rate value>``.
+        """
+        return self.query(f"RAMP?{output}")
+
+    def WriteRamp(self, output, state, rate):
+        """Docstring by Claude. Configure setpoint ramping (``RAMP``, p.165).
+
+        With ramping on, a new setpoint is approached at a controlled rate
+        rather than stepped to immediately. This is gentler on the fridge: a
+        step change asks the loop for maximum heater output at once, whereas a
+        ramp keeps the heat load predictable.
+
+        Parameters
+        ----------
+        output : int
+            Output number: ``0`` sample heater or ``1`` warm-up heater.
+        state : int
+            ``0`` ramping off, ``1`` ramping on.
+        rate : float
+            Ramp rate in kelvin per minute, 0.001 to 10.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f"RAMP {output},{state},{rate}")
+
+    def ReadRampStatus(self, output):
+        """Docstring by Claude. Read whether a setpoint ramp is in progress (``RAMPST?``, p.165).
+
+        Poll this to know when the instrument has finished ramping and the
+        setpoint has actually reached its target value.
+
+        Parameters
+        ----------
+        output : int
+            Output number: ``0`` sample heater or ``1`` warm-up heater.
+
+        Returns
+        -------
+        str
+            ``0`` ramp complete (or not ramping), ``1`` currently ramping.
+        """
+        return self.query(f"RAMPST?{output}")
+
+    def WriteStillOutput(self, output, level):
+        """Docstring by Claude. Set the still-heater output level (``STILL``, p.168).
+
+        Applies when output 2 is configured in still mode (see
+        :meth:`WriteOutputMode`). The still heater sets the circulation rate
+        of the dilution unit, and so indirectly the base temperature.
+
+        Parameters
+        ----------
+        output : int
+            Output number (``2`` for the still).
+        level : float
+            Output level as a percentage of full scale, 0 to 100.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f"STILL {output},{level}")
+
+    def ReadAnalogOutputParameter(self, output):
+        """Docstring by Claude. Read the analog output configuration (``ANALOG?``, pp.148-149).
+
+        Returns the fields written by :meth:`WriteAnalogOutputParameter`.
+
+        Parameters
+        ----------
+        output : int
+            Output number (``2`` for the analog output).
+
+        Returns
+        -------
+        str
+            ``<polarity>,<mode>,<input>,<source>,<high>,<low>,<manual>``.
+        """
+        return self.query(f"ANALOG?{output}")
+
+    def WriteAnalogOutputParameter(self, output, polarity, mode,
+                                   input_channel, source, high_value,
+                                   low_value, manual_value):
+        """Docstring by Claude. Configure the analog output (``ANALOG``, pp.148-149).
+
+        Used when the analog output is driven as a monitor: it emits a voltage
+        proportional to a chosen reading, scaled so that ``low_value`` maps to
+        the bottom of the output range and ``high_value`` to the top. That
+        voltage can then be logged by an external DAQ.
+
+        Parameters
+        ----------
+        output : int
+            Output number (``2`` for the analog output).
+        polarity : int
+            ``0`` unipolar, ``1`` bipolar.
+        mode : int
+            ``0`` off, ``1`` monitor out, ``2`` open loop, ``4`` still,
+            ``5`` closed loop, ``6`` warm up.
+        input_channel : str or int
+            Input the monitor tracks: ``A`` or ``1``-``16``, ``0`` for none.
+        source : int
+            Quantity monitored: ``1`` kelvin, ``2`` ohms, ``3`` linear data.
+        high_value : float
+            Reading corresponding to +100% output.
+        low_value : float
+            Reading corresponding to 0% (unipolar) or -100% (bipolar) output.
+        manual_value : float
+            Output level used in manual mode, as a percentage.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(
+            f"ANALOG {output},{polarity},{mode},{input_channel},{source},"
+            f"{high_value},{low_value},{manual_value}"
+        )
+
+    def ReadWarmupMode(self, output):
+        """Docstring by Claude. Read the warm-up heater mode (``WARMUP?``, p.169).
+
+        Parameters
+        ----------
+        output : int
+            Output number (``1`` for the warm-up heater).
+
+        Returns
+        -------
+        str
+            ``<mode>,<percentage>``.
+        """
+        return self.query(f"WARMUP?{output}")
+
+    def WriteWarmupMode(self, output, mode, percentage):
+        """Docstring by Claude. Configure the warm-up heater (``WARMUP``, p.169).
+
+        The warm-up heater is the high-power output used to bring the fridge
+        back to room temperature. In auto mode the instrument ramps the output
+        itself; in continuous mode it holds the given level until told
+        otherwise.
+
+        Parameters
+        ----------
+        output : int
+            Output number (``1`` for the warm-up heater).
+        mode : int
+            ``0`` auto off, ``1`` continuous.
+        percentage : float
+            Output level as a percentage of full scale, 0 to 100.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f"WARMUP {output},{mode},{percentage}")
+
+    def ReadZone(self, output, zone):
+        """Docstring by Claude. Read one zone's control parameters (``ZONE?``, p.170).
+
+        Parameters
+        ----------
+        output : int
+            Output number: ``0`` sample heater or ``1`` warm-up heater.
+        zone : int
+            Zone number, ``1``-``10``.
+
+        Returns
+        -------
+        str
+            ``<upper bound>,<P>,<I>,<D>,<mout>,<range>,<rate>,<relay 1>,
+            <relay 2>``.
+        """
+        return self.query(f"ZONE?{output},{zone}")
+
+    def WriteZone(self, output, zone, upper_bound, p, i, d, manual_output,
+                  heater_range, ramp_rate, relay_1=0, relay_2=0):
+        """Docstring by Claude. Define one zone's control parameters (``ZONE``, p.170).
+
+        Zone mode lets the instrument switch PID gains and heater range
+        automatically as the temperature changes, which matters on a dilution
+        fridge because gains that are stable at base are wrong at a few
+        kelvin. Each zone applies from the previous zone's upper bound up to
+        its own, and zones must be entered in ascending order of
+        ``upper_bound``. Zone mode is selected with ``mode=3`` in
+        :meth:`WriteOutputMode`.
+
+        Parameters
+        ----------
+        output : int
+            Output number: ``0`` sample heater or ``1`` warm-up heater.
+        zone : int
+            Zone number, ``1``-``10``.
+        upper_bound : float
+            Upper setpoint boundary of this zone, in kelvin.
+        p : float
+            Proportional gain for the zone, 0.0 to 1000.
+        i : float
+            Integral time in seconds, 0 to 10000.
+        d : float
+            Derivative time in seconds, 0 to 2500.
+        manual_output : float
+            Manual output offset for the zone, as a percentage.
+        heater_range : int
+            Heater range used in the zone; see :meth:`WriteHeaterRange`.
+        ramp_rate : float
+            Setpoint ramp rate in kelvin per minute, 0.001 to 10.
+        relay_1 : int, optional
+            ``0`` off, ``1`` on. Default 0.
+        relay_2 : int, optional
+            ``0`` off, ``1`` on. Default 0.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(
+            f"ZONE {output},{zone},{upper_bound},{p},{i},{d},"
+            f"{manual_output},{heater_range},{ramp_rate},{relay_1},{relay_2}"
+        )

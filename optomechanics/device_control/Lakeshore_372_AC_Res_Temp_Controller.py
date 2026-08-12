@@ -6,13 +6,6 @@ from .Device_Visa_Super import Device
 # trigger_command1 = 'KRDG?3'
 # T1K_value=float(instrument.query(trigger_command1))
 
-#: Module-level safety guard. While ``True`` every method that would send a
-#: command to the instrument prints the command instead of transmitting it, so
-#: the driver can be exercised with no hardware attached and no risk of
-#: changing heater or setpoint state. Queries are never affected.
-SAFE_MODE = False
-
-
 class Temp_Controller(Device):
     """Docstring by Claude. Driver for the Lake Shore Model 372 AC resistance
     bridge and temperature controller.
@@ -34,7 +27,7 @@ class Temp_Controller(Device):
 
     Method naming follows the repository convention: ``Read...`` methods issue
     a query and return the instrument's response, ``Write...`` methods send a
-    command through :meth:`safe_write`.
+    command to the instrument.
 
     References
     ----------
@@ -44,33 +37,6 @@ class Temp_Controller(Device):
     """
     def __init__(self, *args, **kwargs):
         Device.__init__(self, *args, **kwargs, )
-
-    # --- safety guard ---------------------------------------------------
-
-    def safe_write(self, cmd):
-        """Docstring by Claude. Send a command, unless safe mode is engaged.
-
-        All ``Write...`` methods route through this rather than calling
-        :meth:`write` directly, so that the module-level :data:`SAFE_MODE`
-        flag can block every state-changing command in one place.
-
-        Parameters
-        ----------
-        cmd : str
-            The fully formatted SCPI command string, e.g. ``"SETP 0,0.1"``.
-
-        Returns
-        -------
-        bool
-            ``True`` if the command was actually transmitted, ``False`` if it
-            was suppressed because :data:`SAFE_MODE` is ``True``.
-        """
-        if SAFE_MODE:
-            print(f"[SAFE MODE] would send: {cmd}")
-            return False
-        print(f"[SEND] {cmd}")
-        self.write(cmd)
-        return True
 
     # --- reads ----------------------------------------------------------
 
@@ -320,10 +286,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"PID {output},{p},{i},{d}")
+        return self.write(f"PID {output},{p},{i},{d}")
 
     def WriteSetpoint(self, output, setpoint):
         """Docstring by Claude. Set the control setpoint (``SETP``, p.168).
@@ -342,10 +307,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"SETP {output},{setpoint}")
+        return self.write(f"SETP {output},{setpoint}")
 
     def WriteHeaterRange(self, output, heater_range):
         """Docstring by Claude. Set the heater range (``RANGE``, p.165).
@@ -383,10 +347,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"RANGE {output},{heater_range}")
+        return self.write(f"RANGE {output},{heater_range}")
 
     def WriteManualOutput(self, output, percent):
         """Docstring by Claude. Set the manual output level (``MOUT``, p.162).
@@ -404,10 +367,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"MOUT {output},{percent}")
+        return self.write(f"MOUT {output},{percent}")
 
     def WriteOutputMode(self, output, mode, input_channel, powerup_enable=0,
                         polarity=0, use_filter=0, delay=1):
@@ -450,10 +412,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(
+        return self.write(
             f"OUTMODE {output},{mode},{input_channel},{powerup_enable},"
             f"{polarity},{use_filter},{delay}"
         )
@@ -559,10 +520,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write("MNMXRST")
+        return self.write("MNMXRST")
 
     def ReadHeaterStatus(self, output):
         """Docstring by Claude. Read the heater error status (``HTRST?``, p.155).
@@ -659,10 +619,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(
+        return self.write(
             f"INSET {channel},{enabled},{dwell},{pause},{curve_number},"
             f"{tempco}"
         )
@@ -705,10 +664,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(
+        return self.write(
             f"INTYPE {channel},{mode},{excitation},{autorange},"
             f"{resistance_range},{cs_shunt},{units}"
         )
@@ -758,10 +716,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(
+        return self.write(
             f"FILTER {channel},{state},{settle_time},{window}"
         )
 
@@ -796,10 +753,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f'INNAME {channel},"{name}"')
+        return self.write(f'INNAME {channel},"{name}"')
 
     def ReadInputCurveNumber(self, channel):
         """Docstring by Claude. Read a channel's curve number (``INCRV?``, p.156).
@@ -835,10 +791,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"INCRV {channel},{curve_number}")
+        return self.write(f"INCRV {channel},{curve_number}")
 
     def ReadTemperatureLimit(self, channel):
         """Docstring by Claude. Read a channel's temperature limit (``TLIMIT?``, pp.168-169).
@@ -875,10 +830,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"TLIMIT {channel},{limit}")
+        return self.write(f"TLIMIT {channel},{limit}")
 
     def ReadExcitationFrequency(self, channel):
         """Docstring by Claude. Read the excitation frequency (``FREQ?``, p.154).
@@ -913,10 +867,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"FREQ {channel},{frequency}")
+        return self.write(f"FREQ {channel},{frequency}")
 
     def ReadCommonModeReduction(self):
         """Docstring by Claude. Read the common-mode reduction state (``CMR?``, p.150).
@@ -943,10 +896,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"CMR {state}")
+        return self.write(f"CMR {state}")
 
     # --- outputs and control --------------------------------------------
 
@@ -996,10 +948,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(
+        return self.write(
             f"HTRSET {output},{resistance},{max_current},"
             f"{max_user_current},{display}"
         )
@@ -1038,10 +989,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"RAMP {output},{state},{rate}")
+        return self.write(f"RAMP {output},{state},{rate}")
 
     def ReadRampStatus(self, output):
         """Docstring by Claude. Read whether a setpoint ramp is in progress (``RAMPST?``, p.165).
@@ -1077,10 +1027,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"STILL {output},{level}")
+        return self.write(f"STILL {output},{level}")
 
     def ReadAnalogOutputParameter(self, output):
         """Docstring by Claude. Read the analog output configuration (``ANALOG?``, pp.148-149).
@@ -1131,10 +1080,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(
+        return self.write(
             f"ANALOG {output},{polarity},{mode},{input_channel},{source},"
             f"{high_value},{low_value},{manual_value}"
         )
@@ -1173,10 +1121,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"WARMUP {output},{mode},{percentage}")
+        return self.write(f"WARMUP {output},{mode},{percentage}")
 
     def ReadZone(self, output, zone):
         """Docstring by Claude. Read one zone's control parameters (``ZONE?``, p.170).
@@ -1235,10 +1182,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(
+        return self.write(
             f"ZONE {output},{zone},{upper_bound},{p},{i},{d},"
             f"{manual_output},{heater_range},{ramp_rate},{relay_1},{relay_2}"
         )
@@ -1275,10 +1221,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"SCAN {channel},{autoscan}")
+        return self.write(f"SCAN {channel},{autoscan}")
 
     def ReadDigitalOutput(self):
         """Docstring by Claude. Read the digital output state (``DOUT?``, p.153).
@@ -1306,10 +1251,9 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"DOUT {bit_weighting}")
+        return self.write(f"DOUT {bit_weighting}")
 
     # --- diagnostics -----------------------------------------------------
 
@@ -1350,7 +1294,6 @@ class Temp_Controller(Device):
 
         Returns
         -------
-        bool
-            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        None
         """
-        return self.safe_write(f"MONITOR {mode}")
+        return self.write(f"MONITOR {mode}")

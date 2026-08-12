@@ -839,3 +839,111 @@ class Temp_Controller(Device):
             ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
         """
         return self.safe_write(f"INCRV {channel},{curve_number}")
+
+    def ReadTemperatureLimit(self, channel):
+        """Docstring by Claude. Read a channel's temperature limit (``TLIMIT?``, pp.168-169).
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, or ``1``-``16`` for a measurement
+            channel.
+
+        Returns
+        -------
+        str
+            Limit in kelvin; ``0`` means no limit is set.
+        """
+        return self.query(f"TLIMIT?{channel}")
+
+    def WriteTemperatureLimit(self, channel, limit):
+        """Docstring by Claude. Set a channel's temperature limit (``TLIMIT``, pp.168-169).
+
+        A protective interlock: if the channel reads above this temperature
+        the instrument turns all heater outputs off. Setting a limit on the
+        mixing-chamber or still thermometer guards against a runaway loop
+        heating the fridge, so it is worth configuring before enabling
+        closed-loop control.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, or ``1``-``16`` for a measurement
+            channel.
+        limit : float
+            Limit in kelvin. ``0`` disables the limit.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f"TLIMIT {channel},{limit}")
+
+    def ReadExcitationFrequency(self, channel):
+        """Docstring by Claude. Read the excitation frequency (``FREQ?``, p.154).
+
+        Parameters
+        ----------
+        channel : str or int
+            ``0`` for the measurement inputs, ``A`` for the control input.
+
+        Returns
+        -------
+        str
+            Frequency index: ``1`` = 9.8 Hz, ``2`` = 13.7 Hz, ``3`` = 18.2 Hz.
+        """
+        return self.query(f"FREQ?{channel}")
+
+    def WriteExcitationFrequency(self, channel, frequency):
+        """Docstring by Claude. Set the AC excitation frequency (``FREQ``, p.154).
+
+        The bridge measures with an AC excitation, and the frequency is chosen
+        to avoid line pickup and to suit the sensor's cabling. Higher
+        frequencies settle faster but are more affected by cable capacitance.
+        The setting applies to a whole input group, not to individual
+        measurement channels.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``0`` for the measurement inputs, ``A`` for the control input.
+        frequency : int
+            ``1`` = 9.8 Hz, ``2`` = 13.7 Hz, ``3`` = 18.2 Hz.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f"FREQ {channel},{frequency}")
+
+    def ReadCommonModeReduction(self):
+        """Docstring by Claude. Read the common-mode reduction state (``CMR?``, p.150).
+
+        Returns
+        -------
+        str
+            ``0`` off, ``1`` on.
+        """
+        return self.query("CMR?")
+
+    def WriteCommonModeReduction(self, state):
+        """Docstring by Claude. Enable or disable common-mode reduction (``CMR``, p.150).
+
+        Common-mode reduction suppresses the common-mode voltage on the input,
+        which is what causes VCM overloads on long or noisy fridge wiring. If
+        :meth:`ReadReadingStatus` is reporting VCM OVL, turning this on is the
+        first thing to try.
+
+        Parameters
+        ----------
+        state : int
+            ``0`` off, ``1`` on.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f"CMR {state}")

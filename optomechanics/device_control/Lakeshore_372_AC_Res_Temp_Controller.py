@@ -1242,3 +1242,115 @@ class Temp_Controller(Device):
             f"ZONE {output},{zone},{upper_bound},{p},{i},{d},"
             f"{manual_output},{heater_range},{ramp_rate},{relay_1},{relay_2}"
         )
+
+    # --- scanner ---------------------------------------------------------
+
+    def ReadScanner(self):
+        """Docstring by Claude. Read the scanner state (``SCAN?``, p.167).
+
+        Returns
+        -------
+        str
+            ``<channel>,<autoscan>`` — the channel currently selected and
+            whether autoscan is running.
+        """
+        return self.query("SCAN?")
+
+    def WriteScanner(self, channel, autoscan):
+        """Docstring by Claude. Select a scanner channel or start autoscan (``SCAN``, p.167).
+
+        With autoscan off the instrument dwells on one channel indefinitely,
+        which gives the fastest update rate on that thermometer. With autoscan
+        on it steps through all enabled channels, spending the dwell time on
+        each — see :meth:`WriteInputChannelParameter` for the per-channel
+        dwell and pause settings that determine how long a full cycle takes.
+
+        Parameters
+        ----------
+        channel : int
+            Measurement channel to select, ``1``-``16``. With autoscan on this
+            is the channel scanning starts from.
+        autoscan : int
+            ``0`` autoscan off (hold on ``channel``), ``1`` autoscan on.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f"SCAN {channel},{autoscan}")
+
+    def ReadDigitalOutput(self):
+        """Docstring by Claude. Read the digital output state (``DOUT?``, p.153).
+
+        Returns
+        -------
+        str
+            Bit-weighted value of the five digital output lines.
+        """
+        return self.query("DOUT?")
+
+    def WriteDigitalOutput(self, bit_weighting):
+        """Docstring by Claude. Set the digital output lines (``DOUT``, p.153).
+
+        Drives the five general-purpose digital outputs on the rear panel.
+        These lines are only available when no scanner is installed — with a
+        3726 or 3708 fitted the instrument uses them to address the scanner
+        and the command has no effect.
+
+        Parameters
+        ----------
+        bit_weighting : int
+            Bit-weighted sum of the lines to assert, 0 to 31 (bit 1 = output
+            1, bit 2 = output 2, and so on).
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f"DOUT {bit_weighting}")
+
+    # --- diagnostics -----------------------------------------------------
+
+    def ReadMonitorOutput(self):
+        """Docstring by Claude. Read the diagnostic monitor selection (``MONITOR?``, p.161).
+
+        Returns
+        -------
+        str
+            The selected monitor source; see :meth:`WriteMonitorOutput`.
+        """
+        return self.query("MONITOR?")
+
+    def WriteMonitorOutput(self, mode):
+        """Docstring by Claude. Select the diagnostic monitor point (``MONITOR``, p.161).
+
+        Routes an internal signal to the monitor output so it can be observed
+        on a scope or spectrum analyser. This is the tool for chasing noise
+        and overload problems in the measurement chain (manual section 8.12) —
+        for example, watching the common-mode voltage when
+        :meth:`ReadReadingStatus` reports VCM overloads.
+
+        Parameters
+        ----------
+        mode : int
+            Monitor source:
+
+            ==== ==================================================
+            0    off
+            1    CS NEG — current source, negative
+            2    CS POS — current source, positive
+            3    VAD — measurement ADC input
+            4    VCM NEG — common-mode voltage, negative
+            5    VCM POS — common-mode voltage, positive
+            6    VDIF — differential input voltage
+            7    VAD2 — control-input ADC
+            ==== ==================================================
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write(f"MONITOR {mode}")

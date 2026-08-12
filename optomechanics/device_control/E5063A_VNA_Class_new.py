@@ -29,7 +29,7 @@ import pandas
 
 class VNA(Device):
     """
-    Made by Claude. VISA driver for the Keysight E5063A vector network analyser.
+    Docstring by Claude. VISA driver for the Keysight E5063A vector network analyser.
 
     Extends :class:`~optomechanics.device_control.Device_Visa_Super.Device`
     with SCPI commands specific to the E5063A.  The command set is
@@ -62,7 +62,7 @@ class VNA(Device):
     
     def __init__(self, address, baud_rate = 9600):
         """
-        Made by Claude. Initialise the E5063A VNA driver.
+        Docstring by Claude. Initialise the E5063A VNA driver.
 
         Parameters
         ----------
@@ -77,7 +77,7 @@ class VNA(Device):
     
     def sense_freq_start(self, channel, FreqVal):
         """
-        Made by Claude. Set the sweep start frequency (``SENSe<Ch>:FREQuency:STARt``).
+        Docstring by Claude. Set the sweep start frequency (``SENSe<Ch>:FREQuency:STARt``).
 
         Parameters
         ----------
@@ -97,7 +97,7 @@ class VNA(Device):
     
     def sense_freq_stop(self, channel, FreqVal):
         """
-        Made by Claude. Set the sweep stop frequency (``SENSe<Ch>:FREQuency:STOP``).
+        Docstring by Claude. Set the sweep stop frequency (``SENSe<Ch>:FREQuency:STOP``).
 
         Parameters
         ----------
@@ -118,7 +118,7 @@ class VNA(Device):
     def sense_sweep_points(self, channel, SweepPoint):
 
         """
-        Made by Claude. Set the number of measurement points per sweep (``SENSe<Ch>:SWEep:POINts``).
+        Docstring by Claude. Set the number of measurement points per sweep (``SENSe<Ch>:SWEep:POINts``).
 
         Parameters
         ----------
@@ -146,7 +146,7 @@ class VNA(Device):
 
     def sense_sweep_type(self, channel, sense_sweep_type_format):
         """
-        Made by Claude. Set the sweep type (``SENSe<Ch>:SWEep:TYPE``).
+        Docstring by Claude. Set the sweep type (``SENSe<Ch>:SWEep:TYPE``).
 
         Parameters
         ----------
@@ -165,7 +165,7 @@ class VNA(Device):
 
     def sense_average_state(self, channel, state):
         """
-        Made by Claude. Enable or disable sweep averaging (``SENSe<Ch>:AVERage:STATe``).
+        Docstring by Claude. Enable or disable sweep averaging (``SENSe<Ch>:AVERage:STATe``).
 
         Parameters
         ----------
@@ -185,7 +185,7 @@ class VNA(Device):
     
     def sense_average_clear(self, channel):
         """
-        Made by Claude. Start a new average cycle, discarding previous results (``SENSe:AVERage:CLEar``).
+        Docstring by Claude. Start a new average cycle, discarding previous results (``SENSe:AVERage:CLEar``).
 
         Parameters
         ----------
@@ -202,7 +202,7 @@ class VNA(Device):
     
     def sense_average_count(self, channel, average_factor):
         """
-        Made by Claude. Set the number of sweeps to average (``SENSe<Ch>:AVERage:COUNt``).
+        Docstring by Claude. Set the number of sweeps to average (``SENSe<Ch>:AVERage:COUNt``).
 
         This sets the averaging factor for consecutive sweeps (not
         point-by-point averaging).  Verify behaviour before use.
@@ -226,7 +226,7 @@ class VNA(Device):
     
     def sense_bandwidth_resolution(self, channel, band_width):
         """
-        Made by Claude. Set the IF (resolution) bandwidth (``SENSe<Ch>:BANDwidth:RESolution``).
+        Docstring by Claude. Set the IF (resolution) bandwidth (``SENSe<Ch>:BANDwidth:RESolution``).
 
         Parameters
         ----------
@@ -259,7 +259,7 @@ class VNA(Device):
     
     def sense_sweep_time_auto(self, channel, boolean):
         """
-        Made by Claude. Enable or disable automatic sweep time (``SENSe<Ch>:SWEep:TIME:AUTO``).
+        Docstring by Claude. Enable or disable automatic sweep time (``SENSe<Ch>:SWEep:TIME:AUTO``).
 
         Parameters
         ----------
@@ -279,7 +279,7 @@ class VNA(Device):
     
     def source_power_level(self, channel, IntSourcePow = -10):
         """
-        Made by Claude. Set the internal source power level (``SOURce<Ch>:POWer:LEVel:IMMediate:AMPLitude``).
+        Docstring by Claude. Set the internal source power level (``SOURce<Ch>:POWer:LEVel:IMMediate:AMPLitude``).
 
         Parameters
         ----------
@@ -309,7 +309,7 @@ class VNA(Device):
  
     def initiate_continuous(self, channel, boolean):
         """
-        Made by Claude. Select single-sweep or continuous-sweep mode (``INITiate<Ch>:CONTinuous``).
+        Docstring by Claude. Select single-sweep or continuous-sweep mode (``INITiate<Ch>:CONTinuous``).
 
         Parameters
         ----------
@@ -328,7 +328,7 @@ class VNA(Device):
     
     def initiate_sweep(self,channel):
         """
-        Made by Claude. Trigger a single sweep (``INITiate<Ch>:IMMediate``).
+        Docstring by Claude. Trigger a single sweep (``INITiate<Ch>:IMMediate``).
 
         Only available when the instrument is in single-sweep mode
         (``INITiate<Ch>:CONTinuous OFF``).
@@ -350,7 +350,7 @@ class VNA(Device):
     
     def calculate_parameter_define(self, channel, TraceName, Result):
         """
-        Made by Claude. Assign a measurement parameter to a trace (``CALCulate<Ch>:PARameter<Tr>:DEFine``).
+        Docstring by Claude. Assign a measurement parameter to a trace (``CALCulate<Ch>:PARameter<Tr>:DEFine``).
 
         May need to be used alongside other commands to create the channel
         and trace first.
@@ -375,7 +375,7 @@ class VNA(Device):
     
     def output_state(self, state):
         """
-        Made by Claude. Enable or disable the RF signal output (``OUTPut:STATe``).
+        Docstring by Claude. Enable or disable the RF signal output (``OUTPut:STATe``).
 
         Parameters
         ----------
@@ -392,7 +392,7 @@ class VNA(Device):
     def display_window_trace_y_scale_auto(self, channel, TraceName, boolean):
 
         """
-        Made by Claude. Enable or disable Y-axis autoscale for a trace (``DISPlay:WINDow<Ch>:TRACe<Tr>:Y:SCALe:AUTO``).
+        Docstring by Claude. Enable or disable Y-axis autoscale for a trace (``DISPlay:WINDow<Ch>:TRACe<Tr>:Y:SCALe:AUTO``).
 
         Parameters
         ----------
@@ -413,7 +413,7 @@ class VNA(Device):
     
     def calculate_data_format(self, channel, TraceName, data_format):
         """
-        Made by Claude. Set the data format for a trace (``CALCulate<Ch>:TRACe<Tr>:FORMat``).
+        Docstring by Claude. Set the data format for a trace (``CALCulate<Ch>:TRACe<Tr>:FORMat``).
 
         See "Internal data arrays" in the instrument manual for details on
         how the format affects retrieved data.
@@ -440,7 +440,7 @@ class VNA(Device):
         
     def sense_sweep_time_query(self, channel):
         """
-        Made by Claude. Query the current sweep time (``SENSe<Ch>:SWEep:TIME?``).
+        Docstring by Claude. Query the current sweep time (``SENSe<Ch>:SWEep:TIME?``).
 
         Parameters
         ----------
@@ -459,7 +459,7 @@ class VNA(Device):
     def calculate_data_fdata_query(self, channel, TraceName):
 
         """
-        Made by Claude. Retrieve formatted trace data (``CALCulate<Ch>:TRACe<Tr>:DATA:FDATa?``).
+        Docstring by Claude. Retrieve formatted trace data (``CALCulate<Ch>:TRACe<Tr>:DATA:FDATa?``).
 
         Parameters
         ----------
@@ -479,7 +479,7 @@ class VNA(Device):
     def calculate_data_sdata_query(self, channel, TraceName):
 
         """
-        Made by Claude. Retrieve corrected (complex) trace data (``CALCulate<Ch>:TRACe<Tr>:DATA:SDATa?``).
+        Docstring by Claude. Retrieve corrected (complex) trace data (``CALCulate<Ch>:TRACe<Tr>:DATA:SDATa?``).
 
         Parameters
         ----------
@@ -498,7 +498,7 @@ class VNA(Device):
     
     def sense_freq_data(self, channel):
         """
-        Made by Claude. Query the frequency stimulus data array (``SENSe<Ch>:FREQuency:DATA?``).
+        Docstring by Claude. Query the frequency stimulus data array (``SENSe<Ch>:FREQuency:DATA?``).
 
         Parameters
         ----------
@@ -515,7 +515,7 @@ class VNA(Device):
 
     def error(self,):
         """
-        Made by Claude. Query the instrument error queue (``SYST:ERR?``).
+        Docstring by Claude. Query the instrument error queue (``SYST:ERR?``).
 
         Returns
         -------
@@ -530,7 +530,7 @@ class VNA(Device):
     
     def recieve_fdata(self, data_formats, channel, TraceName,):
         """
-        Made by Claude. Retrieve formatted trace data for multiple data formats.
+        Docstring by Claude. Retrieve formatted trace data for multiple data formats.
 
         Iterates over ``data_formats``, sets the trace format with
         :meth:`calculate_data_format`, and queries the data with
@@ -570,7 +570,7 @@ class VNA(Device):
               sense_sweep_type_format = "LINear",\
               reset = True,_file_name = "default", file_location = "", extra_meta = {}, dummy_sweep = False, ):
         """
-        Made by Claude. Configure the VNA and perform a single S-parameter sweep.
+        Docstring by Claude. Configure the VNA and perform a single S-parameter sweep.
 
         Resets the instrument (optionally), configures frequency range, sweep
         type, source power, IF bandwidth, and averaging, then triggers a

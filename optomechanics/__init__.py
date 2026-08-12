@@ -1,5 +1,5 @@
 """
-Made by Claude. Top-level package for the optomechanics experiment suite.
+Docstring by Claude. Top-level package for the optomechanics experiment suite.
 
 Provides data acquisition, analysis, and device-control tools for
 optomechanical experiments.  The main sub-packages are:

@@ -5,7 +5,7 @@ Created on Tue Apr 23 14:57:25 2024
 @author: seanh
 """
 
-from optomechanics import Device
+from .Device_Visa_Super import Device
 import pyvisa
 import numpy as np
 

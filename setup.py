@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Apr  9 11:37:10 2024
+from setuptools import setup, find_packages
 
-@author: WaveWhisperer
-"""
-from setuptools import setup
 setup(
-  name='optomechanics',
-  version='1.0',
-  py_modules=['optomechanics'],
+    name='optomechanics',
+    version='1.0',
+    packages=find_packages(),
+    install_requires=[
+        'numpy',
+        'scipy',
+        'pandas',
+        'matplotlib',
+        'plotly',
+        'pyvisa',
+    ],
 )

@@ -89,8 +89,8 @@ import traceback
 import numpy as np
 import pandas as pd
 
-from optomechanics.device_control.Lakeshore_372_AC_Res_Temp_Controller import Temp_Controller
-from optomechanics.data_management.data_logger import dated_logger
+from Optomechanics.device_control.Lakeshore_372_AC_Res_Temp_Controller import Temp_Controller
+from Optomechanics.data_management.data_logger import dated_logger
 
 
 # %% Configuration

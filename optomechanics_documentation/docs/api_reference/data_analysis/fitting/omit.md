@@ -1,8 +1,11 @@
-# omit
+# omit (OMIT / OMIA)
 
-Fitting routines for Optomechanically Induced Transparency (OMIT) spectra.
-Provides the OMIT lineshape equation and two fitting helpers — one with a
-free background floor and one with a fixed floor.
+Fitting routines for Optomechanically Induced Transparency (OMIT) and
+Optomechanically Induced Absorption (OMIA) spectra.  The same lineshape
+equation handles both effects via the sign of the amplitude parameter `A`
+(positive = transparency peak, negative = absorption dip).  Two fitting
+helpers are provided — one with a free background floor and one with a
+fixed floor.
 
 ## Examples
 

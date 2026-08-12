@@ -17,7 +17,7 @@ import numpy as np
 #import pyvisa  as visa
 #from pyvisa import constants
 from .Device_Visa_Super import Device
-from optomechanics.Fitting import re_and_im_to_dB_and_phase
+from optomechanics.data_analysis.unit_conversions import linear_voltage_to_dB
 import pandas
 
 
@@ -25,7 +25,7 @@ import pandas
 
 class ZNA(Device):
     """
-    Made by Claude. VISA driver for the Rohde & Schwarz ZNA vector network analyser.
+    Docstring by Claude. VISA driver for the Rohde & Schwarz ZNA vector network analyser.
 
     Extends :class:`~optomechanics.device_control.Device_Visa_Super.Device`
     with SCPI commands specific to the R&S ZNA family.
@@ -68,7 +68,7 @@ class ZNA(Device):
     
     def __init__(self, address, baud_rate = 9600, **kwargs):
         """
-        Made by Claude. Initialise the ZNA driver.
+        Docstring by Claude. Initialise the ZNA driver.
 
         Parameters
         ----------
@@ -85,7 +85,7 @@ class ZNA(Device):
         
     def calculate_format(self, channel, format_type):
         """
-        Made by Claude. Set the trace display format (``CALCulate<Ch>:FORMat``).
+        Docstring by Claude. Set the trace display format (``CALCulate<Ch>:FORMat``).
 
         Parameters
         ----------
@@ -110,7 +110,7 @@ class ZNA(Device):
     def sense_freq_start(self, channel, FreqVal):
 
         """
-        Made by Claude. Set the sweep start frequency (``SENSe<Ch>:FREQuency:STARt``).
+        Docstring by Claude. Set the sweep start frequency (``SENSe<Ch>:FREQuency:STARt``).
 
         Parameters
         ----------
@@ -130,7 +130,7 @@ class ZNA(Device):
     def sense_freq_stop(self, channel, FreqVal):
 
         """
-        Made by Claude. Set the sweep stop frequency (``SENSe<Ch>:FREQuency:STOP``).
+        Docstring by Claude. Set the sweep stop frequency (``SENSe<Ch>:FREQuency:STOP``).
 
         Parameters
         ----------
@@ -151,7 +151,7 @@ class ZNA(Device):
     def sense_sweep_points(self, channel, SweepPoint):
 
         """
-        Made by Claude. Set the number of measurement points per sweep (``SENSe<Ch>:SWEep:POINts``).
+        Docstring by Claude. Set the number of measurement points per sweep (``SENSe<Ch>:SWEep:POINts``).
 
         Parameters
         ----------
@@ -179,7 +179,7 @@ class ZNA(Device):
 
     def sense_sweep_type(self, channel, sense_sweep_type_format):
         """
-        Made by Claude. Select the sweep type (``SENSe<Ch>:SWEep:TYPE``).
+        Docstring by Claude. Select the sweep type (``SENSe<Ch>:SWEep:TYPE``).
 
         Parameters
         ----------
@@ -199,7 +199,7 @@ class ZNA(Device):
 
     def sense_average_state(self, channel, state):
         """
-        Made by Claude. Enable or disable sweep averaging (``SENSe<Ch>:AVERage:STATe``).
+        Docstring by Claude. Enable or disable sweep averaging (``SENSe<Ch>:AVERage:STATe``).
 
         Parameters
         ----------
@@ -218,7 +218,7 @@ class ZNA(Device):
     
     def sense_average_clear(self, channel):
         """
-        Made by Claude. Start a new average cycle, discarding previous results (``SENSe:AVERage:CLEar``).
+        Docstring by Claude. Start a new average cycle, discarding previous results (``SENSe:AVERage:CLEar``).
 
         Parameters
         ----------
@@ -235,7 +235,7 @@ class ZNA(Device):
     
     def sense_average_count(self, channel, average_factor):
         """
-        Made by Claude. Set the sweep averaging factor (``SENSe<Ch>:AVERage:COUNt``).
+        Docstring by Claude. Set the sweep averaging factor (``SENSe<Ch>:AVERage:COUNt``).
 
         Parameters
         ----------
@@ -254,7 +254,7 @@ class ZNA(Device):
     
     def sense_average_point_count(self, channel, factor):
         """
-        Made by Claude. Set the point-averaging factor (``SENSe<Ch>:AVERage:POINt:COUNt``).
+        Docstring by Claude. Set the point-averaging factor (``SENSe<Ch>:AVERage:POINt:COUNt``).
 
         Requires option R&S ZNA-K7.  Point averaging must be enabled with
         ``SENSe<Ch>:AVERage:POINt:STATe ON`` before this setting takes effect.
@@ -277,7 +277,7 @@ class ZNA(Device):
     
     def sense_bandwidth_resolution(self, channel, band_width):
         """
-        Made by Claude. Set the IF (resolution) bandwidth (``SENSe<Ch>:BANDwidth:RESolution``).
+        Docstring by Claude. Set the IF (resolution) bandwidth (``SENSe<Ch>:BANDwidth:RESolution``).
 
         Valid from 1 Hz to 1.5 MHz (up to 30 MHz with option R&S ZNA-K17).
         Bandwidths step in a 1–1.5–2–3–5–7 sequence per decade.
@@ -309,7 +309,7 @@ class ZNA(Device):
     
     def source_power_level(self, channel, IntSourcePow = -10):
         """
-        Made by Claude. Set the channel base source power (``SOURce<Ch>:POWer:LEVel:IMMediate:AMPLitude``).
+        Docstring by Claude. Set the channel base source power (``SOURce<Ch>:POWer:LEVel:IMMediate:AMPLitude``).
 
         Valid for all sweep types except power sweep.  The usable power range
         is frequency-dependent; refer to the instrument data sheet.
@@ -332,7 +332,7 @@ class ZNA(Device):
     def Trace_copy(self, MemTraceName, DataTraceName):
 
         """
-        Made by Claude. Copy a data trace to a memory trace (``TRACe:COPY``).
+        Docstring by Claude. Copy a data trace to a memory trace (``TRACe:COPY``).
 
         The source trace is the unmodified data trace.  An existing memory
         trace with the same name is overwritten.
@@ -356,7 +356,7 @@ class ZNA(Device):
  
     def initiate_continuous(self, channel, boolean):
         """
-        Made by Claude. Select single-sweep or continuous-sweep mode (``INITiate<Ch>:CONTinuous``).
+        Docstring by Claude. Select single-sweep or continuous-sweep mode (``INITiate<Ch>:CONTinuous``).
 
         Parameters
         ----------
@@ -376,7 +376,7 @@ class ZNA(Device):
     
     def initiate_immediate_dummy(self,channel):
         """
-        Made by Claude. Trigger a new single sweep (``INITiate<Ch>:IMMediate:DUMMy``).
+        Docstring by Claude. Trigger a new single sweep (``INITiate<Ch>:IMMediate:DUMMy``).
 
         Available in single-sweep mode only
         (``INITiate<Ch>:CONTinuous OFF``).  Implemented for overlapped
@@ -397,7 +397,7 @@ class ZNA(Device):
     
     def sense_sweep_time_auto(self, channel):
         """
-        Made by Claude. Query the automatic sweep time state (``SENSe<Ch>:SWEep:TIME:AUTO``).
+        Docstring by Claude. Query the automatic sweep time state (``SENSe<Ch>:SWEep:TIME:AUTO``).
 
         .. note::
            Despite the method name, this function *queries* (not sets) the
@@ -421,7 +421,7 @@ class ZNA(Device):
     
     def calculate_parameter_sdefine(self, channel, TraceName, Result):
         """
-        Made by Claude. Create a trace and assign a measurement parameter (``CALCulate<Ch>:PARameter:SDEFine``).
+        Docstring by Claude. Create a trace and assign a measurement parameter (``CALCulate<Ch>:PARameter:SDEFine``).
 
         The trace becomes the active trace in the channel but is not
         displayed.  To display it, create a diagram window with
@@ -450,7 +450,7 @@ class ZNA(Device):
     
     def calculate_parameter_delete(self, channel, TraceName):
         """
-        Made by Claude. Delete a named trace from a channel (``CALCulate<Ch>:PARameter:DELete``).
+        Docstring by Claude. Delete a named trace from a channel (``CALCulate<Ch>:PARameter:DELete``).
 
         Parameters
         ----------
@@ -468,7 +468,7 @@ class ZNA(Device):
     
     def display_window_state(self, window, state):
         """
-        Made by Claude. Create or destroy a diagram window (``DISPlay:WINDow<Wnd>:STATe``).
+        Docstring by Claude. Create or destroy a diagram window (``DISPlay:WINDow<Wnd>:STATe``).
 
         Parameters
         ----------
@@ -487,7 +487,7 @@ class ZNA(Device):
     
     def display_window_trace_feed(self, window, window_trace, TraceName ):
         """
-        Made by Claude. Assign a trace to a diagram window (``DISPlay:WINDow<Wnd>:TRACe<WndTr>:FEED``).
+        Docstring by Claude. Assign a trace to a diagram window (``DISPlay:WINDow<Wnd>:TRACe<WndTr>:FEED``).
 
         The window must already exist (created with :meth:`display_window_state`).
         A trace can only be assigned to a given diagram once.
@@ -512,7 +512,7 @@ class ZNA(Device):
 
     def calculate_parameter_delete_all(self,):
         """
-        Made by Claude. Delete all traces in all channels (``CALCulate:PARameter:DELete:ALL``).
+        Docstring by Claude. Delete all traces in all channels (``CALCulate:PARameter:DELete:ALL``).
 
         Deletes all traces in all channels of the active recall set,
         including the default trace ``Trc1`` in channel 1.  The manual
@@ -535,7 +535,7 @@ class ZNA(Device):
     
     def output_state(self, state):
         """
-        Made by Claude. Enable or disable the RF output (``OUTPut:STATe``).
+        Docstring by Claude. Enable or disable the RF output (``OUTPut:STATe``).
 
         Parameters
         ----------
@@ -558,7 +558,7 @@ class ZNA(Device):
     
     def sense_sweep_time_auto_query(self, channel):
         """
-        Made by Claude. Query whether automatic sweep time is enabled (``SENSe<Ch>:SWEep:TIME:AUTO?``).
+        Docstring by Claude. Query whether automatic sweep time is enabled (``SENSe<Ch>:SWEep:TIME:AUTO?``).
 
         When enabled, the minimum sweep time is calculated internally from
         the channel settings and the dwell time (``SENSe<Ch>:SWEep:DWELl``).
@@ -584,7 +584,7 @@ class ZNA(Device):
             format_type = "SDATa", FwCount = "1", FwCountEnd = ""):
 
         """
-        Made by Claude. Send a NSWeep:FIRSt read request as a write command (``CALCulate<Chn>:DATA:NSWeep:FIRSt?``).
+        Docstring by Claude. Send a NSWeep:FIRSt read request as a write command (``CALCulate<Chn>:DATA:NSWeep:FIRSt?``).
 
         Only valid when ``SENSe<Ch>:SWEep:COUNt`` > 1 and
         ``INITiate<Ch>:CONTinuous OFF``.  Returns unformatted (real +
@@ -623,7 +623,7 @@ class ZNA(Device):
                           
     def calculate_data_query(self, channel, format_type = "FDATA"):
         """
-        Made by Claude. Read trace data for the active trace (``CALCulate<Chn>:DATA?``).
+        Docstring by Claude. Read trace data for the active trace (``CALCulate<Chn>:DATA?``).
 
         The query reads the response values of the selected channel's active
         trace.  Data units follow the measured parameter (see
@@ -662,7 +662,7 @@ class ZNA(Device):
     
     def use_ext_ref(self,):
         """
-        Made by Claude. Switch the reference oscillator to external (``ROSC EXT``).
+        Docstring by Claude. Switch the reference oscillator to external (``ROSC EXT``).
 
         Configures the instrument to use an external 10 MHz reference signal.
 
@@ -675,7 +675,7 @@ class ZNA(Device):
     
     def load_cal(self, channel, file):
         """
-        Made by Claude. Load and apply a calibration file to a channel (``MMEM:LOAD:CORR``).
+        Docstring by Claude. Load and apply a calibration file to a channel (``MMEM:LOAD:CORR``).
 
         Parameters
         ----------
@@ -688,7 +688,7 @@ class ZNA(Device):
 
     def sense_sweep_count(self, channel, count):
         """
-        Made by Claude. Set the number of sweeps per measurement cycle (``SENSe<Ch>:SWEep:COUNt``).
+        Docstring by Claude. Set the number of sweeps per measurement cycle (``SENSe<Ch>:SWEep:COUNt``).
 
         Parameters
         ----------
@@ -702,7 +702,7 @@ class ZNA(Device):
 
     def calculate_data_nsweep_first(self, channel, format, fwcount, fwcountend):
         """
-        Made by Claude. Query trace data from a specific sweep in single-sweep mode (``CALCulate<Chn>:DATA:NSWeep:FIRSt?``).
+        Docstring by Claude. Query trace data from a specific sweep in single-sweep mode (``CALCulate<Chn>:DATA:NSWeep:FIRSt?``).
 
         Returns unformatted (real + imaginary) data for the specified sweep
         or range of sweeps.  Requires ``SENSe<Ch>:SWEep:COUNt`` > 1 and
@@ -733,7 +733,7 @@ class ZNA(Device):
 
     def check_current_sweep_number():
         """
-        Made by Claude. Query the number of completed sweeps (``CALCULATE1:DATA:NSWEEP:COUNT?``).
+        Docstring by Claude. Query the number of completed sweeps (``CALCULATE1:DATA:NSWEEP:COUNT?``).
 
         .. warning::
            This method is missing the ``self`` parameter and is therefore a
@@ -752,7 +752,7 @@ class ZNA(Device):
               extra_meta = {},
                   ):
         """
-        Made by Claude. Configure the ZNA, run a sweep, and save the results to a TSV file.
+        Docstring by Claude. Configure the ZNA, run a sweep, and save the results to a TSV file.
 
         Performs the full sweep workflow: optional reset, trace/channel
         setup, frequency/power/bandwidth configuration, sweep execution
@@ -950,7 +950,8 @@ class ZNA(Device):
                 #print(sweep.T)
                 re = sweep[0]
                 im = sweep[1]
-                power_db, phase = re_and_im_to_dB_and_phase(re, im)
+                power_db = linear_voltage_to_dB(np.sqrt(re**2 + im**2))
+                phase = np.arctan2(im, re)
                 data_dict[f"sweep_number_mag[dB]:{i+1}"] = power_db
                 data_dict[f"sweep_number_phase[rad]:{i+1}"] = phase
 
@@ -989,7 +990,7 @@ class ZNA(Device):
 
     def save_data(self, file_name, location = "", meta_data = ""):
         """
-        Made by Claude. Save the last sweep data to a tab-separated text file.
+        Docstring by Claude. Save the last sweep data to a tab-separated text file.
 
         Writes a header line with ``meta_data``, a column-label row, then
         one row per point containing log-magnitude (dB), phase, and
@@ -1020,7 +1021,7 @@ class ZNA(Device):
     
     def follow_value(self,):
         """
-        Made by Claude. Track the peak value via phase — stub, not yet implemented.
+        Docstring by Claude. Track the peak value via phase — stub, not yet implemented.
 
         .. warning::
            This method is an empty stub; no tracking logic has been

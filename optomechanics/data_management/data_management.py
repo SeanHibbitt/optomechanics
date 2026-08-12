@@ -1,10 +1,16 @@
+"""
+Docstring by Claude. Data I/O and attenuation management for optomechanics experiments.
+
+Provides file reading/writing utilities, the attenuation_object class for
+managing microwave attenuation chains, and save_data_3 for structured data export.
+"""
 import numpy as np
 import pandas
 from optomechanics.data_analysis.unit_conversions import *
 
 def read_file(file_loc, sep = r"\s+" ):
     """
-    Made by Claude. Read a delimited data file into a DataFrame and parse its metadata.
+    Docstring by Claude. Read a delimited data file into a DataFrame and parse its metadata.
 
     Wraps ``pandas.read_csv``, skipping lines starting with ``#``, and also
     returns the metadata parsed from those comment lines via `read_meta_data`.
@@ -32,7 +38,7 @@ def read_file(file_loc, sep = r"\s+" ):
     
 def read_meta_data(file_loc):
     """
-    Made by Claude. Parse key-value metadata from comment lines in a data file.
+    Docstring by Claude. Parse key-value metadata from comment lines in a data file.
 
     Reads the file line by line until a non-comment, non-blank line is
     encountered.  Comment lines must have the format ``#\\tkey\\tvalue``.
@@ -76,7 +82,7 @@ def read_meta_data(file_loc):
 
 def save_data_3(data, file_name, file_location = "", headers = None, meta_data = {}, delimiter = "\t"):
     """
-    Made by Claude. Save an array to a delimited text file with key-value metadata lines.
+    Docstring by Claude. Save an array to a delimited text file with key-value metadata lines.
 
     Writes metadata as ``#\\tkey\\tvalue`` comment lines, then an optional
     header line, then the data.  For 2-D arrays the output is column-major;
@@ -124,7 +130,7 @@ def save_data_3(data, file_name, file_location = "", headers = None, meta_data =
 
 class attenuation_object:
     """
-    Made by Claude. Frequency-dependent attenuation with optional asymmetric errors.
+    Docstring by Claude. Frequency-dependent attenuation with optional asymmetric errors.
 
     Stores a magnitude array (in dB) and a corresponding frequency array.
     Arithmetic operations (``+`` and ``-``) interpolate the second operand
@@ -164,7 +170,7 @@ class attenuation_object:
 
     def __init__(self, magnitude, frequencies, upper_error = None, lower_error = None ):
         """
-        Made by Claude. Initialise the attenuation object and validate error arrays.
+        Docstring by Claude. Initialise the attenuation object and validate error arrays.
 
         Prints a warning if no errors are provided or if any error values are NaN.
         """
@@ -191,7 +197,7 @@ class attenuation_object:
 
     def load_from_tsv( file_location):
         """
-        Made by Claude. Load an attenuation_object from a TSV file.
+        Docstring by Claude. Load an attenuation_object from a TSV file.
 
         The file must have the following tab-separated columns (with optional
         ``#``-prefixed metadata lines): ``Frequency[Hz]``, ``attenuation[dB]``,
@@ -213,7 +219,7 @@ class attenuation_object:
 
     def save_to_tsv():
         """
-        Made by Claude. Save the attenuation_object to a TSV file.
+        Docstring by Claude. Save the attenuation_object to a TSV file.
 
         Raises
         ------
@@ -225,7 +231,7 @@ class attenuation_object:
 
     def __add__(self, second_atten):
         """
-        Made by Claude. Add two attenuation objects, propagating errors in quadrature.
+        Docstring by Claude. Add two attenuation objects, propagating errors in quadrature.
 
         Interpolates `second_atten` onto ``self.frequencies``, adds the
         magnitudes, and propagates errors in quadrature.  Addition is **not**
@@ -271,7 +277,7 @@ class attenuation_object:
     
     def __sub__(self, second_atten):
         """
-        Made by Claude. Subtract an attenuation object, propagating errors in quadrature.
+        Docstring by Claude. Subtract an attenuation object, propagating errors in quadrature.
 
         Interpolates `second_atten` onto ``self.frequencies``, subtracts the
         magnitudes, and propagates errors in quadrature.  Subtraction is **not**
@@ -422,7 +428,7 @@ class attenuation_object:
     
     def __call__(self, *args, **kwds):
         """
-        Made by Claude. Return the magnitude and frequency arrays.
+        Docstring by Claude. Return the magnitude and frequency arrays.
 
         Returns
         -------

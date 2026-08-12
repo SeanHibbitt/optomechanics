@@ -25,7 +25,7 @@ class Device(mainDevice):
 
 
     """
-    Made by Claude. VISA device base class using the RsInstrument backend.
+    Docstring by Claude. VISA device base class using the RsInstrument backend.
 
     Extends :class:`~optomechanics.device_control.Device_Visa_Super.Device`
     by replacing the PyVISA resource manager with the Rohde & Schwarz
@@ -51,7 +51,7 @@ class Device(mainDevice):
     
     def __init__(self, address, baud_rate = 9600, query_delay = 0, timeout = 10000  ):
         """
-        Made by Claude. Initialise the RsInstrument-backed device.
+        Docstring by Claude. Initialise the RsInstrument-backed device.
 
         Delegates to the parent
         :meth:`~optomechanics.device_control.Device_Visa_Super.Device.__init__`
@@ -74,7 +74,7 @@ class Device(mainDevice):
 
     def open(self):
         """
-        Made by Claude. Open the instrument connection using the RsInstrument backend.
+        Docstring by Claude. Open the instrument connection using the RsInstrument backend.
 
         Creates an :class:`RsInstrument` connection to ``self.address`` with
         ID query and reset both enabled (``True, True``).  Stores the
@@ -97,7 +97,7 @@ class Device(mainDevice):
     @staticmethod
     def connected_devices():
         """
-        Made by Claude. List all VISA resources visible to the RsInstrument backend.
+        Docstring by Claude. List all VISA resources visible to the RsInstrument backend.
 
         Returns
         -------

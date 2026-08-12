@@ -1,4 +1,11 @@
+"""
+Docstring by Claude. Optomechanically Induced Transparency / Absorption (OMIT/OMIA) fitting functions.
 
+Provides the OMIT/OMIA lineshape equation and fitting routines for extracting
+mechanical parameters from cavity transmission under strong pump driving.
+The same equation handles both OMIT (transparency peak, ``A > 0``) and
+OMIA (absorption dip, ``A < 0``) via the sign of the amplitude parameter.
+"""
 import numpy as np
 from scipy.optimize import curve_fit
 import traceback
@@ -25,9 +32,11 @@ from optomechanics.data_analysis.fitting.S21 import S21_eq, fit_S21_peak
 def OMIT_equation(f, f_m, g_m, A, floor, kk_tot):
 
     """
-    Made by Claude. Optomechanically induced transparency (OMIT) lineshape equation.
+    Docstring by Claude. OMIT/OMIA lineshape equation for optomechanically induced transparency or absorption.
 
-    Computes the OMIT transmission amplitude as a function of frequency.
+    Computes the OMIT/OMIA transmission amplitude as a function of frequency.
+    Positive ``A`` produces a transparency peak (OMIT); negative ``A`` produces
+    an absorption dip (OMIA).
     The amplitude parameter ``A`` and background ``floor`` are defined as::
 
         A     = (k_ext * 4 * omega_m * g_0**2 * n_d)
@@ -42,9 +51,10 @@ def OMIT_equation(f, f_m, g_m, A, floor, kk_tot):
     f_m : float
         Mechanical resonance frequency (Hz).
     g_m : float
-        Mechanical linewidth / damping rate (Hz).
+        Mechanical linewidth / damping rate, $\\Gamma_m / 2\\pi$ (Hz).
     A : float
-        OMIT peak amplitude (linear voltage units).
+        OMIT/OMIA amplitude (linear voltage units). Positive for
+        transparency peak (OMIT), negative for absorption dip (OMIA).
     floor : float
         Background transmission level (linear voltage units).
     kk_tot : float
@@ -71,7 +81,7 @@ def OMIT_equation(f, f_m, g_m, A, floor, kk_tot):
 def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
 
     """
-    Made by Claude. Fit the OMIT equation to a measured transmission spectrum.
+    Docstring by Claude. Fit the OMIT equation to a measured transmission spectrum.
 
     Converts the input dB magnitudes to linear voltage, then fits
     :func:`OMIT_equation` using ``scipy.optimize.curve_fit``.  The ``floor``
@@ -110,10 +120,10 @@ def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
     #organise variables
     amplitude_linear_voltage = dB_to_linear_voltage(mags_dB)
 
-    f_m_guess, g_m_guess, A_guess, floor = guesses
+
 
     #guesses:
-    if np.any(guesses) == False:
+    if guesses == False:
         amplitude_linear_voltage_guess = np.abs(amplitude_linear_voltage)
         max_value = np.max(amplitude_linear_voltage_guess)
         f_m_guess = rel_freqs[np.argmax(amplitude_linear_voltage_guess)]
@@ -126,9 +136,11 @@ def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
         
         guesses_temp = f_m_guess, g_m_guess, A_guess, floor_guess
 
-        guesses[guesses == False] = guesses_temp[guesses == False]
+        #guesses[guesses == False] = guesses_temp[guesses == False]
 
-    guesses = [f_m_guess, g_m_guess, A_guess, floor]
+        guesses = [f_m_guess, g_m_guess, A_guess, floor_guess]
+
+    f_m_guess, g_m_guess, A_guess, floor = guesses
 
     OMIT_equation_reduced = lambda f, f_m, g_m, A, floor,: OMIT_equation(f, f_m, g_m, A, floor, k_tot)
 
@@ -141,7 +153,7 @@ def fit_OMIT(rel_freqs, mags_dB, k_tot, floor, guesses = False):
 def fit_OMIT_set_floor(rel_freqs, mags_dB, k_tot, floor, guesses = False):
 
     """
-    Made by Claude. Fit the OMIT equation with a fixed background floor.
+    Docstring by Claude. Fit the OMIT equation with a fixed background floor.
 
     Identical to :func:`fit_OMIT` except that ``floor`` is held fixed at the
     supplied value rather than being a free fit parameter.  This reduces the
@@ -195,6 +207,7 @@ def fit_OMIT_set_floor(rel_freqs, mags_dB, k_tot, floor, guesses = False):
         guesses[guesses == False] = guesses_temp[guesses == False]
 
     guesses = [f_m_guess, g_m_guess, A_guess]
+    f_m_guess, g_m_guess, A_guess = guesses
 
     OMIT_equation_reduced = lambda f, f_m, g_m, A: OMIT_equation(f, f_m, g_m, A, floor, k_tot)
 

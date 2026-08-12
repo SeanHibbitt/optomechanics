@@ -5,6 +5,13 @@
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or Anaconda
 - Git with SSH access configured (see the project README for SSH key setup)
 
+## Clone the repository
+
+```bash
+git clone <repository-url>
+cd optomechanics
+```
+
 ## Create the conda environment
 
 The project ships an `ExperimentsEnvironment.yml` file that reproduces the full

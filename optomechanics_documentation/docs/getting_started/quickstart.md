@@ -10,10 +10,11 @@ from optomechanics.data_analysis.fitting.S21 import fit_S21_peak_dB
 
 # Load your frequency sweep data
 frequencies = np.linspace(6.99e9, 7.01e9, 1001)   # Hz
-powers_dB   = ...                                   # measured S21 in dB
+powers_dB   = np.zeros(1001)                        # replace with measured S21 in dB
 
-# Fit — returns optimal parameters and covariance
-popt, pcov, guesses, amplitude, freqs, errors = fit_S21_peak_dB(
+# Fit — returns optimal parameters, covariance, initial guesses,
+#        the fitted trace, the frequency axis for the fit, and fit errors
+popt, pcov, guesses, s21_fit, freqs_fit, errors = fit_S21_peak_dB(
     powers_dB, frequencies
 )
 

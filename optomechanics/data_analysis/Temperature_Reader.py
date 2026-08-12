@@ -1,4 +1,9 @@
+"""
+Docstring by Claude. Temperature data loading and parsing for optomechanics experiments.
 
+Reads temperature log files from cryogenic measurement setups and provides
+utilities for aligning temperature data with mechanical PSD time series.
+"""
 import numpy as np
 import os
 
@@ -9,7 +14,7 @@ import os
 def temp_reader(temp_day_paths):
 
     """
-    Made by Claude. Read and concatenate temperature log files from a directory tree.
+    Docstring by Claude. Read and concatenate temperature log files from a directory tree.
 
     Walks a two-level directory hierarchy (month → day → files) rooted at
     each path in ``temp_day_paths``, reads all CSV files using

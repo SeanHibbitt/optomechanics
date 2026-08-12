@@ -36,6 +36,18 @@ nav:
     - Device Control: user_guide/device_control.md
     - Spectrum Analyser (IQ/PSD): user_guide/spectrum_analyser.md
     - Data Management: user_guide/data_management.md
+    - S21 Fitting: user_guide/s21_fitting.md
+    - Attenuation Measurement: user_guide/attenuation_measurement.md
+    - Attenuation Processing: user_guide/attenuation_processing.md
+    - Thermal Motion Measurement: user_guide/thermal_motion_measurement.md
+    - Thermal Motion Analysis: user_guide/thermal_motion_analysis.md
+    - Displacement Measurement: user_guide/displacement_measurement.md
+    - OMIT / OMIA Analysis: user_guide/omit_analysis.md
+    - Intracavity Photon Number: user_guide/photon_number.md
+    - Cooperativity: user_guide/cooperativity.md
+    - End-to-End Workflow: user_guide/end_to_end_workflow.md
+    - Parameter Glossary: user_guide/glossary.md
+    - Temperature Control GUI: user_guide/gui_temperature_control.md
   - API Reference:
     - api_reference/index.md
     - data_analysis:
@@ -53,6 +65,7 @@ nav:
         - S21: api_reference/data_analysis/fitting/S21.md
         - Sww: api_reference/data_analysis/fitting/Sww.md
         - omit: api_reference/data_analysis/fitting/omit.md
+        - _fitting: api_reference/data_analysis/fitting/_fitting.md
     - device_control:
       - Overview: api_reference/device_control/index.md
       - Device_Visa_Super: api_reference/device_control/Device_Visa_Super.md
@@ -75,6 +88,20 @@ nav:
       - data_management: api_reference/data_management/data_management.md
       - file_management: api_reference/data_management/file_management.md
       - data_logger: api_reference/data_management/data_logger.md
+    - gui:
+      - Overview: api_reference/gui/index.md
+      - Temp_Controller: api_reference/gui/temp_controller.md
+    - misc:
+      - Overview: api_reference/misc/index.md
+    - zurich:
+      - Overview: api_reference/zurich/index.md
+      - Device_Zurich_Super: api_reference/zurich/device_zurich_super.md
+  - Roadmap:
+    - roadmap/index.md
+    - Planned Physics: roadmap/planned_physics.md
+    - Code Improvements: roadmap/code_improvements.md
+  - Development:
+    - Testing: development/testing.md
   - Release Notes: release_notes.md
   - About: about.md
 
@@ -100,6 +127,8 @@ markdown_extensions:
       generic: true
   - admonition
   - pymdownx.details
+  - attr_list
+  - md_in_html
   - toc:
       permalink: true
 

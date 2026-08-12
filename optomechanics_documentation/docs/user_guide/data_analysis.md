@@ -31,8 +31,11 @@ Curve-fitting routines for cavity / resonator measurements.
 `fitting.S21` fits the transmission through a microwave cavity.  The model is:
 
 $$
-S_{21}(f) = \left| \frac{2\pi\kappa_\text{ext}}{2\pi\kappa_\text{tot} + 4\pi i(f - f_0)} \right| + \text{background}
+S_{21}(f) = \left| \frac{\kappa_\text{ext}}{\kappa_\text{tot} + 2j(f - f_0)} \right| + m\,f + c
 $$
+
+where all values are in Hz (the $2\pi$ factors cancel between numerator and
+denominator).
 
 Key functions:
 
@@ -46,9 +49,45 @@ See [S21 API](../api_reference/data_analysis/fitting/S21.md).
 
 #### Sww fitting
 
-`fitting.Sww` fits the noise power spectral density $S_{ww}(f)$ of a mechanical resonator.
+`fitting.Sww` fits the noise power spectral density $S_{ww}(f)$ of a mechanical
+resonator.  The mechanical Brownian motion produces a Lorentzian peak in the PSD
+centred at $f_m$ with linewidth $\Gamma_m$.  The basic model (`basic_S_ww_eq`) is:
+
+$$
+S_{ww}(\omega) = \frac{A}{\gamma_m^2 + 4(\omega - \omega_m)^2} + n_f
+$$
+
+where $\omega = 2\pi f$, $\omega_m = 2\pi f_m$, $\gamma_m = 2\pi\Gamma_m$.
+The code accepts all frequencies in **Hz** and converts to angular frequency
+internally.  The fitted amplitude $A$ is in angular-frequency units.
+
+From the fitted parameters and the cavity S21 fit, the code extracts the
+vacuum optomechanical coupling rate $g_0$ — see
+[Thermal Motion Analysis](thermal_motion_analysis.md) for the full workflow.
 
 See [Sww API](../api_reference/data_analysis/fitting/Sww.md).
+
+#### OMIT / OMIA fitting
+
+`fitting.omit` fits the OMIT/OMIA lineshape — a narrow transparency window (or absorption
+dip) in cavity transmission caused by optomechanical interference when a strong pump tone
+drives the cavity.  The model is:
+
+$$
+\text{OMIT}(f) = \text{floor} \times \left(1 + A \left|\frac{1}{(\omega_m^2 - \omega^2 - i\Gamma_m\omega)(\kappa - 2i\omega)}\right|\right)
+$$
+
+where $\omega = 2\pi f$, $\omega_m = 2\pi f_m$, $\Gamma_m = 2\pi\,$`g_m`,
+$\kappa = 2\pi\,$`kk_tot`.  Positive $A$ fits a transparency peak (OMIT); negative $A$
+fits an absorption dip (OMIA).
+
+Key functions:
+
+- `OMIT_equation` — evaluate the lineshape at given frequencies
+- `fit_OMIT` — fit all four parameters ($f_m$, `g_m`, $A$, `floor`)
+- `fit_OMIT_set_floor` — fit with fixed background floor
+
+See [OMIT / OMIA Analysis](omit_analysis.md) | [omit API](../api_reference/data_analysis/fitting/omit.md).
 
 ---
 
@@ -84,3 +123,7 @@ See [utilities API](../api_reference/data_analysis/utilities.md).
 Miscellaneous physical equations that do not belong to a specific module.
 
 See [misc_equations API](../api_reference/data_analysis/misc_equations.md).
+
+## See also
+
+- [Parameter Glossary](glossary.md)

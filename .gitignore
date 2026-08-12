@@ -69,3 +69,7 @@ TODO.md
 CLAUDE.md
 *.cpython-312.pyc
 *.cpython-312*
+
+*/test_data
+*test_data/
+*/test_data/

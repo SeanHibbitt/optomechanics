@@ -106,12 +106,31 @@ _tc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_tc)
 
 # ---------------------------------------------------------------------------
-# 4.  Launch the GUI
+# 4.  Subclass MainWindow to re-enable PID buttons (safe: no hardware calls)
+# ---------------------------------------------------------------------------
+
+class MockMainWindow(_tc.MainWindow):
+    """MainWindow with PID controls unlocked for mock testing."""
+
+    def __init__(self):
+        super().__init__()
+        # Re-enable buttons that were disabled to protect real hardware.
+        # All these actions are purely software-side (worker.pid + JSON files).
+        self.step_up_button.setEnabled(True)
+        self.step_down_button.setEnabled(True)
+        self.load_pid_settings_button.setEnabled(True)
+        self.save_pid_settings_button.setEnabled(True)
+        self.initialize_settings_button.setEnabled(True)
+        self.remove_pid_settings_button.setEnabled(True)
+        print('[MOCK] PID control buttons enabled.')
+
+# ---------------------------------------------------------------------------
+# 5.  Launch the GUI
 # ---------------------------------------------------------------------------
 
 if __name__ == '__main__':
     from PyQt5.QtWidgets import QApplication
     app = QApplication(sys.argv)
-    window = _tc.MainWindow()
+    window = MockMainWindow()
     window.show()
     sys.exit(app.exec_())

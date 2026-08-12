@@ -29,9 +29,10 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from Optomechanics.device_control.KeithleyDMM6500 import DMM6500
-from Optomechanics.device_control.SPD3303XE import SPD
-from Optomechanics.data_management.data_logger import dated_logger
+from optomechanics.device_control.KeithleyDMM6500 import DMM6500
+# from optomechanics.device_control.SPD3303XE import SPD  # disabled: power supply control
+from optomechanics.data_management.data_logger import dated_logger
+from simple_pid import PID
 
 from PyQt5.QtWidgets import (
     QFormLayout, QGroupBox, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, 
@@ -143,11 +144,11 @@ class Worker(QObject):
                     "output_limits": settings.get('output_limits', (0, 32)),
                     "proportional_on_measurement": settings.get('proportional_on_measurement', False)
                 }
-                #self.pid = PID(**pid_settings)
+                self.pid = PID(**pid_settings)
                 print(f"Loaded PID settings: {pid_settings}")
         except FileNotFoundError as e:
-            #self.pid = PID(Kp=0, Ki=0.0, Kd=0.0, setpoint=20.0, sample_time=1, output_limits=(0, 32),
-                           #proportional_on_measurement=False)
+            self.pid = PID(Kp=0, Ki=0.0, Kd=0.0, setpoint=20.0, sample_time=1, output_limits=(0, 32),
+                           proportional_on_measurement=False)
             print("PID settings file not found. Using default settings.")
             if hasattr(e, 'message'):
                 print(e.message)
@@ -346,7 +347,7 @@ https://www.google.com/search?sca_esv=c0b955b0d7f1ad2c&sxsrf=ADLYWIJY9jEEVpSxiZp
                          
                         
                         self.plot_data_updated.emit(self.data)
-                        self.check_remote_update()
+                        # self.check_remote_update()  # disabled: do not write to remote_control.json
                         time.sleep(0.5)
 
                 except KeyboardInterrupt as e:
@@ -586,6 +587,14 @@ class MainWindow(QMainWindow):
         self.save_pid_settings_button.clicked.connect(self.save_settings)
         self.initialize_settings_button.clicked.connect(self.initialize_settings)
         self.remove_pid_settings_button.clicked.connect(self.remove_settings)
+
+        # Disabled: prevent any changes to temperature controller settings
+        self.step_up_button.setEnabled(False)
+        self.step_down_button.setEnabled(False)
+        self.load_pid_settings_button.setEnabled(False)
+        self.save_pid_settings_button.setEnabled(False)
+        self.initialize_settings_button.setEnabled(False)
+        self.remove_pid_settings_button.setEnabled(False)
 
         # Toggle button to expand/minimize left layout
         self.expand_button = QPushButton("Expand/Minimize", self)

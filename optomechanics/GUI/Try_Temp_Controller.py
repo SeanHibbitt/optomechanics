@@ -1,4 +1,4 @@
-from Optomechanics.device_control.Lakeshore_372_AC_Res_Temp_Controller import Temp_Controller
+from optomechanics.device_control.Lakeshore_372_AC_Res_Temp_Controller import Temp_Controller
 
 import time
 import datetime

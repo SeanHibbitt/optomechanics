@@ -457,3 +457,147 @@ class Temp_Controller(Device):
             f"OUTMODE {output},{mode},{input_channel},{powerup_enable},"
             f"{polarity},{use_filter},{delay}"
         )
+
+    # --- readings and status --------------------------------------------
+
+    def ReadQuadrature(self, channel):
+        """Docstring by Claude. Read the quadrature (reactive) component (``QRDG?``, p.164).
+
+        The bridge measures a complex impedance; :meth:`ReadResistance`
+        returns the in-phase part and this returns the out-of-phase part. A
+        quadrature reading that is large compared with the resistance
+        indicates stray capacitance or inductance in the wiring, so this is
+        primarily a diagnostic for cabling problems.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, or ``1``-``16`` for a measurement
+            channel.
+
+        Returns
+        -------
+        str
+            Imaginary part of the reading in ohms, ``±nnn.nnnE±nn`` format.
+        """
+        return self.query(f"QRDG?{channel}")
+
+    def ReadReadingStatus(self, channel):
+        """Docstring by Claude. Read a channel's reading-status flags (``RDGST?``, p.166).
+
+        Always worth checking before trusting a temperature: a channel that is
+        over-range or open reports a number rather than an error. The return
+        is a bit-weighted sum:
+
+        ===== ==================================================
+        bit   meaning
+        ===== ==================================================
+        1     CS OVL — current source overload
+        2     VCM OVL — common-mode voltage overload
+        4     VMIX OVL — mixer overload
+        8     VDIF OVL — differential input overload
+        16    R. OVER — resistance over range
+        32    R. UNDER — resistance under range
+        64    T. OVER — temperature over range
+        128   T. UNDER — temperature under range
+        ===== ==================================================
+
+        A value of ``0`` means the reading is valid.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, or ``1``-``16`` for a measurement
+            channel.
+
+        Returns
+        -------
+        str
+            Bit-weighted status value, ``0`` when the reading is good.
+        """
+        return self.query(f"RDGST?{channel}")
+
+    def ReadSettleStatus(self):
+        """Docstring by Claude. Read whether the reading has settled (``RDGSTL?``, p.167).
+
+        After a range or channel change the measurement needs time to settle.
+        This reports whether the current reading is considered settled, which
+        is the right thing to poll before recording data following a change.
+
+        Returns
+        -------
+        str
+            ``0`` not settled, ``1`` settled.
+        """
+        return self.query("RDGSTL?")
+
+    def ReadMinMax(self, channel):
+        """Docstring by Claude. Read a channel's recorded minimum and maximum (``MDAT?``, p.161).
+
+        The instrument continuously tracks the extreme readings seen on each
+        channel since the last reset. Use :meth:`WriteMinMaxReset` to clear
+        them, for example at the start of a stability measurement.
+
+        Parameters
+        ----------
+        channel : str or int
+            ``A`` for the control input, or ``1``-``16`` for a measurement
+            channel.
+
+        Returns
+        -------
+        str
+            ``<min>,<max>`` in the channel's preferred units.
+        """
+        return self.query(f"MDAT?{channel}")
+
+    def WriteMinMaxReset(self):
+        """Docstring by Claude. Clear the stored min/max data (``MNMXRST``, p.161).
+
+        Resets the tracked extremes on every channel at once; there is no
+        per-channel form. Takes no parameters.
+
+        Returns
+        -------
+        bool
+            ``True`` if sent, ``False`` if suppressed by :data:`SAFE_MODE`.
+        """
+        return self.safe_write("MNMXRST")
+
+    def ReadHeaterStatus(self, output):
+        """Docstring by Claude. Read the heater error status (``HTRST?``, p.155).
+
+        Reports whether the heater output has faulted. A non-zero value means
+        the instrument has shut the heater down, and the fault must be cleared
+        before it will drive again.
+
+        Parameters
+        ----------
+        output : int
+            Output number: ``0`` sample heater or ``1`` warm-up heater.
+
+        Returns
+        -------
+        str
+            ``0`` no error, ``1`` heater open circuit, ``2`` heater short.
+        """
+        return self.query(f"HTRST?{output}")
+
+    def ReadAnalogOutput(self, output):
+        """Docstring by Claude. Read the analog output level (``AOUT?``, p.149).
+
+        Reports the percentage of full scale currently on the analog output
+        (output 2), whatever is driving it — manual value, still setting, or
+        a monitor-out source.
+
+        Parameters
+        ----------
+        output : int
+            Output number (``2`` for the analog output).
+
+        Returns
+        -------
+        str
+            Output level as a percentage of full scale.
+        """
+        return self.query(f"AOUT?{output}")

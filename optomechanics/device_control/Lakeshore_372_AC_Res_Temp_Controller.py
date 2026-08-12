@@ -1,5 +1,5 @@
 
-from Optomechanics import Device
+from .Device_Visa_Super import Device
 
 # trigger_command = 'KRDG?4'
 # TMC_value=float(instrument.query(trigger_command))

@@ -1,3 +1,9 @@
+"""
+Docstring by Claude. File and directory management utilities for experiment data.
+
+Provides dated directory creation (dated_file_maker), path construction (make_path),
+and helper utilities for organising measurement data on disk.
+"""
 import os
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -6,7 +12,18 @@ from datetime import datetime
 
 def make_path(folders):
     """
-    makes a path from a given ordered list of folders
+    Docstring by Claude. Build a backslash-separated path string from an ordered list of folder names.
+
+    Parameters
+    ----------
+    folders : iterable of str
+        Folder names in hierarchical order (outermost first).
+
+    Returns
+    -------
+    str
+        Path string with a trailing backslash, e.g.
+        ``'C:\\\\Data\\\\2024\\\\'``.
     """
     
     path = ""
@@ -17,22 +34,29 @@ def make_path(folders):
 
 def dated_file_maker(base_path):
     """
-    writes a single line to the specified file. Creates a new file/directory if 
-    the specified file/directory does not exist. Setup to only create date folders.
-    The base path is setup to run with an expected format, here is an example: 
-        'C:\\Users\\FridgeDaddy\\Documents\\Experiment Data\\2024\\February\\24'
-    The code only checks to see if the day has changed before checking month and year, 
-    if testing the code, make sure to always change to a different day.
+    Docstring by Claude. Create a year/month/day directory hierarchy under a base path.
 
-    removed the small writing section att he bottom to make it more generic
-    now it will simply make a folder system for year -> month -> day
-    ----------------------------------------
-    base_path: string
-    this is the directory to write to
-    file_name: string
-    name of file
-    to_write: string
-    line to write 
+    Appends the current date (``year\\month_name\\day``) to `base_path` and
+    creates any missing directories in the hierarchy.  Only the day folder is
+    checked first; month and year folders are created if absent.
+
+    The expected base path format is::
+
+        'C:\\\\Users\\\\FridgeDaddy\\\\Documents\\\\Experiment Data'
+
+    Resulting in a dated path such as::
+
+        'C:\\\\Users\\\\FridgeDaddy\\\\Documents\\\\Experiment Data\\\\2024\\\\February\\\\24\\\\'
+
+    Parameters
+    ----------
+    base_path : str
+        Root directory under which the dated folder structure is created.
+
+    Returns
+    -------
+    str
+        Full path to the day folder (with trailing backslash).
     """
     current_date = datetime.now()
     

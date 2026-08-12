@@ -1,4 +1,4 @@
-from DeviceClasses import Device
+from .Device_Visa_Super import Device
 import pyvisa
 import numpy as np
 import time

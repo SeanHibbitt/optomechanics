@@ -1,3 +1,9 @@
+"""
+Docstring by Claude. Mechanical power spectral density (Sww) fitting and normalisation.
+
+Provides Lorentzian lineshape models for the mechanical PSD, normalisation to
+G²S_xx, and g₀ extraction following Rojas et al. (2022) and Kumar (2023).
+"""
 import numpy as np
 from scipy.optimize import curve_fit
 import traceback
@@ -18,16 +24,98 @@ from optomechanics.data_analysis.fitting.S21 import S21_eq, fit_S21_peak
 from optomechanics.data_analysis.misc_equations import photon_number                                 
 
 
+def basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
+    """
+    Docstring by Claude. Lorentzian approximation of the mechanical displacement spectral density.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    omega_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    A : float
+        Amplitude scaling factor.
+    nf : float
+        Noise floor offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        Spectral density S_ww (W/Hz or arb. units matching `A`).
+    """
+    freqs = freqs*2*np.pi
+
+    omega_m = omega_m *2*np.pi
+
+    G_m = G_m *2 *np.pi
+
+    S_ww =  (A /((G_m**2) + 4*(freqs - omega_m )**2)) +nf
+
+    return S_ww
+
 class fit_S_xx:
+    """
+    Docstring by Claude. High-level fitter for the mechanical displacement spectral density S_xx.
+
+    Normalises raw spectrum analyser (SA) power data to the dimensionless
+    quantity G²S_xx using a simultaneously acquired VNA S21 trace, then
+    averages over multiple sweeps and fits with `basic_S_ww_eq` to extract
+    the optomechanical coupling g_0 and optical coupling G.
+
+    All static methods — instantiation is not required.  Call
+    ``fit_S_xx.__average_and_fit_S_xx__`` as the main entry point.
+
+    Notes
+    -----
+    Returned values of g_0 and G are in angular units (2π × Hz).
+    """
     @staticmethod
     def __normalise_Sww_to_GGSxx__(index, row, S21_df, VNA_S21_extra_atten, SG_cavity_to_SA_atten, SG_to_cavity_atten, NENBW = RS_default_window_NENBW, S21_eq = S21_eq, signal_applied = True):
         """
-        Expects to have row and index from a pandas df.
-        
-        2025_06_15:
-            Added check for if VNA_S21_extra_atten is None, if it is then it it doesn't apply
-            attenuation to S21 power.
-        
+        Docstring by Claude. Normalise a single SA sweep to G²S_xx using the nearest S21 measurement.
+
+        Expects a row and index from a pandas DataFrame. Applies attenuation
+        corrections, fits S21 to extract cavity parameters, and normalises the
+        SA power spectrum to G²S_xx.
+
+        2025-06-15: Added check for ``VNA_S21_extra_atten is None`` — if it is
+        None the S21 attenuation correction is skipped.
+
+        Parameters
+        ----------
+        index : int
+            Row index in `SA_df` (used for bookkeeping).
+        row : pandas.Series
+            A single row from the SA DataFrame containing fields:
+            ``drive_freq``, ``res_band_width``, ``temperature_mc[k]``,
+            ``drive_power``, ``data``, ``timestamp[s]``.
+        S21_df : pandas.DataFrame
+            DataFrame of VNA S21 sweeps with a ``timestamp[s]`` column.
+        VNA_S21_extra_atten : attenuation_object or None
+            Extra attenuation applied to the VNA signal path.  Pass ``None``
+            to skip S21 attenuation correction.
+        SG_cavity_to_SA_atten : attenuation_object
+            Attenuation from the cavity output to the spectrum analyser.
+        SG_to_cavity_atten : attenuation_object
+            Attenuation from the signal generator to the cavity input.
+        NENBW : float, optional
+            Noise-equivalent noise bandwidth factor. Default is
+            ``RS_default_window_NENBW``.
+        S21_eq : callable, optional
+            S21 model equation. Default is `S21_eq`.
+        signal_applied : bool, optional
+            If True, one applied tone is notched before S21 fitting. Default
+            is True.
+
+        Returns
+        -------
+        dict
+            Dictionary containing S21 fit results, normalised SA spectrum
+            (``GGS_xx``), mechanical frequencies, photon number, and related
+            variables.
         """
         ##get relevant meta variables and process
         f_d = float(row["drive_freq"])
@@ -127,23 +215,49 @@ class fit_S_xx:
 
     @staticmethod
     def __average_and_fit_S_xx__(SA_df, select, m_eff, S21_df, VNA_S21_extra_atten, SG_cavity_to_SA_atten, SG_to_cavity_atten, basic_S_ww_eq = basic_S_ww_eq, NENBW = RS_default_window_NENBW, S21_eq = S21_eq, ):
-
         """
-        SA_df:
-            Expects to have a pandas data frame
+        Docstring by Claude. Average multiple SA sweeps and fit for g_0 and G.
 
-        selects:
-            Expects a dictionary which selects data based on the wanted meta_data
-            Selects example:
-                select = {
-                        "drive_power": ["0"],
-                        "domain":["freq"]
-                    }
-                This selects only drive powers of "0", and domains of "freq"
+        Iterates over `SA_df`, selects rows matching `select`, normalises each
+        to G²S_xx via `__normalise_Sww_to_GGSxx__`, averages, and fits
+        `basic_S_ww_eq` to extract optomechanical parameters.
 
-        Only give this one data set, e.g not multiple powers that you want plotted seperately
+        Only pass one data set (e.g. a single drive power); do not mix
+        conditions that should be plotted separately.
 
-        returned g_0 and G are in angular units (2pi*Hz)
+        Returned g_0 and G are in angular units (2π × Hz).
+
+        Parameters
+        ----------
+        SA_df : pandas.DataFrame
+            DataFrame of SA sweeps.
+        select : dict
+            Column filters, e.g.
+            ``{"drive_power": ["0"], "domain": ["freq"]}``.
+        m_eff : float
+            Effective mass of the mechanical resonator (kg).
+        S21_df : pandas.DataFrame
+            DataFrame of VNA S21 sweeps.
+        VNA_S21_extra_atten : attenuation_object or None
+            Extra attenuation on the VNA signal path.
+        SG_cavity_to_SA_atten : attenuation_object
+            Attenuation from cavity to spectrum analyser.
+        SG_to_cavity_atten : attenuation_object
+            Attenuation from signal generator to cavity.
+        basic_S_ww_eq : callable, optional
+            Mechanical spectral density model to fit. Default is
+            `basic_S_ww_eq`.
+        NENBW : float, optional
+            Noise-equivalent noise bandwidth factor. Default is
+            ``RS_default_window_NENBW``.
+        S21_eq : callable, optional
+            S21 model equation. Default is `S21_eq`.
+
+        Returns
+        -------
+        dict
+            Dictionary containing averaged G²S_xx, fit parameters, g_0, G,
+            x_zpf, raw lists of S21 and SA data, and all intermediate results.
         """
         S_ww_raw_list = []
         S_ww_raw_freqs_list = []
@@ -321,23 +435,31 @@ class fit_S_xx:
 ## old fitters ----------------------------
 
 
-
-
-def basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
-
-    freqs = freqs*2*np.pi
-
-    omega_m = omega_m *2*np.pi
-
-    G_m = G_m *2 *np.pi
-
-    S_ww =  (A /((G_m**2) + 4*(freqs - omega_m )**2)) +nf
-
-    return S_ww
-
 def basic_S_ww_eq_2(freqs, omega_m, G_m, A, nf):
     """
-    Doesn't have lorentzian approx, taken from GW book
+    Docstring by Claude. Full mechanical displacement spectral density without the Lorentzian approximation.
+
+    Uses the exact susceptibility form taken from the gravitational-wave
+    (GW) textbook, rather than the near-resonance Lorentzian approximation
+    used in `basic_S_ww_eq`.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    omega_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    A : float
+        Amplitude scaling factor.
+    nf : float
+        Noise floor offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        Spectral density S_ww (W/Hz or arb. units matching `A`).
     """
 
     freqs = freqs*2*np.pi
@@ -351,16 +473,54 @@ def basic_S_ww_eq_2(freqs, omega_m, G_m, A, nf):
     return S_ww
 
 def dBm_basic_S_ww_eq(freqs, omega_m, G_m, A, nf):
+    """
+    Docstring by Claude. Lorentzian mechanical spectral density in dBm.
 
+    Wrapper around `basic_S_ww_eq` that converts the output to dBm.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    omega_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    A : float
+        Amplitude scaling factor.
+    nf : float
+        Noise floor offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        Spectral density in dBm.
+    """
     return watts_to_dBm(basic_S_ww_eq(freqs, omega_m, G_m, A, nf))
 
 
 def S_ff_thermal(freqs, m_eff, G_m, T):
     """
-    Thermal force spectral density as defined in 
-    gw michele maggoire 8.123
+    Docstring by Claude. Thermal force spectral density.
 
-    Give inputs in Hz
+    As defined in Maggiore (GW textbook) eq. 8.123. All frequency inputs
+    must be in Hz.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz) — used only to determine output shape.
+    m_eff : float
+        Effective mass of the mechanical resonator (kg).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    T : float
+        Temperature (K).
+
+    Returns
+    -------
+    numpy.ndarray
+        Thermal force spectral density S_ff (N^2/Hz), flat across `freqs`.
     """
 
     G_m = G_m*2*np.pi
@@ -370,8 +530,26 @@ def S_ff_thermal(freqs, m_eff, G_m, T):
 
 def SHO_TF_sq(freqs, m_eff, f_m, G_m ):
     """
-    Transfer derived from function from S Kumar 2023 eq 5
-    and thermal force power spectral density as in func S_ff_thermal
+    Docstring by Claude. Squared magnitude of the simple harmonic oscillator transfer function.
+
+    Derived from S. Kumar (2023) eq. 5 and consistent with the thermal force
+    spectral density in `S_ff_thermal`.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    m_eff : float
+        Effective mass of the mechanical resonator (kg).
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+
+    Returns
+    -------
+    numpy.ndarray
+        Squared SHO transfer function |χ(ω)|² (m²/N²).
     """
     w_freqs = freqs*2*np.pi
     w_m, G_m = np.array([f_m, G_m])*2*np.pi
@@ -380,14 +558,65 @@ def SHO_TF_sq(freqs, m_eff, f_m, G_m ):
 
 
 def S_xx_thermal(freqs, m_eff, T, f_m, G_m ):
-    
+    """
+    Docstring by Claude. Thermal displacement spectral density of a mechanical resonator.
+
+    Product of the squared SHO transfer function and the thermal force
+    spectral density.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    m_eff : float
+        Effective mass of the mechanical resonator (kg).
+    T : float
+        Temperature (K).
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+
+    Returns
+    -------
+    numpy.ndarray
+        Thermal displacement spectral density S_xx (m²/Hz).
+    """
     return SHO_TF_sq(freqs, m_eff, f_m, G_m ) * S_ff_thermal(freqs, m_eff, G_m, T)
 
 
 def S_hh_24_25_exp_14_4(S_xx_freqs,  f_m, G_m, S_xx, q_yy = None, q_xx = None, mu = None):
     """
-    thin-film re-entrant cavity S_hh transfer function 
-    
+    Docstring by Claude. Thin-film re-entrant cavity S_hh transfer function.
+
+    Computes the cavity gap spectral density S_hh from the mechanical
+    displacement spectral density S_xx using the transfer function of a
+    thin-film re-entrant cavity (eqs. 24–25 of experiment 14.4).
+
+    Parameters
+    ----------
+    S_xx_freqs : array-like
+        Frequency array (Hz).
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    S_xx : array-like
+        Mechanical displacement spectral density (m²/Hz).
+    q_yy : float, optional
+        Electromechanical coupling coefficient q_yy. Default is
+        -1.5174802642178184e-06.
+    q_xx : float, optional
+        Electromechanical coupling coefficient q_xx. Default is
+        7.587286243641971e-07.
+    mu : float, optional
+        Electromechanical coupling parameter mu. Default is
+        0.0002293073538383159.
+
+    Returns
+    -------
+    numpy.ndarray
+        Cavity gap spectral density S_hh (m²/Hz).
     """
     #default values moved here so the def line doesn't get too long
     if q_yy is None:
@@ -414,8 +643,33 @@ def S_hh_24_25_exp_14_4(S_xx_freqs,  f_m, G_m, S_xx, q_yy = None, q_xx = None, m
 
 
 def S_xx_impre(freqs, f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity, G):
-    """eq 69 Aspelmeyer 2014 review
-    All inputs should be in Hz, not radHz
+    """
+    Docstring by Claude. Imprecision noise spectral density of the displacement measurement.
+
+    Eq. 69 of Aspelmeyer (2014) review. All frequency inputs must be in Hz,
+    not rad/Hz.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    f_d : float
+        Drive frequency (Hz).
+    f_c : float
+        Cavity resonance frequency (Hz).
+    k_ext : float
+        External coupling rate (Hz).
+    k_tot : float
+        Total linewidth (Hz).
+    linear_drive_power_at_cavity : float
+        Drive power at the cavity input (W).
+    G : float
+        Optomechanical coupling rate (Hz/m).
+
+    Returns
+    -------
+    numpy.ndarray
+        Imprecision spectral density S_xx_imp (m²/Hz).
     """
     n_cav = photon_number(f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity)
     G = G * 2*np.pi
@@ -427,8 +681,31 @@ def S_xx_impre(freqs, f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity, G):
 
 def S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
     """
-    Eq 70 Aspelmeyer 2014 review
-    All freq inputs in Hz
+    Docstring by Claude. Radiation-pressure backaction force spectral density.
+
+    Eq. 70 of Aspelmeyer (2014) review. All frequency inputs must be in Hz.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    f_d : float
+        Drive frequency (Hz).
+    G : float
+        Optomechanical coupling rate (Hz/m).
+    f_c : float
+        Cavity resonance frequency (Hz).
+    k_ext : float
+        External coupling rate (Hz).
+    k_tot : float
+        Total linewidth (Hz).
+    linear_drive_power_at_cavity : float
+        Drive power at the cavity input (W).
+
+    Returns
+    -------
+    numpy.ndarray
+        Backaction force spectral density S_FF_back (N²/Hz).
     """
     n_cav = photon_number(f_d, f_c, k_ext, k_tot, linear_drive_power_at_cavity)
     G_rad = G * 2*np.pi
@@ -439,7 +716,40 @@ def S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
     return S_FF_bac
 
 def S_xx_back(freqs, m_eff, f_m, G_m, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,):
+    """
+    Docstring by Claude. Backaction displacement spectral density.
 
+    Product of the squared SHO transfer function and the backaction force
+    spectral density.
+
+    Parameters
+    ----------
+    freqs : array-like
+        Frequency array (Hz).
+    m_eff : float
+        Effective mass of the mechanical resonator (kg).
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    f_d : float
+        Drive frequency (Hz).
+    G : float
+        Optomechanical coupling rate (Hz/m).
+    f_c : float
+        Cavity resonance frequency (Hz).
+    k_ext : float
+        External coupling rate (Hz).
+    k_tot : float
+        Total linewidth (Hz).
+    linear_drive_power_at_cavity : float
+        Drive power at the cavity input (W).
+
+    Returns
+    -------
+    numpy.ndarray
+        Backaction displacement spectral density S_xx_back (m²/Hz).
+    """
     S_FF_bac = S_FF_back(freqs, f_d, G, f_c, k_ext, k_tot, linear_drive_power_at_cavity,)
     TF_Sq = SHO_TF_sq(freqs, m_eff, f_m, G_m )
     
@@ -448,8 +758,43 @@ def S_xx_back(freqs, m_eff, f_m, G_m, f_d, G, f_c, k_ext, k_tot, linear_drive_po
 
 
 def S_ww_constant_calculator(f_m, G_m, A, f_c, k_tot, k_ext, incident_pump_power, T, m_eff, drive_freq ):
+    """
+    Docstring by Claude. Calculate g_0, G, and photon number from spectral density fit parameters.
 
-    """equation from X rojas et al 28/11/2022, eq 3-> 5"""
+    Equation from X. Rojas et al. (2022-11-28), eqs. 3–5.
+
+    Parameters
+    ----------
+    f_m : float
+        Mechanical resonance frequency (Hz).
+    G_m : float
+        Mechanical linewidth / damping rate (Hz).
+    A : float
+        Amplitude coefficient from `basic_S_ww_eq` fit.
+    f_c : float
+        Cavity resonance frequency (Hz).
+    k_tot : float
+        Total cavity linewidth (Hz).
+    k_ext : float
+        External coupling rate (Hz).
+    incident_pump_power : float
+        Incident pump power at the cavity (W).
+    T : float
+        Temperature (K).
+    m_eff : float
+        Effective mass of the mechanical resonator (kg).
+    drive_freq : float
+        Drive (pump) frequency (Hz).
+
+    Returns
+    -------
+    g_0 : float
+        Vacuum optomechanical coupling rate (Hz, not rad/Hz).
+    G : float
+        Optomechanical coupling rate (Hz/m, not rad).
+    n_d : float
+        Intracavity photon number.
+    """
     #constants
     h = 6.62607015e-34
     h_bar = h/(2*np.pi)
@@ -472,30 +817,65 @@ def S_ww_constant_calculator(f_m, G_m, A, f_c, k_tot, k_ext, incident_pump_power
     return g_0, G, n_d
 
 
-def fit_basic_S_ww_eq_linear_power(freqs_minus_pump_freq:np.array, linear_power:np.array, guesses:list, sig = None):  
+def fit_basic_S_ww_eq_linear_power(freqs_minus_pump_freq:np.array, linear_power:np.array, guesses:list, sig = None):
     """
-    fits the basic S_ww equation
+    Docstring by Claude. Fit the basic S_ww equation to data given in linear (watts) power.
 
-    freqs_minus_pump_freq: np.array containing frequencies relative to the pump frequency
+    Converts `linear_power` to dBm and delegates to `fit_basic_S_ww_eq`.
 
-    dBm_mag: np.array containing magnitudes in dBm
+    Parameters
+    ----------
+    freqs_minus_pump_freq : numpy.ndarray
+        Frequencies relative to the pump frequency (Hz).
+    linear_power : numpy.ndarray
+        Power spectral density values in linear units (W/Hz).
+    guesses : list
+        Initial parameter guesses in the order ``[f_m, G_m, A, nf]``.
+        Frequencies should not be in reduced (angular) units.
+    sig : array-like or None, optional
+        Uncertainties on `linear_power` (in dBm) passed as ``sigma`` to
+        ``scipy.optimize.curve_fit``.  Default is None (equal weights).
 
-    list: list of guesses in order: [f_m, G_m, A, nf], shouldn't be reduced frequencies
-    
+    Returns
+    -------
+    popt : numpy.ndarray
+        Absolute values of the fitted parameters ``[f_m, G_m, A, nf]``.
+    pcov : numpy.ndarray
+        Estimated covariance of ``popt``.  Diagonal elements give the
+        variance of each parameter.  ``np.nan`` if the fit failed.
     """
 
     return fit_basic_S_ww_eq(freqs_minus_pump_freq, watts_to_dBm(linear_power), guesses, sig)
 
-def fit_basic_S_ww_eq(freqs_minus_pump_freq:np.array, dBm_mag:np.array, guesses:list, sig = None):  
+def fit_basic_S_ww_eq(freqs_minus_pump_freq:np.array, dBm_mag:np.array, guesses:list, sig = None):
     """
-    fits the basic S_ww equation
+    Docstring by Claude. Fit the basic S_ww Lorentzian equation to a power spectrum in dBm.
 
-    freqs_minus_pump_freq: np.array containing frequencies relative to the pump frequency
+    Converts `dBm_mag` to watts and fits `basic_S_ww_eq` using
+    ``scipy.optimize.curve_fit``.  If the fit fails with a ``RuntimeError``,
+    the initial guesses are returned as ``popt`` and a ``NaN`` covariance
+    matrix is returned.
 
-    dBm_mag: np.array containing magnitudes in dBm
+    Parameters
+    ----------
+    freqs_minus_pump_freq : numpy.ndarray
+        Frequencies relative to the pump frequency (Hz).
+    dBm_mag : numpy.ndarray
+        Power spectral density values in dBm.
+    guesses : list
+        Initial parameter guesses in the order ``[f_m, G_m, A, nf]``.
+        Frequencies should not be in reduced (angular) units.
+    sig : array-like or None, optional
+        Uncertainties on the data passed as ``sigma`` to
+        ``scipy.optimize.curve_fit``.  Default is None (equal weights).
 
-    list: list of guesses in order: [f_m, G_m, A, nf], shouldn't be reduced frequencies
-    
+    Returns
+    -------
+    popt : numpy.ndarray
+        Absolute values of the fitted parameters ``[f_m, G_m, A, nf]``.
+    pcov : numpy.ndarray
+        Estimated covariance of ``popt``.  Diagonal elements give the
+        variance of each parameter.  All ``np.nan`` if the fit failed.
     """
 
     watts = dBm_to_watts(dBm_mag)
@@ -512,10 +892,38 @@ def fit_basic_S_ww_eq(freqs_minus_pump_freq:np.array, dBm_mag:np.array, guesses:
 
 
 def FWHM_guesser(freqs, magnitude, resonance_guess):
-
     """
-    wrapper to fit the basic S_ww equation 
-    
+    Docstring by Claude. Estimate S_ww fit parameters from FWHM and fit the spectrum.
+
+    Walks away from the resonance position to find the half-power point,
+    computes initial guesses for ``[f_m, G_m, A, nf]``, then calls
+    `fit_basic_S_ww_eq` with those guesses.
+
+    Parameters
+    ----------
+    freqs : numpy.ndarray
+        Frequency array (Hz).
+    magnitude : numpy.ndarray
+        Power spectral density in dBm.
+    resonance_guess : float
+        Approximate resonance frequency (Hz) used as the search start.
+
+    Returns
+    -------
+    popt : numpy.ndarray
+        Absolute values of the fitted parameters ``[f_m, G_m, A, nf]``
+        from `fit_basic_S_ww_eq`.
+    pcov : numpy.ndarray
+        Estimated covariance of ``popt``.
+    guesses : list
+        Auto-generated initial guesses ``[f_m, G_m, A, nf]`` used for the
+        fit.
+
+    Raises
+    ------
+    Exception
+        If the half-power point is not found within ``freqs.size / 10``
+        iterations.
     """
     
     max_iter = int(freqs.size/10)

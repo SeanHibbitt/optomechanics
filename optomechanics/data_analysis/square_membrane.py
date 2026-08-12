@@ -1,6 +1,40 @@
 import numpy as np
 
 class membrane:
+    """
+    Docstring by Claude. Resonance frequency calculator for a pre-stressed square membrane resonator
+    with an optional thin-film deposition.
+
+    Parameters
+    ----------
+    length_x : float
+        Membrane length along x (m).
+    length_y : float
+        Membrane length along y (m).
+    height_of_sin : float
+        Silicon nitride thickness (m).
+    depth_deposition : float
+        Thin-film deposition thickness (m).
+    density_of_deposition : float
+        Deposition material density (kg/m^3).
+    density_of_membrane_material : float, optional
+        SiN density (kg/m^3). Default is 2820.
+    stress_of_membrane : float, optional
+        Membrane stress (Pa). Default is 1e9.
+
+    Attributes
+    ----------
+    area_of_membrane : float
+        length_x * length_y (m^2).
+    mass_of_membrane : float
+        Mass of the bare SiN membrane (kg).
+    mass_of_deposition : float
+        Mass of the deposited thin film (kg).
+    effective_mass_of_membrane : float
+        Effective mass for the fundamental square mode = mass_of_membrane / 4,
+        following "A general procedure for thermomechanical calibration of
+        nano/micro-mechanical resonators".
+    """
 
     def __init__(self, length_x, length_y, height_of_sin, depth_deposition, density_of_deposition, density_of_membrane_material = 2820, stress_of_membrane = 1e9 ):
 
@@ -35,7 +69,27 @@ class membrane:
     
 
     def fm(self, m_x, n_y):
+        """
+        Docstring by Claude. Calculate the resonance frequency for mode (m_x, n_y).
 
+        Computes the bare membrane frequency f_m and the mass-loaded frequency
+        reduced_f_m that accounts for the additional mass of the thin-film
+        deposition.
+
+        Parameters
+        ----------
+        m_x : int
+            Mode number along x.
+        n_y : int
+            Mode number along y.
+
+        Returns
+        -------
+        reduced_f_m : float
+            Resonance frequency in Hz including deposition mass loading.
+        f_m : float
+            Bare membrane resonance frequency in Hz (no deposition mass loading).
+        """
 
         sqrt_ = (self.stress_of_membrane/self.density_of_membrane_material) *((m_x/self.length_x )**2 + (n_y/self.length_y)**2)
         f_m = 0.5 * np.sqrt(sqrt_)

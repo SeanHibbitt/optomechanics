@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Apr  8 12:14:00 2024
+Docstring by Claude. Base VISA instrument driver for optomechanics device control.
 
-@author: Sean Hibbitt
-Email: Sean.hibbitt.2019@;ive.rhul.ac.uk
-phone number: 07808665776
-
-changes log: (not using git)
-Please make new version and save old version in a folder if mangage alterations/additions are made
-please note any changes here under your name, along with contact details:
+Provides the Device_Visa_Super base class which wraps PyVISA to manage
+instrument connections. Use as a context manager (``with`` block) to ensure
+the connection is properly closed after use.
 """
 
 
@@ -17,29 +13,59 @@ from pyvisa import constants
 from time import sleep
 import matplotlib.pyplot as plt
 import numpy as np
-from Optomechanics.data_management.data_management import save_data_3 as save_data_3_temp
+from optomechanics.data_management.data_management import save_data_3 as save_data_3_temp
 
 
 #%%Define Class
 class Device():
-    
-    
     """
-    
-    super class with default behaviours from pyvisa etc
-    
-    contains default scpi commands. 
-    These were taken from the ZNA manual: https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
+    Docstring by Claude. VISA super-class providing IEEE 488.2 / SCPI commands and device management.
 
-    SCPI wikipage: https://en.wikipedia.org/wiki/Standard_Commands_for_Programmable_Instruments
-    
-        
+    Wraps pyvisa to provide SCPI commands common to all Rohde & Schwarz (and
+    compatible) instruments.  Subclass this to add instrument-specific methods.
+    Supports use as a context manager (``with`` statement).
+
+    SCPI command reference: ZNA User Manual
+    https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
+
+    SCPI standard: https://en.wikipedia.org/wiki/Standard_Commands_for_Programmable_Instruments
+
+    Parameters
+    ----------
+    address : str
+        VISA resource address string (e.g. ``'TCPIP::192.168.0.1::INSTR'``).
+    baud_rate : int, optional
+        Baud rate for serial connections. Default is 9600.
+    query_delay : float, optional
+        Delay in seconds between write and read in a query. Default is 0.
+    timeout : int, optional
+        Communication timeout in milliseconds. Default is 10000.
+
+    Attributes
+    ----------
+    rm : pyvisa.ResourceManager
+        The pyvisa resource manager instance.
+    address : str
+        VISA resource address string.
+    baud_rate : int
+        Baud rate.
+    query_delay : float
+        Query delay in seconds.
+    timeout : int
+        Communication timeout in milliseconds.
+    _device : pyvisa.Resource
+        The open pyvisa resource; available after calling `open`.
     """
     
     
     
     def __init__(self, address, baud_rate = 9600, query_delay = 0, timeout = 10000  ):
-        
+        """
+        Docstring by Claude. Initialise the resource manager and store connection parameters.
+
+        The connection is not opened here; call `open` (or use the ``with``
+        statement) to establish communication with the instrument.
+        """
         #setup visa
         self.rm = visa.ResourceManager()  
 
@@ -53,7 +79,14 @@ class Device():
 
 
     def open(self):
-        """ Opens the device via visa"""
+        """
+        Docstring by Claude. Open the VISA resource and configure communication parameters.
+
+        Returns
+        -------
+        Device
+            Returns ``self`` to allow chaining and use in ``with`` blocks.
+        """
         self._device = self.rm.open_resource(self.address)
         #setup device parameters
         self._device.baud_rate = self.baud_rate
@@ -66,14 +99,43 @@ class Device():
 
     def __enter__(self):
         """
-        opens resource, works with "with" structure
-        https://realpython.com/python-with-statement/#coding-class-based-context-managers
+        Docstring by Claude. Enter the context manager by opening the VISA resource.
+
+        Calls `open` and returns ``self``, enabling use in ``with`` blocks::
+
+            with Device('TCPIP::192.168.0.1::INSTR') as dev:
+                dev.IDN_query()
+
+        See also: https://realpython.com/python-with-statement/#coding-class-based-context-managers
+
+        Returns
+        -------
+        Device
+            The opened device instance.
         """
         return self.open()
         
     def __exit__(self, exc_type, exc_value, exc_tb):
         """
-        closes resource, works with "with" structure
+        Docstring by Claude. Exit the context manager by closing the VISA resource.
+
+        Calls `close` on exit.  If an ``IndexError`` was raised inside the
+        ``with`` block it is caught, printed, and suppressed.
+
+        Parameters
+        ----------
+        exc_type : type or None
+            Exception type, or ``None`` if no exception occurred.
+        exc_value : Exception or None
+            Exception instance, or ``None``.
+        exc_tb : traceback or None
+            Traceback object, or ``None``.
+
+        Returns
+        -------
+        bool or None
+            ``True`` if an ``IndexError`` was caught (suppressing propagation);
+            ``None`` otherwise.
         """
         self.close()
         if isinstance(exc_value, IndexError):
@@ -82,10 +144,18 @@ class Device():
             print(f"Exception message: {exc_value}")
             return True
 
-    @staticmethod 
+    @staticmethod
     def connected_devices():
         """
-        return the static methods
+        Docstring by Claude. List all VISA resources currently visible to the system.
+
+        Creates a temporary resource manager, enumerates all resources, and
+        returns the result.
+
+        Returns
+        -------
+        tuple of str
+            VISA resource address strings for all connected devices.
         """
         temp_rm = visa.ResourceManager()  
         temp_list = temp_rm.list_resources()
@@ -95,15 +165,58 @@ class Device():
 
         
     def query(self, cmd,):
+        """
+        Docstring by Claude. Send a SCPI query command and return the response string.
+
+        Parameters
+        ----------
+        cmd : str
+            SCPI command string to send (e.g. ``'*IDN?'``).
+
+        Returns
+        -------
+        str
+            Response string from the instrument.
+        """
         return self._device.query(cmd)
     
     def write(self, cmd):
+        """
+        Docstring by Claude. Send a SCPI write command with no response expected.
+
+        Parameters
+        ----------
+        cmd : str
+            SCPI command string to send.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call
+            (number of bytes written, status code).
+        """
         return self._device.write(cmd)
         
     def read_bytes(self, bits):
+        """
+        Docstring by Claude. Read a fixed number of bytes from the instrument.
+
+        Parameters
+        ----------
+        bits : int
+            Number of bytes to read.
+
+        Returns
+        -------
+        bytes
+            Raw bytes read from the instrument.
+        """
         return self._device.read_bytes(bits)
     
     def close(self,):
+        """
+        Docstring by Claude. Close the VISA resource manager and print a confirmation message.
+        """
         self.rm.close()
         print("device closed")
     
@@ -112,68 +225,90 @@ class Device():
         
     ##### write commands:
     def CLS(self,):
-        """*CLS
-        Clear status
-        Sets the status byte (STB), the standard event register (ESR) and the EVENt part of
-        the QUEStionable and the OPERation registers to zero. The command does not
-        alter the mask and transition parts of the registers. It clears the output buffer.
-        Usage: Setting only
+        """
+        Docstring by Claude. Send the ``*CLS`` (Clear Status) SCPI command.
+
+        Clears the status byte (STB), the standard event register (ESR), and the
+        EVENt part of the QUEStionable and OPERation registers to zero.  Does not
+        alter mask or transition register parts.  Clears the output buffer.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write("*CLS")
     
     def OPC(self,):
         """
-        *OPC
-        Operation Complete
-        Sets bit 0 in the event status register when all preceding commands have been executed.
-        This bit can be used to initiate a service request. The query writes a "1" into the
-        output buffer when all preceding commands have been executed, which is useful for
-        command synchronization.
-        
-        See ESE query
+        Docstring by Claude. Send the ``*OPC`` (Operation Complete) SCPI command.
+
+        Sets bit 0 in the event status register when all preceding commands have
+        been executed.  This bit can be used to initiate a service request.
+        See `ESE` and `ESR_query` for event-status register management.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write("*OPC")
 
     def PCB(self,Address):
         """
-        *PCB <Address>
-        Pass control back
-        Indicates the controller address to which remote control is returned after termination of
-        the triggered action.
-        Setting parameters:
-        <Address> Range: 0 to 30
-        Usage: Setting only
+        Docstring by Claude. Send the ``*PCB`` (Pass Control Back) SCPI command.
+
+        Indicates the controller address to which remote control is returned
+        after termination of the triggered action.
+
+        Parameters
+        ----------
+        Address : int
+            Controller address in the range 0–30.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write(f"*PCB{Address}")
     
     def PRE(self, Value):
         """
-        
-        *PRE <Value>
-        Parallel poll register enable
-        Sets parallel poll enable register to the indicated value. The query returns the contents
-        of the parallel poll enable register in decimal form.
-        Parameters:
-        <Value> Range: 0 to 255
+        Docstring by Claude. Send the ``*PRE`` (Parallel Poll Register Enable) SCPI command.
 
+        Sets the parallel poll enable register to the indicated value.
+
+        Parameters
+        ----------
+        Value : int
+            Value to write to the parallel poll enable register (0–255).
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write(f"*PRE{Value}")
     
     def PSC(self, Action):
         """
-        
-        *PSC <Action>
-        Power on status clear
-        Determines whether the contents of the ENABle registers are preserved or reset when
-        the instrument is switched on. Thus a service request can be triggered when the instrument is switched on, if the status registers ESE and SRE are suitably configured. The
-        query reads out the contents of the "power-on-status-clear" flag.
-        Parameters:
-        <Action> 0 | 1
-        0
-        The contents of the status registers are preserved.
-        1
-        Resets the status registers.
+        Docstring by Claude. Send the ``*PSC`` (Power On Status Clear) SCPI command.
 
+        Determines whether the contents of the ENABle registers are preserved or
+        reset when the instrument is switched on.  A service request can be
+        triggered on power-on if the ESE and SRE registers are suitably configured.
+
+        Parameters
+        ----------
+        Action : int
+            ``0`` — preserve the status register contents on power-on.
+            ``1`` — reset the status registers on power-on.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         
         return self.write(f"*PSC{Action}")
@@ -181,172 +316,242 @@ class Device():
     
     def RST(self, ):
         """
-        
-        *RST
-        Reset
-        Sets the instrument to a defined default status. The command is equivalent to
-        SYSTem:PRESet[:DUMMy]. The *RST value of each command is reported in the reference description. See also SYSTem:PRESet:SCOPe.
-        Usage: Setting only
+        Docstring by Claude. Send the ``*RST`` (Reset) SCPI command.
 
+        Sets the instrument to its defined default state.  Equivalent to
+        ``SYSTem:PRESet[:DUMMy]``.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write(f"*RST")
     
     def SRE(self, Contents):
         """
-        
-        Service request enable
-        Sets the service request enable register to the value indicated. Bit 6 (MSS mask bit)
-        remains 0. This command determines under which conditions a service request is triggered. The query *SRE? returns the contents of the service request enable register in
-        decimal form. Bit 6 is always 0.
-        Parameters:
-        <Contents> Contents of the service request enable register in decimal form.
-        Bit 6 (MSS mask bit) is always 0.
-        Range: 0 to 255
+        Docstring by Claude. Send the ``*SRE`` (Service Request Enable) SCPI command.
 
+        Sets the service request enable register to the specified value.
+        Bit 6 (MSS mask bit) always remains 0.
+
+        Parameters
+        ----------
+        Contents : int
+            Contents of the service request enable register in decimal form
+            (0–255); bit 6 is always 0.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write(f"*SRE{Contents}")
     
     def TRG(self,):
         """
-        
-        *TRG
-        Trigger
-        Triggers all actions waiting for a trigger event. In particular, *TRG generates a manual
-        trigger signal. This common command complements the TRIGger commands of the
-        analyzer.
-        Usage: Event
+        Docstring by Claude. Send the ``*TRG`` (Trigger) SCPI command.
 
+        Triggers all actions waiting for a trigger event and generates a manual
+        trigger signal.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write("*TRG")
     
     def WAI(self,):
-        
         """
-        *WAI
-        Wait to continue
-        Prevents servicing of the subsequent commands until all preceding commands have
-        been executed and all signals have settled (see Command sequence and command
-        synchronization and *OPC).
-        Usage: Event
+        Docstring by Claude. Send the ``*WAI`` (Wait to Continue) SCPI command.
+
+        Prevents execution of subsequent commands until all preceding commands
+        have been executed and all signals have settled.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write("*WAI")
     
     def ESE(self, value):
         """
-        *ESE <Value>
-        Event status enable
-        Sets the event status enable register to the specified value. The query returns the contents of the event status enable register in decimal form.
-        Parameters:
-        <Value> Range: 0 to 255
+        Docstring by Claude. Send the ``*ESE`` (Event Status Enable) SCPI command.
+
+        Sets the event status enable register to the specified value.
+
+        Parameters
+        ----------
+        value : int
+            Value for the event status enable register (0–255).
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
         """
         return self.write(f"*ESE {value}")
     
     #####query commands:
     
     def ESE_query(self):
+        """
+        Docstring by Claude. Query the event status enable register (``*ESE?``).
+
+        Returns
+        -------
+        str
+            Contents of the event status enable register in decimal form.
+        """
         return self.query("*ESE?")
 
     
     def ESR_query(self):
         """
-        *ESR?
-        Event status read
-        Returns the contents of the event status register in decimal form and then sets the register to zero.
-        Return values:
-        <Contents> Range: 0 to 255
-        Usage: Query only
+        Docstring by Claude. Query and clear the event status register (``*ESR?``).
 
-        This is used to check if the OPC bit is 1 or 0, the first bit of the returned number is the OPC bit.
-        1 means its ready to continue, 0 means its not.
+        Returns the contents of the event status register in decimal form and
+        then sets the register to zero.  Bit 0 (OPC bit) indicates whether
+        all preceding operations have completed: ``1`` = ready, ``0`` = busy.
+
+        Returns
+        -------
+        str
+            Contents of the event status register in decimal form (0–255).
         """
         return self.query("*ESR?")
         
     def IDN_query(self,):
         """
-        
-        *IDN?
-        Identification
-        Returns the instrument identification string of the R&S ZNA, including the manufacturer, the instrument type, its serial number, and the software revision..
-        The identification string is editable; see "Define *IDN + *OPT..." on page 939.
-        Usage: Query only
+        Docstring by Claude. Query the instrument identification string (``*IDN?``).
 
+        Returns the manufacturer, instrument type, serial number, and software
+        revision.
+
+        Returns
+        -------
+        str
+            Instrument identification string.
         """
         return self.query("*IDN?")
     
     
     def IST_query(self, ):
         """
-        
-        *IST?
-        Individual status query
-        Returns the contents of the IST flag in decimal form. The IST flag is the status bit
-        which is sent during a parallel poll.
-        Return values:
-        <ISTflag> 0 | 1
-        Usage: Query only
+        Docstring by Claude. Query the individual status flag (``*IST?``).
 
+        Returns the contents of the IST flag, which is the status bit sent
+        during a parallel poll.
+
+        Returns
+        -------
+        str
+            ``'0'`` or ``'1'``.
         """
         return self.query("*IST?")
     
     def OPT_query(self, ):
         """
-        
-        *OPT?
-        Option identification query
-        Returns a list of installed options. The response consists of arbitrary ASCII response
-        data according to IEEE 488.2. The options are returned at fixed positions in a commaseparated string. A zero is returned for options that are not installed.
-        For a list of all available options and their description, refer to the specifications document.
-        The OPT information is editable; see "Define *IDN + *OPT..." on page 939.
-        Usage: Query only
-        Manual operation: See relevant device manual
+        Docstring by Claude. Query the list of installed options (``*OPT?``).
 
+        Returns a comma-separated string of installed options at fixed positions;
+        a zero is returned for options that are not installed.
+
+        Returns
+        -------
+        str
+            Comma-separated options string.
         """
         return self.query("*OPT?")
     
     def STB_query(self, ):
         """
-        
-        *STB?
-        Status byte query
-        Reads the contents of the status byte in decimal form.
-        Usage: Query only
+        Docstring by Claude. Query the status byte register (``*STB?``).
 
+        Returns
+        -------
+        str
+            Contents of the status byte in decimal form.
         """
         return self.query("*STB?")
     
     def TST_query(self,):
         """
-        
-        *TST?
-        Self-test query
-        Performs a self test and returns its boolean result (0 = passed, 1 = failed)
-        Return values:
-        <ErrorCode> integer > 0 (in decimal format)
-        An error occurred.
-        0
-        No errors occurred.
-        Usage: Query only
-        Manual operation: relevant device manual
+        Docstring by Claude. Perform a self-test and return the result (``*TST?``).
 
+        Returns
+        -------
+        str
+            ``'0'`` if no errors occurred; a positive integer string if a
+            self-test error occurred.
         """
         
         return self.query(f"*TST?")
     
     def OPC_query(self,):
-        
-        
+        """
+        Docstring by Claude. Send the ``*OPC?`` (Operation Complete Query) command.
+
+        Writes ``*OPC?`` to the instrument; the instrument places ``'1'`` in the
+        output buffer when all preceding operations are complete.
+
+        Returns
+        -------
+        tuple
+            Return value of the underlying pyvisa write call.
+        """
         return self.write("*OPC?")
     
     
     ####Extra Functions
     
     def check_OPC_event(self):
+        """
+        Docstring by Claude. Read the event status register and extract the first binary digit.
+
+        Reads the event status register via `ESR_query`, converts the decimal
+        string to an integer, and returns the first character of the resulting
+        binary string representation.
+
+        Returns
+        -------
+        str
+            First character of the binary representation of the ESR value.
+        """
         OPC_bit = bin(int(self.ESR_query()))[0]
         return OPC_bit
     
     
     
     def wait_on_OPC(self, wait_time = 60, timeout = None, updates = True, function = None, **function_kwargs):
+        """
+        Docstring by Claude. Poll the instrument until the OPC (Operation Complete) bit is set.
+
+        Enables the ESE register for OPC events, sends ``*OPC``, then loops
+        until `check_OPC_event` indicates completion.  Optionally calls
+        `function` on each iteration (e.g. to update a live plot).
+
+        Parameters
+        ----------
+        wait_time : float, optional
+            Time in seconds to pause between polling iterations. Default is 60.
+        timeout : float or None, optional
+            Not currently implemented. Default is None.
+        updates : bool, optional
+            Not currently used. Default is True.
+        function : callable or None, optional
+            Optional function to call on each polling iteration. Default is
+            None.
+        **function_kwargs : dict
+            Keyword arguments passed to `function` if provided.
+
+        Returns
+        -------
+        bool
+            ``True`` when the OPC bit is detected as set.
+        """
         self.ESE(1)
         print(f"ESE bits:{self.ESE_query()}")
         self.OPC()
@@ -367,7 +572,30 @@ class Device():
    
     
     def save_data(self, datas, freqs, file_name, file_location = "", headers = None, meta_data = "", delimiter = "\t"):
-        
+        """
+        Docstring by Claude. Save paired data and frequency arrays to a delimited text file.
+
+        Writes one row per data-frequency pair.  An optional metadata line and
+        header line are written before the data rows.
+
+        Parameters
+        ----------
+        datas : iterable
+            Data values to save.
+        freqs : iterable
+            Frequency values corresponding to each element of `datas`.
+        file_name : str
+            Output filename (including extension).
+        file_location : str, optional
+            Directory path for the output file. Default is ``""`` (current
+            directory).
+        headers : str or None, optional
+            Column header line. Default is None (no header written).
+        meta_data : str, optional
+            Metadata string written as the first line. Default is ``""``.
+        delimiter : str, optional
+            Field delimiter. Default is ``'\\t'`` (tab).
+        """
         with open(file_location+file_name, "w") as file1:
             file1.write(meta_data+"\n")
             if headers != None:
@@ -377,6 +605,28 @@ class Device():
 
 
     def save_data_2(self, data, file_name, file_location = "", headers = None, meta_data = "", delimiter = "\t"):
+        """
+        Docstring by Claude. Save a 2-D array to a delimited text file, written column-major.
+
+        Writes the array column by column: each output row contains one element
+        from each row of `data` at the same column index.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            2-D data array with shape ``(n_channels, n_points)``.
+        file_name : str
+            Output filename (including extension).
+        file_location : str, optional
+            Directory path for the output file. Default is ``""`` (current
+            directory).
+        headers : str or None, optional
+            Column header line. Default is None.
+        meta_data : str, optional
+            Metadata string written as the first line. Default is ``""``.
+        delimiter : str, optional
+            Field delimiter. Default is ``'\\t'`` (tab).
+        """
         data_shape = np.shape(data)
         #print(data_shape)
         with open(file_location+file_name, "w") as file1:
@@ -390,7 +640,32 @@ class Device():
                 file1.write("\n")
 
     def save_data_3(self, data, file_name, file_location = "", headers = None, meta_data = {}, delimiter = "\t"):
-        
+        """
+        Docstring by Claude. Save an array to a delimited text file with key-value metadata lines.
+
+        Writes metadata as ``#\\tkey\\tvalue`` comment lines, then an optional
+        header line, then the data.  For 2-D arrays the output is column-major
+        (same layout as `save_data_2`); for 1-D arrays each element is written
+        on its own line.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Data array (1-D or 2-D).  For 2-D arrays, shape should be
+            ``(n_channels, n_points)``.
+        file_name : str
+            Output filename (including extension).
+        file_location : str, optional
+            Directory path for the output file. Default is ``""`` (current
+            directory).
+        headers : str or None, optional
+            Column header line. Default is None.
+        meta_data : dict, optional
+            Dictionary of metadata key-value pairs written as comment lines.
+            Default is ``{}``.
+        delimiter : str, optional
+            Field delimiter. Default is ``'\\t'`` (tab).
+        """
         data_shape = np.shape(data)
         print(f"datashape:{data_shape}")
         with open(file_location+file_name, "w") as file1:

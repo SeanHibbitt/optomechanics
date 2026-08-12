@@ -29,47 +29,116 @@ import pandas
 
 class VNA(Device):
     """
-    class for VNA E5063A, based on the ZNA script, check using commands before hand
-    
-    
-    
-    ZNA
-    manual:  https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
-    website: https://www.rohde-schwarz.com/uk/manual/r-s-zna-user-manual-manuals_78701-601863.html
-    
-    
-    
-    
+    Docstring by Claude. VISA driver for the Keysight E5063A vector network analyser.
+
+    Extends :class:`~optomechanics.device_control.Device_Visa_Super.Device`
+    with SCPI commands specific to the E5063A.  The command set is
+    structurally similar to the Rohde & Schwarz ZNA; verify commands against
+    the E5063A documentation before use.
+
+    Parameters
+    ----------
+    address : str
+        VISA resource address string (e.g. ``'TCPIP::134.219.128.53::INSTR'``).
+    baud_rate : int, optional
+        Serial baud rate.  Default is ``9600``.
+
+    Attributes
+    ----------
+    freq_list : numpy.ndarray
+        Frequency array populated by :meth:`sweep`.
+    data_1 : numpy.ndarray
+        Log-magnitude (dB) data populated by :meth:`sweep`.
+    data_2 : numpy.ndarray
+        Phase (degrees) data populated by :meth:`sweep`.
+    freq_data : numpy.ndarray
+        Stimulus frequency data populated by :meth:`sweep`.
+
+    References
+    ----------
+    ZNA user manual:
+    https://scdn.rohde-schwarz.com/ur/pws/dl_downloads/pdm/cl_manuals/user_manual/1178_6462_01/ZNA_UserManual_en_34.pdf
     """
     
     def __init__(self, address, baud_rate = 9600):
+        """
+        Docstring by Claude. Initialise the E5063A VNA driver.
+
+        Parameters
+        ----------
+        address : str
+            VISA resource address string.
+        baud_rate : int, optional
+            Serial baud rate.  Default is ``9600``.
+        """
         Device.__init__(self, address, baud_rate, timeout = 25000)
         
         
     
     def sense_freq_start(self, channel, FreqVal):
         """
-        Resolution of 1 Hz
+        Docstring by Claude. Set the sweep start frequency (``SENSe<Ch>:FREQuency:STARt``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        FreqVal : float
+            Start frequency (Hz).  Resolution is 1 Hz.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
-        
+
         return self.write(f"SENSe{channel}:FREQuency:STARt {FreqVal}")
     
     
     def sense_freq_stop(self, channel, FreqVal):
         """
-        Resolution of 1 Hz
+        Docstring by Claude. Set the sweep stop frequency (``SENSe<Ch>:FREQuency:STOP``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        FreqVal : float
+            Stop frequency (Hz).  Resolution is 1 Hz.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
-        
+
         return self.write(f"SENSe{channel}:FREQuency:STOP {FreqVal}")
 
 
     def sense_sweep_points(self, channel, SweepPoint):
-        
+
         """
-        Defines the total number of measurement points per sweep ("Number of Points").
-        Values between 1 and 100001 can be set.
+        Docstring by Claude. Set the number of measurement points per sweep (``SENSe<Ch>:SWEep:POINts``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        SweepPoint : int
+            Number of sweep points.  Valid range is 2–10001.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        Raises
+        ------
+        ValueError
+            If ``SweepPoint`` is outside the valid range (guard logic present
+            but the ``try/except`` block does not correctly enforce it).
         """
-        
+
         try: SweepPoint in range(2, 10001) == True
         except: raise ValueError("Please use number of points from 2 to 10001")
         
@@ -77,40 +146,79 @@ class VNA(Device):
 
     def sense_sweep_type(self, channel, sense_sweep_type_format):
         """
-        [SENSe<Ch>:]SWEep:TYPE <Format>
-        Selects the sweep type
-        types of sweep: LINear, LOGarithmic, SEGment
+        Docstring by Claude. Set the sweep type (``SENSe<Ch>:SWEep:TYPE``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        sense_sweep_type_format : str
+            Sweep type.  One of ``'LINear'``, ``'LOGarithmic'``, or
+            ``'SEGment'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:SWEep:TYPE {sense_sweep_type_format}")
 
     def sense_average_state(self, channel, state):
         """
-        [SENSe:]AVERage[:STATe] Enable or disable the sweep average. Suffix: .
-        Channel number Parameters: ON | OFF - enables
-        or disables the automatic calculation of the sweep 
-        average over the specified number
-        of sweeps ([SENSe:]AVERage:COUNt).
+        Docstring by Claude. Enable or disable sweep averaging (``SENSe<Ch>:AVERage:STATe``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        state : str
+            ``'ON'`` to enable averaging; ``'OFF'`` to disable.  The number
+            of averages is set by :meth:`sense_average_count`.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:AVERage:STATe {state}")
 
     
     def sense_average_clear(self, channel):
         """
-        [SENSe:]AVERage:CLEar Starts a new average cycle, 
-        clearing all previous results and thus eliminating their
-        effect on the new cycle
+        Docstring by Claude. Start a new average cycle, discarding previous results (``SENSe:AVERage:CLEar``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe:{channel}AVERage:CLEar")
         
     
     def sense_average_count(self, channel, average_factor):
         """
-        Defines the number of consecutive sweeps to be 
-        combined for the sweep average ("Factor").
-        This appears to be consecutive averaged sweeps instead of averages at a single point.
-        See many before use
-        1-999
-        default of 16
+        Docstring by Claude. Set the number of sweeps to average (``SENSe<Ch>:AVERage:COUNt``).
+
+        This sets the averaging factor for consecutive sweeps (not
+        point-by-point averaging).  Verify behaviour before use.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        average_factor : int
+            Number of sweeps to average.  Valid range is 1–999;
+            default on the instrument is 16.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"SENSe{channel}:AVERage:COUNt {average_factor}")
 
@@ -118,13 +226,27 @@ class VNA(Device):
     
     def sense_bandwidth_resolution(self, channel, band_width):
         """
-        This command sets/gets the IF bandwidth.
+        Docstring by Claude. Set the IF (resolution) bandwidth (``SENSe<Ch>:BANDwidth:RESolution``).
 
-        possible values:
-        10|15|20|30|40|50|70|100|150|200|300|400|500|700|1k|1.5k|2k|3k|4k|5k|7k|10k
-        |15k|20k|30k|40k|50k|70k|100k|150k|200k|300k
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        band_width : float
+            IF bandwidth (Hz).  Must be a power-of-ten multiple of one of
+            ``[1, 1.5, 2, 3, 4, 5, 7]`` and no greater than ``300000`` Hz.
+            Examples: 10, 15, 20, …, 100k, 150k, 200k, 300k.
 
-        
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        Raises
+        ------
+        ValueError
+            If ``band_width`` is not a valid value (guard logic present but
+            the ``try/except`` block does not correctly enforce it).
         """
         band_width_mods_truth = np.any(np.equal(np.array(band_width) % np.array([1,1.5,2,3,4,5,7]),[0,0,0,0,0,0,0]))\
             and band_width <= 300000
@@ -137,18 +259,45 @@ class VNA(Device):
     
     def sense_sweep_time_auto(self, channel, boolean):
         """
-        turns on or off the auto sweep mode
-        :SENSe<Ch>:SWEep:TIME:AUTO {ON|OFF|1|0}
-        :SENSe<Ch>:SWEep:TIME:AUTO?
+        Docstring by Claude. Enable or disable automatic sweep time (``SENSe<Ch>:SWEep:TIME:AUTO``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        boolean : str or int
+            ``'ON'`` / ``1`` to enable auto sweep time; ``'OFF'`` / ``0``
+            to disable.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
 
         return self.write(f"SENSe{channel}:SWEep:TIME:AUTO {boolean}")
     
     def source_power_level(self, channel, IntSourcePow = -10):
         """
-        :SOURce<Ch>:POWer:PORT<Pt>[:LEVel][:IMMediate][:AMPLitude] <Value>
-        range: -20 -> 0
+        Docstring by Claude. Set the internal source power level (``SOURce<Ch>:POWer:LEVel:IMMediate:AMPLitude``).
 
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        IntSourcePow : float, optional
+            Output power (dBm).  Must be in the range ``[-20, 0]``.
+            Default is ``-10``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
+
+        Raises
+        ------
+        ValueError
+            If ``IntSourcePow`` is outside ``[-20, 0]``.
         """
         if IntSourcePow <= 0 and IntSourcePow >=-20:
             pass
@@ -160,17 +309,39 @@ class VNA(Device):
  
     def initiate_continuous(self, channel, boolean):
         """
-        INITiate<Ch>:CONTinuous <Boolean>
-        Qualifies whether the analyzer measures in single sweep or in continuous sweep
-        mode
+        Docstring by Claude. Select single-sweep or continuous-sweep mode (``INITiate<Ch>:CONTinuous``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        boolean : str or int
+            ``'ON'`` / ``1`` for continuous sweep; ``'OFF'`` / ``0`` for
+            single sweep.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"INITiate{channel}:CONTinuous {boolean}")
     
     def initiate_sweep(self,channel):
         """
-        INITiate<Ch>:IMMediate
-        Starts a new single sweep sequence. This command is available in single sweep mode
-        only (INITiate<Ch>:CONTinuous OFF).
+        Docstring by Claude. Trigger a single sweep (``INITiate<Ch>:IMMediate``).
+
+        Only available when the instrument is in single-sweep mode
+        (``INITiate<Ch>:CONTinuous OFF``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"INITiate{channel}")    
     
@@ -179,37 +350,89 @@ class VNA(Device):
     
     def calculate_parameter_define(self, channel, TraceName, Result):
         """
-        Sets/gets the measurement parameter, this may have to be used in
-        tandem with other commands to create the channel and trace
-        Result is S parameter, i.e:
-            S11
-            S12
-            S21
-            S22
+        Docstring by Claude. Assign a measurement parameter to a trace (``CALCulate<Ch>:PARameter<Tr>:DEFine``).
+
+        May need to be used alongside other commands to create the channel
+        and trace first.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        TraceName : int or str
+            Trace identifier.
+        Result : str
+            S-parameter to measure, e.g. ``'S11'``, ``'S12'``, ``'S21'``,
+            or ``'S22'``.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"CALCulate{channel}:PARameter{TraceName}:DEFine {Result}")
           
     
     def output_state(self, state):
         """
-        Turns on and off the signal output
-        state: ON/OFF
+        Docstring by Claude. Enable or disable the RF signal output (``OUTPut:STATe``).
+
+        Parameters
+        ----------
+        state : str
+            ``'ON'`` to enable the output; ``'OFF'`` to disable.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f"OUTPut:STATe {state}")
     
     def display_window_trace_y_scale_auto(self, channel, TraceName, boolean):
-        
+
         """
-        turns on or off autoscale, not sure if this is contiuous or not
-        True
-        False
+        Docstring by Claude. Enable or disable Y-axis autoscale for a trace (``DISPlay:WINDow<Ch>:TRACe<Tr>:Y:SCALe:AUTO``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel / window number.
+        TraceName : int or str
+            Trace identifier.
+        boolean : bool or str
+            ``True`` / ``'ON'`` to enable autoscale; ``False`` / ``'OFF'``
+            to disable.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f":DISPlay:WINDow{channel}:TRACe{TraceName}:Y:SCALe:AUTO {boolean}")
     
     def calculate_data_format(self, channel, TraceName, data_format):
         """
-        sets format of data on trace
-        see "Internal data arrays" in manual for important infomation
+        Docstring by Claude. Set the data format for a trace (``CALCulate<Ch>:TRACe<Tr>:FORMat``).
+
+        See "Internal data arrays" in the instrument manual for details on
+        how the format affects retrieved data.
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        TraceName : int or str
+            Trace identifier.
+        data_format : str
+            Data format string, e.g. ``'MLOGarithmic'`` (log magnitude),
+            ``'PHASe'`` (phase in degrees), ``'REAL'``, ``'IMAGinary'``,
+            etc.
+
+        Returns
+        -------
+        tuple
+            Return value of :meth:`~Device.write`.
         """
         return self.write(f':Calculate{channel}:TRACe{TraceName}:FORMat {data_format}')
                 
@@ -217,34 +440,88 @@ class VNA(Device):
         
     def sense_sweep_time_query(self, channel):
         """
-        Query's sweep time
-        :SENSe<Ch>:SWEep:TIME:?
+        Docstring by Claude. Query the current sweep time (``SENSe<Ch>:SWEep:TIME?``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        str
+            Sweep time in seconds as a string returned by the instrument.
         """
         return self.query(f"SENSe{channel}:SWEep:TIME?")
         
 
     
     def calculate_data_fdata_query(self, channel, TraceName):
-    
+
         """
-        returns data from a formatted data array of the given channel
+        Docstring by Claude. Retrieve formatted trace data (``CALCulate<Ch>:TRACe<Tr>:DATA:FDATa?``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        TraceName : int or str
+            Trace identifier.
+
+        Returns
+        -------
+        str
+            Comma-separated formatted data string.  The format is determined
+            by the last call to :meth:`calculate_data_format`.
         """
         return self.query(f"CALCulate{channel}:TRACe{TraceName}:DATA:FDATa?")
     
     def calculate_data_sdata_query(self, channel, TraceName):
-    
+
         """
-        returns data from a corrected data array of the given channel
+        Docstring by Claude. Retrieve corrected (complex) trace data (``CALCulate<Ch>:TRACe<Tr>:DATA:SDATa?``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+        TraceName : int or str
+            Trace identifier.
+
+        Returns
+        -------
+        str
+            Comma-separated corrected data string (real/imaginary pairs).
         """
         return self.query(f"CALCulate{channel}:TRACe{TraceName}:DATA:SDATa?")
     
     
     def sense_freq_data(self, channel):
-        """ returns Freq stimulus data """
+        """
+        Docstring by Claude. Query the frequency stimulus data array (``SENSe<Ch>:FREQuency:DATA?``).
+
+        Parameters
+        ----------
+        channel : int
+            Channel number.
+
+        Returns
+        -------
+        str
+            Comma-separated frequency values (Hz) as a string.
+        """
         return self.query(f"SENSe{channel}:FREQuency:DATA?")
     
 
     def error(self,):
+        """
+        Docstring by Claude. Query the instrument error queue (``SYST:ERR?``).
+
+        Returns
+        -------
+        str
+            Error code and message string from the instrument error queue.
+        """
         return self.query("SYST:ERR?")
         
     
@@ -252,6 +529,29 @@ class VNA(Device):
         
     
     def recieve_fdata(self, data_formats, channel, TraceName,):
+        """
+        Docstring by Claude. Retrieve formatted trace data for multiple data formats.
+
+        Iterates over ``data_formats``, sets the trace format with
+        :meth:`calculate_data_format`, and queries the data with
+        :meth:`calculate_data_fdata_query` for each format.
+
+        Parameters
+        ----------
+        data_formats : list of str
+            Sequence of format strings to retrieve in turn (e.g.
+            ``['MLOGarithmic', 'PHASe']``).
+        channel : int
+            Channel number.
+        TraceName : int or str
+            Trace identifier.
+
+        Returns
+        -------
+        None
+            Result is accumulated in ``data`` but not returned (incomplete
+            implementation — function body does not return ``data``).
+        """
         data = []
         for data_format in data_formats:
             self.calculate_data_format(self, channel, TraceName, data_format) 
@@ -270,43 +570,77 @@ class VNA(Device):
               sense_sweep_type_format = "LINear",\
               reset = True,_file_name = "default", file_location = "", extra_meta = {}, dummy_sweep = False, ):
         """
-        
+        Docstring by Claude. Configure the VNA and perform a single S-parameter sweep.
+
+        Resets the instrument (optionally), configures frequency range, sweep
+        type, source power, IF bandwidth, and averaging, then triggers a
+        single sweep.  Retrieves log-magnitude and phase data after the sweep
+        completes and optionally saves the result to a tab-delimited file.
 
         Parameters
         ----------
-        channel : TYPE
-            The channels you want to use, channels 
-            define themeasurements and recoreded infomation
-        Result : TYPE
-            What you are measuring, e.g "S11"
-        TraceName : TYPE
-            Name of the trace in the channel
-        freq_start : TYPE
-            Start frequency
-        freq_stop : TYPE
-            Stop frequency
-        number_of_points : TYPE, optional
-            Number of points to take measurements over
-        power : TYPE, optional
-            Power in dB, default is -10
-        band_width : TYPE, optional
-            Bandwidth to take each point for, The default is 1e3.
-        sense_average_state : TYPE, optional
-            If avering is ON orOFF The default is "OFF".
-        sense_average_count_factor : TYPE, optional
-            Another
-        sense_average_point_count_factor : TYPE, optional
-            DESCRIPTION. The default is 1.
-        sense_sweep_type_format : TYPE, optional
-            DESCRIPTION. The default is "LINear".
-        reset : TYPE, optional
-            DESCRIPTION. The default is True.
-        _file_name : TYPE, optional
-            DESCRIPTION. The default is "default".
-        file_location : TYPE, optional
-            DESCRIPTION. The default is "".
-         : TYPE
-            DESCRIPTION.
+        channel : int
+            Channel number for the measurement.
+        Result : str
+            S-parameter to measure (e.g. ``'S11'``, ``'S21'``).
+        TraceName : int or str
+            Trace identifier within the channel.
+        freq_start : float
+            Sweep start frequency (Hz).
+        freq_stop : float
+            Sweep stop frequency (Hz).
+        number_of_points : int
+            Number of frequency points in the sweep.
+        probe_power : float
+            Source power level (dBm).  Must be in ``[-20, 0]``.
+        band_width : float
+            IF (resolution) bandwidth (Hz).
+        calibration : str, optional
+            ``'ON'`` to apply calibration correction; ``'OFF'`` to disable.
+            Default is ``'ON'``.
+        load_state : str, optional
+            Path to the instrument state file to load on reset.
+            Default is a pre-defined calibration file path.
+        sense_average_state : str, optional
+            ``'ON'`` to enable sweep averaging; ``'OFF'`` to disable.
+            Default is ``'OFF'``.
+        sense_average_count_factor : int, optional
+            Number of sweeps to average (``SENSe:AVERage:COUNt``).
+            Default is ``1``.
+        sense_average_point_count_factor : int, optional
+            Reserved for future use; currently unused.  Default is ``1``.
+        sense_sweep_type_format : str, optional
+            Sweep type: ``'LINear'`` or ``'LOGarithmic'``.
+            Default is ``'LINear'``.
+        reset : bool, optional
+            If ``True``, calls :meth:`~Device.CLS`, :meth:`~Device.RST`, and
+            loads the state file before configuring. Default is ``True``.
+        _file_name : str, optional
+            Base name for the output file (extension appended automatically).
+            Default is ``'default'``.
+        file_location : str or bool, optional
+            Directory path for saving output.  Set to ``False`` to suppress
+            saving.  Default is ``''``.
+        extra_meta : dict, optional
+            Additional key-value pairs to include in the file metadata.
+            Default is ``{}``.
+        dummy_sweep : bool, optional
+            If ``True``, returns ``None`` immediately after triggering the
+            sweep (no data retrieval).  Default is ``False``.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Tabular data with columns ``freq[Hz]``,
+            ``sweep_number_mag[dB]:1``, and ``sweep_number_phase[rad]:1``.
+        dict
+            Metadata dictionary including sweep parameters and timestamps.
+
+        Raises
+        ------
+        Exception
+            If ``sense_sweep_type_format`` is not ``'LINear'`` or
+            ``'LOGarithmic'``.
         """
         print(f"error info pre-run check \n{self.error()}")
         

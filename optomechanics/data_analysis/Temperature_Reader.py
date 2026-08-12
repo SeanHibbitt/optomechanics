@@ -1,4 +1,9 @@
+"""
+Docstring by Claude. Temperature data loading and parsing for optomechanics experiments.
 
+Reads temperature log files from cryogenic measurement setups and provides
+utilities for aligning temperature data with mechanical PSD time series.
+"""
 import numpy as np
 import os
 
@@ -9,7 +14,28 @@ import os
 def temp_reader(temp_day_paths):
 
     """
-    accepts a list of paths to months to read data from
+    Docstring by Claude. Read and concatenate temperature log files from a directory tree.
+
+    Walks a two-level directory hierarchy (month → day → files) rooted at
+    each path in ``temp_day_paths``, reads all CSV files using
+    ``numpy.genfromtxt``, concatenates the time, temperature, and set-voltage
+    columns, and returns them sorted by time.
+
+    Parameters
+    ----------
+    temp_day_paths : list of str
+        Paths to monthly directories.  Each directory is expected to contain
+        day subdirectories, which in turn contain comma-delimited CSV files
+        with a one-row header and columns ``[time, temperature, set_voltage, ...]``.
+
+    Returns
+    -------
+    Time : numpy.ndarray
+        Concatenated and time-sorted time stamps (first column of each CSV).
+    Temperature : numpy.ndarray
+        Concatenated and time-sorted temperature values (second column).
+    Set_voltage : numpy.ndarray
+        Concatenated and time-sorted set-voltage values (third column).
     """
 
     Temperature = []

@@ -1,9 +1,9 @@
-from DeviceClasses import Device
+from .Device_Visa_Super import Device
 import pyvisa
 import numpy as np
 import time
 import matplotlib.pyplot as plt
-from DeviceClasses.Utilities.Fitting import dBm_to_watts, watts_to_dBm
+from optomechanics.data_analysis.unit_conversions import dBm_to_watts, watts_to_dBm
 
 class FSW(Device):
     """

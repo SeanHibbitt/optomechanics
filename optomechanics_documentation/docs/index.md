@@ -1,17 +1,50 @@
-# Welcome to MkDocs
+# Optomechanics
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+**Optomechanics** is a Python package for experimental optomechanics research. It provides tools for
+data acquisition, device control, and data analysis — including cavity fitting, unit conversions,
+and mechanical membrane calculations.
 
-## Commands
+---
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+## Getting started
 
-## Project layout
+New to the package? Start here.
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+<div class="grid cards" markdown>
+
+- **Installation**
+
+    ---
+
+    Set up the conda environment and install the package.
+
+    [Installation](getting_started/installation.md)
+
+- **Quick start**
+
+    ---
+
+    Run your first S21 fit in a few lines of code.
+
+    [Quick start](getting_started/quickstart.md)
+
+</div>
+
+---
+
+## Package overview
+
+| Subpackage | Description |
+|---|---|
+| [`data_analysis`](api_reference/data_analysis/index.md) | Cavity fitting (S21, Sww), unit conversions, membrane mechanics |
+| [`device_control`](api_reference/device_control/index.md) | VISA instrument drivers (VNA, spectrum analyser, signal generator, …) |
+| [`data_management`](api_reference/data_management/index.md) | Dated file creation, data logging, attenuation accounting |
+
+---
+
+## Contents
+
+- [Getting Started](getting_started/installation.md)
+- [User Guide](user_guide/index.md)
+- [API Reference](api_reference/index.md)
+- [Release Notes](release_notes.md)

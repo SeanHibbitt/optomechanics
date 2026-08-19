@@ -491,10 +491,15 @@ def heater_range_power(heater_range, output=0):
 
     watts = min(current ** 2 * resistance,
                 HEATER_COMPLIANCE_VOLTS ** 2 / resistance)
+
+    # One significant figure.  The ranges are decade steps, so the exact
+    # figures land just off a round number -- 999 nW, 99.9 uW -- which is
+    # harder to read and no more accurate than 1 uW and 100 uW, the values
+    # the range is chosen for.
     for scale, unit in ((1.0, "W"), (1e-3, "mW"), (1e-6, "uW"), (1e-9, "nW")):
-        if watts >= scale:
-            return f"{watts / scale:.3g} {unit}"
-    return f"{watts:.3g} W"
+        if watts >= scale * 0.95:
+            return f"{watts / scale:.0f} {unit}"
+    return f"{watts:.1g} W"
 
 #: Units each heater's output level is expressed in, by output number.
 #:
@@ -1017,8 +1022,12 @@ def read_history_file(path, cutoff, keys):
 
         columns = [pd.to_numeric(times[times >= cutoff], errors="coerce")]
         for key in keys:
-            column_name = history_column_name(key)
-            if column_name in recent.columns:
+            column_name = None
+            for candidate in history_column_names(key):
+                if candidate in recent.columns:
+                    column_name = candidate
+                    break
+            if column_name is not None:
                 columns.append(pd.to_numeric(recent[column_name],
                                              errors="coerce"))
             else:
@@ -1031,6 +1040,38 @@ def read_history_file(path, cutoff, keys):
         print(f"[HISTORY] could not parse {path}: {e}")
         print(traceback.format_exc())
         return []
+
+
+def history_column_names(key):
+    """
+    Made by Claude. List the CSV headings a reading key may appear under.
+
+    The heater columns were once named with the output number in them
+    (``Sample_heater_out0_Setpoint[K]``), which was dropped as redundant.
+    Files written before that are still on disk and still wanted, so both
+    spellings are offered and whichever the file uses is taken.
+
+    Parameters
+    ----------
+    key : str
+        A key from :func:`plot_column_keys`.
+
+    Returns
+    -------
+    list of str
+        Headings to try, current spelling first.
+    """
+    current = history_column_name(key)
+    names = [current]
+
+    for output, info in HEATERS.items():
+        name = info["name"].replace(" ", "_")
+        if current.startswith(f"{name}_"):
+            names.append(current.replace(f"{name}_",
+                                         f"{name}_out{output}_", 1))
+            break
+
+    return names
 
 
 def history_column_name(key):
@@ -2790,6 +2831,7 @@ class Worker(QObject):
             "from_temperature": start,
             # Is there a rung after this one to jump to?
             "can_skip": self.remote_step_index + 1 < len(self.remote_steps),
+            "can_step_back": self.remote_step_index > 0,
         }
 
         print("=" * 70)
@@ -3085,6 +3127,32 @@ class Worker(QObject):
         print(f"[REMOTE] skipping the {skipped} K step; going straight to "
               f"{self.remote_steps[self.remote_step_index]} K instead.")
 
+        return self.park_current_step()
+
+    def step_back(self):
+        """
+        Made by Claude. Offer the rung before the one on show.
+
+        The counterpart to :meth:`skip_to_next_step`, for when a step was
+        jumped over too eagerly.  Nothing is sent: the earlier rung is
+        parked for confirmation like any other.
+
+        Refused on the first rung, which has nothing before it.
+
+        Returns
+        -------
+        bool
+            ``True`` if the previous step is now on offer.
+        """
+        if self.pending_intervention is None:
+            return False
+        if self.remote_step_index <= 0:
+            return False
+
+        self.remote_step_index -= 1
+        self.skipped_last_step = True
+        print(f"[REMOTE] going back to the "
+              f"{self.remote_steps[self.remote_step_index]} K step.")
         return self.park_current_step()
 
     def abandon_ladder(self):
@@ -5591,13 +5659,35 @@ class MainWindow(QMainWindow):
             self.dismiss_intervention)
         buttons.addWidget(self.intervention_manual_button)
 
-        self.intervention_skip_button = QPushButton("Jump to next step")
-        self.intervention_skip_button.setStyleSheet("padding: 6px;")
+        # One button's worth of space holding two halves, divided by a line
+        # down the middle: back to the previous rung, and on to the next.
+        # No spacing between them, and the shared border is what reads as
+        # the divider.
+        self.intervention_step_pair = QWidget()
+        pair = QHBoxLayout(self.intervention_step_pair)
+        pair.setContentsMargins(0, 0, 0, 0)
+        pair.setSpacing(0)
+
+        self.intervention_back_button = QPushButton("< Back")
+        self.intervention_back_button.setToolTip(
+            "Go back to the step before this one.  Nothing is sent.")
+        self.intervention_back_button.setStyleSheet(
+            "padding: 6px; border: 1px solid #808080; "
+            "border-top-right-radius: 0; border-bottom-right-radius: 0;")
+        self.intervention_back_button.clicked.connect(self.step_back)
+        pair.addWidget(self.intervention_back_button)
+
+        self.intervention_skip_button = QPushButton("Next >")
         self.intervention_skip_button.setToolTip(
-            "Pass over this step and offer the next one instead, so the "
-            "fridge goes straight there.  Nothing is sent.")
+            "Pass over this step and offer the next one, so the fridge goes "
+            "straight there.  Nothing is sent.")
+        self.intervention_skip_button.setStyleSheet(
+            "padding: 6px; border: 1px solid #808080; border-left: none; "
+            "border-top-left-radius: 0; border-bottom-left-radius: 0;")
         self.intervention_skip_button.clicked.connect(self.skip_to_next_step)
-        buttons.addWidget(self.intervention_skip_button)
+        pair.addWidget(self.intervention_skip_button)
+
+        buttons.addWidget(self.intervention_step_pair)
 
         self.intervention_cancel_button = QPushButton("Cancel")
         self.intervention_cancel_button.setStyleSheet("padding: 6px;")
@@ -5656,6 +5746,19 @@ class MainWindow(QMainWindow):
         """
         if self.worker.cancel_intervention():
             self.intervention_box.hide()
+
+    def step_back(self):
+        """
+        Made by Claude. Show the step before the one on offer.
+
+        The box stays up, now showing the earlier jump.  Nothing is sent.
+
+        Returns
+        -------
+        None
+        """
+        if self.worker.step_back():
+            self.show_intervention(self.worker.pending_intervention)
 
     def skip_to_next_step(self):
         """
@@ -5717,10 +5820,15 @@ class MainWindow(QMainWindow):
                      "the values, do whatever the fridge needs, then press "
                      "Apply -- or choose your own values by hand.</i>")
 
-        # Only offer the jump when there is a further rung to jump to.  On
-        # the last step the only thing beyond it is the target itself.
-        self.intervention_skip_button.setVisible(
-            bool(pending.get("can_skip")))
+        # Each half is enabled only where it leads somewhere: there is
+        # nothing before the first rung, and nothing past the target.  The
+        # pair is hidden outright when neither applies, which is the case
+        # for a setpoint that takes only one step.
+        can_skip = bool(pending.get("can_skip"))
+        can_back = bool(pending.get("can_step_back"))
+        self.intervention_skip_button.setEnabled(can_skip)
+        self.intervention_back_button.setEnabled(can_back)
+        self.intervention_step_pair.setVisible(can_skip or can_back)
 
         already_showing = not self.intervention_box.isHidden()
 

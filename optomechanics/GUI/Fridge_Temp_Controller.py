@@ -163,7 +163,7 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QWidget, QLineEdit, QPushButton,
     QLabel, QHBoxLayout, QGroupBox, QFormLayout, QMessageBox, QSlider,
     QMenuBar, QAction, QGridLayout, QComboBox, QStackedWidget, QListWidget,
-    QFileDialog, QSpinBox, QDoubleSpinBox
+    QFileDialog, QSpinBox, QDoubleSpinBox, QScrollArea
 )
 from PyQt5.QtCore import pyqtSignal, QObject, Qt, QTimer, QThread
 from PyQt5.QtGui import QFont
@@ -177,6 +177,7 @@ import time
 import datetime
 import threading
 import traceback
+import warnings
 import numpy as np
 import pandas as pd
 import pyvisa
@@ -279,6 +280,39 @@ DATA_FILE_NAME = "Fridge_Temp_data.csv"
 #: moment the window opens.
 REMOTE_CONTROL_PATH = os.path.join(DATA_BASE_PATH, "RemoteControl.txt")
 
+#: How close to a step's setpoint counts as having reached it, as a
+#: fraction of the setpoint.
+#:
+#: Proportional rather than absolute because the ladder spans 20 mK to 7 K:
+#: a window that is sensible at the top would be wider than the whole
+#: journey at the bottom.
+STEP_REACHED_TOLERANCE = 0.02
+
+#: Smallest absolute tolerance in kelvin, whatever the proportional one
+#: works out to.  Keeps the window from closing to nothing at base
+#: temperature, where 2% of 20 mK is 0.4 mK -- finer than the loop holds.
+STEP_MINIMUM_TOLERANCE = 0.002
+
+#: Seconds a step is given to reach its setpoint before it is called stuck.
+#:
+#: Nothing is sent and nothing is switched off when this runs out -- the loop
+#: is left exactly as it is and the GUI simply says so.  The point is that a
+#: setpoint the fridge cannot reach, whether because the PID terms are wrong
+#: or because the cooling power is not there, otherwise waits for ever in
+#: silence and looks the same as one that is merely slow.
+#:
+#: Generous, because a large step at low temperature genuinely can take the
+#: best part of an hour.  Warning too early would train whoever is watching
+#: to ignore it.
+STEP_TIMEOUT_SECONDS = 3600.0
+
+#: Seconds a step must be held within tolerance before the next is offered.
+#:
+#: Without a wait the ladder would advance on the first sample that happened
+#: to touch the setpoint, including one on the way through an overshoot --
+#: which is the behaviour stepping exists to avoid.
+STEP_SETTLE_SECONDS = 60.0
+
 #: Seconds between checks of the remote-control file.
 #:
 #: The file is read and written this often -- three lines on a local disk,
@@ -311,6 +345,36 @@ THERMOMETERS = {
     3: {"name": "1K pot",   "label": "1K pot (ch3)",              "calibrated": True},
     4: {"name": "MC old",   "label": "Mixing chamber, OLD (ch4)", "calibrated": True},
 }
+
+#: Top-to-bottom order of the thermometer panels in the plot.
+#:
+#: Display order only -- it changes nothing about how the channels are
+#: measured or logged, which stay in channel order everywhere else.  The
+#: panels read from the warmest stage down to the coldest, and the two
+#: mixing-chamber thermometers are put next to each other with the calibrated
+#: one above the uncalibrated one, so the comparison the calibration is about
+#: can be read straight off the two adjacent panels.
+PLOT_CHANNEL_ORDER = [3, 4, 2]
+
+
+def display_channels():
+    """
+    Made by Claude. List the thermometer channels in the order they are shown on screen.
+
+    Used by both the plot panels and the thermometer readings box, so that a
+    reading and the panel it belongs to are always in the same position.
+    This is display order only; measurement and logging stay in channel
+    order.  A channel missing from :data:`PLOT_CHANNEL_ORDER` is appended in
+    channel order, so adding a thermometer without editing that list still
+    shows it.
+
+    Returns
+    -------
+    list of int
+        Channel numbers, top to bottom.
+    """
+    channels = [c for c in PLOT_CHANNEL_ORDER if c in THERMOMETERS]
+    return channels + [c for c in sorted(THERMOMETERS) if c not in channels]
 
 #: Channel whose reading the sample heater's closed loop regulates on.
 #:
@@ -369,8 +433,12 @@ HEATERS = {
 
 #: Heater resistance in ohms, by output number.
 HEATER_RESISTANCES = {
-    0: 1000.0,  # sample heater, from HTRSET?0
-    2: 120.0,   # still heater; TODO confirm against the fridge wiring
+    # Both match what the instrument itself holds (HTRSET?), which is what
+    # keeps the setup check quiet.  A room-temperature measurement taken by
+    # holding the probe ends reads high -- skin resistance is in series with
+    # the heater -- so a hand measurement is not a reason to change these.
+    0: 1000.0,  # sample heater (mixing chamber)
+    2: 120.0,   # still heater
 }
 
 #: Full-scale current in amps for each sample-heater range index
@@ -389,6 +457,49 @@ SAMPLE_HEATER_RANGE_CURRENTS = {
 
 #: Full-scale voltage of the analog/still output in volts (manual section 3.8).
 STILL_FULL_SCALE_VOLTS = 10.0
+
+#: Compliance voltage of the sample-heater current source, in volts.
+#:
+#: The current source cannot put more than this across the heater, so above
+#: a certain range the power stops rising with the current setting (manual
+#: p.69).  That ceiling is V^2/R, which is why the top ranges all deliver
+#: the same power.
+HEATER_COMPLIANCE_VOLTS = 10.0
+
+
+def heater_range_power(heater_range, output=0):
+    """
+    Made by Claude. Full-scale power a sample-heater range delivers into this fridge.
+
+    Uses the manual's own two expressions (p.69), taking the lower: the
+    current source gives ``P = I^2 R`` until the compliance voltage limits
+    it to ``P = V^2 / R``.
+
+    Parameters
+    ----------
+    heater_range : int
+        Range index, 0 to 8.
+    output : int, optional
+        Heater output number.  Default 0, the sample heater.
+
+    Returns
+    -------
+    str
+        The power with its unit, or ``"?"`` if it could not be worked out.
+    """
+    current = SAMPLE_HEATER_RANGE_CURRENTS.get(int(heater_range))
+    resistance = HEATER_RESISTANCES.get(output)
+    if current is None or not resistance:
+        return "?"
+    if current == 0:
+        return "off"
+
+    watts = min(current ** 2 * resistance,
+                HEATER_COMPLIANCE_VOLTS ** 2 / resistance)
+    for scale, unit in ((1.0, "W"), (1e-3, "mW"), (1e-6, "uW"), (1e-9, "nW")):
+        if watts >= scale:
+            return f"{watts / scale:.3g} {unit}"
+    return f"{watts:.3g} W"
 
 #: Units each heater's output level is expressed in, by output number.
 #:
@@ -417,38 +528,201 @@ HTRSET_DISPLAY_UNITS = {1: "%", 2: "W"}
 #   0 = off, 1 = 31.6 uA, 2 = 100 uA, 3 = 316 uA, 4 = 1 mA,
 #   5 = 3.16 mA, 6 = 10 mA, 7 = 31.6 mA, 8 = 100 mA
 #
-# The 1.2, 1.4 and 1.6 K rows are the settings this fridge is actually run at.
-# Range 5 (3.16 mA) is 10 mW full scale into the 1000 ohm sample heater, which
-# leaves the loop headroom in both directions at the ~1-2 mW these setpoints
-# need; range 4 would put 1 mW at the very top of the range with nothing in
-# reserve.
+# The range indices below were chosen from the power each one delivers into
+# the sample heater (manual p.69, roughly the 1000 ohm column):
+#
+#   idx 1 -> ~1 uW      idx 4 -> ~1 mW
+#   idx 2 -> ~10 uW     idx 5 -> ~10 mW
+#   idx 3 -> ~100 uW    idx 6 -> ~100 mW
+#
+# Ranges 7 and 8 buy nothing here: the compliance voltage limits the top
+# ranges to the same power as idx 6, so going above it only makes the
+# control coarser.
 #
 # ###########################################################################
-# #  The bands BELOW 1.2 K have not been measured on this fridge.  They     #
-# #  repeat the 1.2 K tuning so that a low setpoint fills the boxes with    #
-# #  something plausible rather than nothing, but they are a starting       #
-# #  point, not a calibration: check the loop by hand before trusting one.  #
+# #  Only the 1.2, 1.4 and 1.6 K rows have been run on this fridge.  Every  #
+# #  other row repeats the same 30/2/0 tuning at a range scaled for that    #
+# #  temperature, so a setpoint fills the boxes with something plausible    #
+# #  rather than nothing.  They are a starting point, not a calibration.    #
+# #                                                                        #
+# #  The same P, I and D are used from 20 mK to 7 K -- a 350x span in       #
+# #  temperature and 60000x in heater power.  Gains that regulate at 1.6 K  #
+# #  will very likely be too aggressive at 20 mK, where the time constants  #
+# #  are far longer.  If a low setpoint oscillates or overshoots, lower P   #
+# #  before touching I.  Keep D at 0: derivative action on a noisy mK       #
+# #  thermometer does more harm than good.                                  #
 # ###########################################################################
 SAMPLE_HEATER_DEFAULTS = {
-    0.100: (30.0, 2.0, 0.0, 5),
-    0.300: (30.0, 2.0, 0.0, 5),
-    0.600: (30.0, 2.0, 0.0, 5),
-    1.200: (30.0, 2.0, 0.0, 5),
-    1.400: (30.0, 2.0, 0.0, 5),
-    1.600: (30.0, 2.0, 0.0, 5),
+    0.020: (30.0, 2.0, 0.0, 1),   # 1 uW
+    0.030: (30.0, 2.0, 0.0, 2),   # 10 uW
+    0.050: (30.0, 2.0, 0.0, 2),   # 10 uW
+    0.080: (30.0, 2.0, 0.0, 2),   # 10 uW
+    0.100: (30.0, 2.0, 0.0, 3),   # 100 uW
+    0.300: (30.0, 2.0, 0.0, 3),   # 100 uW
+    0.500: (30.0, 2.0, 0.0, 3),   # 100 uW
+    0.800: (30.0, 2.0, 0.0, 3),   # 100 uW
+    1.000: (30.0, 2.0, 0.0, 4),   # 1 mW
+    1.200: (30.0, 2.0, 0.0, 4),   # 1 mW
+    1.400: (30.0, 2.0, 0.0, 5),   # 10 mW
+    1.600: (30.0, 2.0, 0.0, 5),   # 10 mW
+    1.800: (30.0, 2.0, 0.0, 5),   # 10 mW
+    2.000: (30.0, 2.0, 0.0, 5),   # 10 mW
+    2.500: (30.0, 2.0, 0.0, 5),   # 10 mW
+    3.000: (30.0, 2.0, 0.0, 6),   # 100 mW
+    3.500: (30.0, 2.0, 0.0, 6),   # 100 mW
+    4.000: (30.0, 2.0, 0.0, 6),   # 100 mW
+    4.500: (30.0, 2.0, 0.0, 6),   # 100 mW
+    5.000: (30.0, 2.0, 0.0, 6),   # 100 mW
+    5.500: (30.0, 2.0, 0.0, 6),   # 100 mW
+    6.000: (30.0, 2.0, 0.0, 6),   # 100 mW
+    6.500: (30.0, 2.0, 0.0, 6),   # 100 mW
+    7.000: (30.0, 2.0, 0.0, 6),   # 100 mW
 }
 
 # The still heater (output 2) is a voltage output run in still mode, so it
 # has no PID and no setpoint.  All that can usefully be defaulted per
 # temperature is the output level, as a percentage of full scale.
 #
-# The still is held at 0% at every setpoint this fridge is run at, so there is
-# one value rather than a table of them.
+# The still is held at 0% at every setpoint this fridge is run at, but the
+# bands are listed one per sample-heater band so that the two tables stay in
+# step and a future setpoint that does need still power has a row to put it
+# in.
 #
 #   T_max [K] : output [%]
 STILL_HEATER_DEFAULTS = {
+    0.020: 0.0,
+    0.030: 0.0,
+    0.050: 0.0,
+    0.080: 0.0,
+    0.100: 0.0,
+    0.300: 0.0,
+    0.500: 0.0,
+    0.800: 0.0,
+    1.000: 0.0,
+    1.200: 0.0,
+    1.400: 0.0,
     1.600: 0.0,
+    1.800: 0.0,
+    2.000: 0.0,
+    2.500: 0.0,
+    3.000: 0.0,
+    3.500: 0.0,
+    4.000: 0.0,
+    4.500: 0.0,
+    5.000: 0.0,
+    5.500: 0.0,
+    6.000: 0.0,
+    6.500: 0.0,
+    7.000: 0.0,
 }
+
+# --- Bands that need something done to the fridge by hand -------------------
+# Read like the tables above: "a target up to and including this key needs
+# this done first".  A band with no entry needs no intervention.
+#
+# These are steps on the gas-handling system that the Lakeshore knows nothing
+# about.  Without them the fridge cannot physically reach the setpoint, so the
+# loop would sit at full output heating the mixing chamber while waiting for a
+# temperature that can never arrive.  That is why a flagged band holds the
+# heater off until someone confirms -- see Worker.pending_intervention.
+#
+# Keyed by the exact band in SAMPLE_HEATER_DEFAULTS the instruction belongs
+# to, NOT by "anything up to this temperature".  The banding rule used for
+# the PID tables would be wrong here: it would sweep every setpoint below
+# 1.2 K -- including 20 mK, which needs nothing -- into the 1.2 K
+# instruction, and tell someone to remove 180 mbar to the dump on the way to
+# base temperature.
+#
+#   band [K] : what has to be done first
+MANUAL_INTERVENTION = {
+    1.200: "Remove 180 mbar to dump, turbo on",
+    1.400: "Remove mix to dump, G2 = 160",
+    1.600: "Remove mix to dump, G2 = 160",
+}
+
+
+def manual_intervention_for(target_temperature):
+    """
+    Made by Claude. Return what must be done by hand before a setpoint can be reached.
+
+    Finds the band the target falls in exactly as
+    :func:`default_settings_for` does, then reports an instruction only if
+    that band has one.  A band with no entry needs nothing done.
+
+    This deliberately does **not** inherit a neighbouring band's
+    instruction.  These are one-off steps on the gas handling for a
+    particular temperature range, not a state the fridge stays in, so
+    carrying one to any other band would be wrong in both directions.
+
+    Parameters
+    ----------
+    target_temperature : float
+        Desired temperature in kelvin.
+
+    Returns
+    -------
+    str or None
+        What has to be done first, or ``None`` if the band needs nothing.
+    """
+    for band in sorted(SAMPLE_HEATER_DEFAULTS):
+        if target_temperature <= band:
+            return MANUAL_INTERVENTION.get(band)
+    # Above every band; default_settings_for falls back to the highest one,
+    # so match it here rather than silently reporting nothing.
+    highest = max(SAMPLE_HEATER_DEFAULTS)
+    return MANUAL_INTERVENTION.get(highest)
+
+def temperature_ladder(start, target):
+    """
+    Made by Claude. List the setpoints to pass through on the way from one temperature to another.
+
+    The fridge is walked between temperatures a band at a time rather than
+    jumped straight to the target, so that each leg is made with the P, I, D
+    and heater range meant for the temperature it ends at.  A single jump
+    would drive the whole way on the tuning of the destination, which at the
+    far end of the table is a very different setting from the one the fridge
+    starts under.
+
+    The rungs are the keys of :data:`SAMPLE_HEATER_DEFAULTS` -- the ladder
+    and the settings tables are the same list, so adding a band adds a rung
+    with no other change.  Only rungs strictly between the start and the
+    target are used, and the target itself is always the last step, whether
+    or not it is a rung.
+
+    Works in both directions: cooling returns the same rungs in descending
+    order.
+
+    Parameters
+    ----------
+    start : float
+        Temperature the fridge is at now, in kelvin.  ``None`` or NaN gives
+        a single step straight to the target, since without knowing where
+        the fridge is there is no way to say what lies between.
+    target : float
+        Temperature asked for, in kelvin.
+
+    Returns
+    -------
+    list of float
+        Setpoints in the order they should be applied, ending at ``target``.
+        A single-element list if the target is already in the same band as
+        the start.
+    """
+    if start is None or (isinstance(start, float) and np.isnan(start)):
+        return [target]
+
+    rungs = sorted(SAMPLE_HEATER_DEFAULTS)
+
+    if target >= start:
+        between = [r for r in rungs if start < r < target]
+    else:
+        between = [r for r in rungs if target < r < start][::-1]
+
+    # The target goes on the end rather than being one of the rungs, so a
+    # value that is not a band (say 1.35 K) still finishes exactly where it
+    # was asked to and not at the nearest rung below it.
+    return between + [target]
+
 
 DEFAULTS_TABLE = {
     0: SAMPLE_HEATER_DEFAULTS,
@@ -790,11 +1064,11 @@ def history_column_name(key):
     for output, info in HEATERS.items():
         if key == f"VOLT_out{output}":
             name = info["name"].replace(" ", "_")
-            return f"{name}_out{output}_Voltage[V]_calculated"
+            return f"{name}_Voltage[V]_calculated"
         if key == f"HTR_out{output}":
             name = info["name"].replace(" ", "_")
             units = HEATER_LEVEL_UNITS.get(output, "%")
-            return f"{name}_out{output}_Output[{units}]"
+            return f"{name}_Output[{units}]"
 
     return key
 
@@ -1664,7 +1938,11 @@ class Worker(QObject):
         #: Seconds the scanner spends on each channel.  Applied to the
         #: instrument whenever the connection is made, and whenever it is
         #: changed from Settings -> Thermometers.
-        self.scan_dwell = SCAN_DWELL_SECONDS
+        #: Scanner dwell time in seconds, per measurement channel.  The
+        #: thermometers are not equally interesting or equally quick to
+        #: settle, so each gets its own; see apply_scan_dwell.
+        self.scan_dwell = {channel: SCAN_DWELL_SECONDS
+                           for channel in THERMOMETERS}
         #: How much history to reload at start-up, in hours.  Set by the GUI
         #: before the thread starts, and again whenever the window is widened
         #: beyond what is already in memory.
@@ -1730,6 +2008,38 @@ class Worker(QObject):
         self.remote_seen_once = False
         #: What the remote channel last did, shown in the GUI.
         self.remote_status = "Remote setpoints: waiting for the S21 computer"
+        #: A setpoint that is waiting for someone to do something to the
+        #: fridge by hand before it is applied, or ``None``.
+        #:
+        #: Holds ``{"setpoint", "settings", "instruction", "described"}``.
+        #: Nothing is sent to the instrument while this is set -- not the
+        #: setpoint, not the PID terms and above all not the heater range --
+        #: so the fridge stays exactly as it was until the "Done" button is
+        #: pressed.  See :data:`MANUAL_INTERVENTION` for why.
+        self.pending_intervention = None
+        #: The temperature finally asked for, which the ladder walks towards.
+        self.remote_final_setpoint = None
+        #: Setpoints still to be passed through on the way there, in order.
+        self.remote_steps = []
+        #: How far along :attr:`remote_steps` the fridge has got.
+        self.remote_step_index = 0
+        #: The step being regulated towards now, once one has been applied,
+        #: or ``None`` while nothing is running.  Watched by
+        #: :meth:`check_step_reached`.
+        self.running_step = None
+        #: When the running step's temperature was first reached, so that it
+        #: can be held for a moment before the next step is offered.
+        self.step_settled_since = None
+        #: When the running step was applied, so that one which never gets
+        #: there can be reported; see :data:`STEP_TIMEOUT_SECONDS`.
+        self.step_started_at = None
+        #: Whether the running step has already been reported as stuck, so
+        #: that it is said once rather than on every polling cycle.
+        self.step_timed_out = False
+        #: Whether the step now on offer replaced one that was skipped.  The
+        #: skipped rung was never applied, so the box must not claim the
+        #: fridge is starting from it.
+        self.skipped_last_step = False
         #: Disagreements found between the instrument's settings and this
         #: file's assumptions, from :meth:`check_instrument_agrees`.  Shown
         #: in the GUI so they are not only in the console.
@@ -1846,6 +2156,9 @@ class Worker(QObject):
                 "revision": self.revision,
                 "remote_status": self.remote_status,
                 "setup_problems": list(self.setup_problems),
+                "pending_intervention": (
+                    dict(self.pending_intervention)
+                    if self.pending_intervention else None),
             }
 
     # --- helpers -----------------------------------------------------------
@@ -1946,6 +2259,15 @@ class Worker(QObject):
             if resistance is None or resistance <= 0:
                 return nan
 
+            # Range 0 is off, and an output that is off delivers nothing
+            # whatever level is stored in it.  Without this the still reads
+            # the voltage its stored level *would* produce -- 0.2 V for a
+            # level of 2% -- while the instrument is in fact putting out
+            # nothing at all.
+            if heater_range is not None and not np.isnan(heater_range):
+                if int(heater_range) == 0:
+                    return 0.0
+
             if HEATERS[output]["closed_loop"]:
                 # The level is watts or a percentage of full-scale current,
                 # depending on a setting held on the instrument.
@@ -1993,7 +2315,7 @@ class Worker(QObject):
             # the instrument is set to use for that output; see
             # HEATER_LEVEL_UNITS.
             units = HEATER_LEVEL_UNITS.get(output, "%")
-            headers.append(f"{name}_out{output}_Output[{units}]")
+            headers.append(f"{name}_Output[{units}]")
             # The 372 measures neither the power nor the voltage in a heater,
             # so the voltage is worked out here from the level, the range and
             # the heater resistance.  The heading says so, because a column
@@ -2004,20 +2326,20 @@ class Worker(QObject):
             # reporting its level in watts that would be a second, worse copy
             # of the level beside it, and for one reporting a percentage the
             # voltage below already carries the same information.
-            headers.append(f"{name}_out{output}_Voltage[V]_calculated")
-            headers.append(f"{name}_out{output}_Range")
+            headers.append(f"{name}_Voltage[V]_calculated")
+            headers.append(f"{name}_Range")
             if not info["closed_loop"]:
                 # What the analog output is really delivering, which differs
                 # from the level above whenever the range is off; see
                 # poll_heaters.
-                headers.append(f"{name}_out{output}_AnalogOut[%]")
+                headers.append(f"{name}_AnalogOut[%]")
             # Only a closed-loop heater has something to regulate towards.
             if info["closed_loop"]:
-                headers.append(f"{name}_out{output}_Setpoint[K]")
-                headers.append(f"{name}_out{output}_ControlChannel")
-                headers.append(f"{name}_out{output}_P")
-                headers.append(f"{name}_out{output}_I")
-                headers.append(f"{name}_out{output}_D")
+                headers.append(f"{name}_Setpoint[K]")
+                headers.append(f"{name}_ControlChannel")
+                headers.append(f"{name}_P")
+                headers.append(f"{name}_I")
+                headers.append(f"{name}_D")
 
         # See END_COLUMN: absorbs the truncation bug in data_logger.
         headers.append(END_COLUMN)
@@ -2105,9 +2427,18 @@ class Worker(QObject):
                 f"range of {info['name']}",
                 self.instrument.ReadHeaterRange, output)
 
+            # For the still the voltage is worked out from what the output is
+            # delivering (``AOUT?``) rather than the level stored in it, so
+            # that it describes the present state of the heater and not a
+            # setting that may not be in force.  The sample heater has no
+            # such distinction: ``HTR?`` is what it is putting out.
+            if info["closed_loop"]:
+                level_for_voltage = readings[f"HTR_out{output}"]
+            else:
+                level_for_voltage = readings[f"AOUT_out{output}"]
+
             readings[f"VOLT_out{output}"] = self.heater_voltage(
-                output, readings[f"HTR_out{output}"],
-                readings[f"RANGE_out{output}"])
+                output, level_for_voltage, readings[f"RANGE_out{output}"])
 
             if not info["closed_loop"]:
                 continue
@@ -2339,12 +2670,25 @@ class Worker(QObject):
 
     def apply_remote_setpoint(self, setpoint, manual_pid):
         """
-        Made by Claude. Send a setpoint that came from the S21 computer.
+        Made by Claude. Hold a setpoint that came from the S21 computer for confirmation.
 
-        Goes through :meth:`apply_heater_settings`, so the command is queued
-        for the polling loop and passes through the same safe-mode check as
-        one entered by hand.  Nothing here can reach the instrument while
-        :data:`SAFE_MODE` is True.
+        Works out the ladder of steps from where the fridge is now to the
+        temperature asked for (see :func:`temperature_ladder`) and parks the
+        first of them.  **Nothing is sent**: the step waits in
+        :attr:`pending_intervention` until :meth:`confirm_intervention`
+        applies it, and each later step is parked in turn as the one before
+        it is reached.
+
+        Every step waits, not only the bands listed in
+        :data:`MANUAL_INTERVENTION`, so that the P, I, D and range chosen for
+        it can be read and checked by eye before the loop is energised.  The
+        flagged bands additionally say what has to be done to the gas
+        handling first.
+
+        Waiting is the safe direction.  An unattended setpoint that is never
+        confirmed leaves the fridge exactly as it was, whereas one applied
+        automatically to a fridge that cannot reach it would sit at full
+        heater output indefinitely.
 
         Parameters
         ----------
@@ -2358,9 +2702,55 @@ class Worker(QObject):
         -------
         None
         """
-        settings = {"setpoint": setpoint}
+        # Remember it before parking it, so that the same value sitting in the
+        # file is not picked up again on the very next cycle and every cycle
+        # after it.
+        self.remote_setpoint = setpoint
 
-        if manual_pid:
+        channel = HEATERS[0]["control_channel"] if 0 in HEATERS else None
+        start = self.latest.get(f"T_ch{channel}") if channel else None
+
+        steps = temperature_ladder(start, setpoint)
+        self.remote_manual_pid = manual_pid
+
+        print("=" * 70)
+        where = "unknown" if start is None or np.isnan(start) else f"{start:.3f} K"
+        print(f"[REMOTE] the S21 computer asked for {setpoint} K.  The fridge "
+              f"is at {where}.")
+        if len(steps) > 1:
+            print(f"[REMOTE] going there in {len(steps)} steps: "
+                  f"{', '.join(f'{s:g}' for s in steps)} K.  Each one is "
+                  f"confirmed separately.")
+        print("=" * 70)
+
+        self.remote_final_setpoint = setpoint
+        self.remote_steps = steps
+        self.remote_step_index = 0
+        self.park_current_step()
+
+    def park_current_step(self):
+        """
+        Made by Claude. Hold the ladder's current step, ready to be confirmed.
+
+        Works out the settings for whichever step the ladder has reached and
+        puts them in :attr:`pending_intervention` for the GUI to show.
+        Nothing is sent to the instrument here.
+
+        Returns
+        -------
+        bool
+            ``True`` if a step was parked, ``False`` if the ladder is
+            finished.
+        """
+        if self.remote_step_index >= len(self.remote_steps):
+            self.remote_steps = []
+            return False
+
+        setpoint = self.remote_steps[self.remote_step_index]
+        settings = {"setpoint": setpoint}
+        still_percent = None
+
+        if self.remote_manual_pid:
             described = "the setpoint only (UseManualPID is True)"
         else:
             defaults = default_settings_for(0, setpoint)
@@ -2370,24 +2760,361 @@ class Worker(QObject):
                 p, i, d, heater_range = defaults
                 settings.update({"p": p, "i": i, "d": d,
                                  "range": int(heater_range)})
-                described = (f"P={p}, I={i}, D={d}, range={heater_range}")
+                described = (f"P={p}, I={i}, D={d}, range={heater_range} "
+                             f"({heater_range_power(heater_range)})")
 
-        # Remember it before sending, so that a failure to send does not make
-        # this run again on the very next cycle and every cycle after it.
-        self.remote_setpoint = setpoint
+            # The still is a separate output with its own table, so it is
+            # carried alongside rather than inside the sample heater's
+            # settings.  UseManualPID leaves it alone as well: it says the
+            # other machine is choosing the tuning, and the still level is
+            # part of that.
+            still_percent = default_settings_for(2, setpoint)
+
+        instruction = manual_intervention_for(setpoint)
+
+        # Where this step starts from, shown in the box as "Temp change from
+        # X to Y".  The rung before it is right only when that rung was
+        # actually applied and reached; after a skip it never happened, so
+        # the fridge's own temperature is the honest answer.
+        if self.remote_step_index > 0 and not self.skipped_last_step:
+            start = self.remote_steps[self.remote_step_index - 1]
+        else:
+            channel = HEATERS[0]["control_channel"] if 0 in HEATERS else None
+            start = self.latest.get(f"T_ch{channel}") if channel else None
+        self.skipped_last_step = False
+
+        self.pending_intervention = {
+            "setpoint": setpoint,
+            "settings": settings,
+            "still_percent": still_percent,
+            "instruction": instruction,
+            "described": described,
+            "final_setpoint": self.remote_final_setpoint,
+            "step_number": self.remote_step_index + 1,
+            "step_count": len(self.remote_steps),
+            "from_temperature": start,
+            # Is there a rung after this one to jump to?
+            "can_skip": self.remote_step_index + 1 < len(self.remote_steps),
+        }
 
         print("=" * 70)
-        print(f"[REMOTE] the S21 computer asked for {setpoint} K, with "
-              f"{described}.")
+        print(f"[REMOTE] step {self.remote_step_index + 1} of "
+              f"{len(self.remote_steps)}: {setpoint} K, with {described}.")
+        if instruction:
+            print(f"[REMOTE] this band needs doing by hand first: "
+                  f"{instruction}")
+        print("[REMOTE] NOTHING has been sent.  Check the values and press "
+              "'Apply these values' in the GUI, or set the heater by hand.")
         print("=" * 70)
 
-        self.apply_heater_settings(0, settings)
+        # Deliberately left blank: the confirmation box directly below says
+        # all of this, and saying it twice on one screen only adds noise.
+        self.remote_status = ""
+        return True
 
-        self.remote_status = (f"Remote setpoint {setpoint} K "
-                              f"{'requested' if SAFE_MODE else 'applied'} at "
-                              f"{datetime.datetime.now().strftime('%H:%M:%S')}")
+    def confirm_intervention(self):
+        """
+        Made by Claude. Apply the setpoint that was waiting for confirmation.
+
+        Called from the GUI's "Apply" button, once whoever pressed it has
+        checked the values and done whatever the fridge needed by hand.  This
+        is the first moment anything reaches the instrument for a remote
+        setpoint.
+
+        Applies the still level first and the sample heater second.  The
+        still sets the circulation rate the sample heater then works against,
+        so setting it after the loop had already started regulating would
+        move the ground under it.
+
+        Both go through :meth:`apply_heater_settings`, so the commands are
+        queued for the polling loop and pass through the same safe-mode check
+        as settings entered by hand.
+
+        Returns
+        -------
+        bool
+            ``True`` if a waiting setpoint was applied, ``False`` if there
+            was nothing waiting.
+        """
+        pending = self.pending_intervention
+        if pending is None:
+            return False
+
+        # Cleared before applying, so that a failure inside
+        # apply_heater_settings cannot leave a stale box on screen that would
+        # apply the same settings again when pressed.
+        self.pending_intervention = None
+
+        still_percent = pending.get("still_percent")
+
+        print("=" * 70)
+        print(f"[REMOTE] confirmed by hand; applying {pending['setpoint']} K "
+              f"with {pending['described']}.")
+        if still_percent is not None:
+            print(f"[REMOTE] still heater to {still_percent}%.")
+        print("=" * 70)
+
+        if still_percent is not None:
+            self.apply_heater_settings(2, {"output": still_percent})
+        self.apply_heater_settings(0, pending["settings"])
+
+        # Now watch for this step to be reached, so the next one can be
+        # offered.  A step that is the last on the ladder ends it.
+        self.running_step = pending["setpoint"]
+        self.step_settled_since = None
+        self.step_started_at = time.time()
+        self.step_timed_out = False
+
+        step_of = ""
+        if pending.get("step_count", 1) > 1:
+            step_of = (f" (step {pending['step_number']} of "
+                       f"{pending['step_count']}, on the way to "
+                       f"{pending['final_setpoint']} K)")
+
+        self.remote_status = (
+            f"Remote setpoint {pending['setpoint']} K "
+            f"{'requested' if SAFE_MODE else 'applied'} at "
+            f"{datetime.datetime.now().strftime('%H:%M:%S')}{step_of}")
         if SAFE_MODE:
             self.remote_status += " -- SAFE MODE, nothing was sent"
+        return True
+
+    def check_step_reached(self, readings):
+        """
+        Made by Claude. Offer the next rung once the running step has been reached.
+
+        Called once per polling cycle.  While a step is being regulated
+        towards, this watches the control thermometer; when it has been
+        within :data:`STEP_REACHED_TOLERANCE` of the setpoint for
+        :data:`STEP_SETTLE_SECONDS`, the next step on the ladder is parked
+        for confirmation.
+
+        The wait is what makes the ladder mean anything.  Offering the next
+        rung the moment the temperature first touches the setpoint would let
+        the fridge move on through an overshoot, which is exactly the
+        behaviour stepping is meant to avoid.
+
+        Nothing here sends anything to the instrument: the next step is
+        parked, and waits to be confirmed like the one before it.
+
+        Parameters
+        ----------
+        readings : dict
+            The readings just taken.
+
+        Returns
+        -------
+        None
+        """
+        if self.running_step is None or self.pending_intervention is not None:
+            return
+
+        channel = HEATERS[0]["control_channel"] if 0 in HEATERS else None
+        if channel is None:
+            return
+
+        temperature = readings.get(f"T_ch{channel}")
+        if temperature is None or np.isnan(temperature):
+            return
+
+        # Proportional, because a tolerance that suits 7 K is wider than
+        # 20 mK is warm.
+        tolerance = max(abs(self.running_step) * STEP_REACHED_TOLERANCE,
+                        STEP_MINIMUM_TOLERANCE)
+
+        now = time.time()
+
+        if abs(temperature - self.running_step) > tolerance:
+            # Drifted back out; start the settle clock again.
+            self.step_settled_since = None
+
+            # Still not there after a long time.  Said once, and only while
+            # the temperature is outside the window, so a step that arrives
+            # late and settles is never called stuck.
+            if (not self.step_timed_out and self.step_started_at is not None
+                    and now - self.step_started_at > STEP_TIMEOUT_SECONDS):
+                self.step_timed_out = True
+                minutes = STEP_TIMEOUT_SECONDS / 60.0
+                print("=" * 70)
+                print(f"[STEP] {self.running_step} K has not been reached "
+                      f"after {minutes:.0f} minutes.  The thermometer reads "
+                      f"{temperature:.4f} K.")
+                print("[STEP] Nothing has been changed; the loop is still "
+                      "running.  The PID terms or the heater range for this "
+                      "band may need adjusting.")
+                print("=" * 70)
+                self.remote_status = (
+                    f"WARNING: {self.running_step} K not reached after "
+                    f"{minutes:.0f} min (now {temperature:.4f} K) -- "
+                    f"check the PID values and range")
+            return
+
+        if self.step_settled_since is None:
+            self.step_settled_since = now
+            return
+        if now - self.step_settled_since < STEP_SETTLE_SECONDS:
+            return
+
+        # Reached and held.  Move on.
+        reached = self.running_step
+        self.running_step = None
+        self.step_settled_since = None
+        self.step_started_at = None
+        self.step_timed_out = False
+        self.remote_step_index += 1
+
+        if self.remote_step_index >= len(self.remote_steps):
+            print(f"[REMOTE] {reached} K reached; that was the last step.")
+            self.remote_steps = []
+            self.remote_status = (
+                f"Reached {reached} K -- nothing further requested")
+            return
+
+        print(f"[REMOTE] {reached} K reached and held; offering the next "
+              f"step.")
+        self.park_current_step()
+
+    def dismiss_intervention(self):
+        """
+        Made by Claude. Discard the suggested settings, sending nothing to the instrument.
+
+        The counterpart to :meth:`confirm_intervention`, for when the values
+        the table chose are not the ones wanted.  It only throws the
+        suggestion away: no command is queued, so the fridge is left exactly
+        as it was and the setpoint is then set by hand from the sample heater
+        panel in the usual way.
+
+        The rest of the ladder is abandoned as well.  Once the heater is
+        being set by hand this program no longer knows what the fridge is
+        being taken through, so continuing to offer rungs of its own would
+        be offering steps towards a plan that is no longer being followed.
+
+        The setpoint is still remembered, so the same value sitting in the
+        remote-control file does not put the box straight back up on the next
+        cycle.  ``CurrentTemp`` also keeps being written back, because the
+        other machine still needs to see the temperature.
+
+        Returns
+        -------
+        bool
+            ``True`` if a waiting setpoint was discarded, ``False`` if there
+            was nothing waiting.
+        """
+        pending = self.pending_intervention
+        if pending is None:
+            return False
+
+        self.pending_intervention = None
+        self.abandon_ladder()
+
+        print("=" * 70)
+        print(f"[REMOTE] the suggested settings for {pending['setpoint']} K "
+              f"were declined; nothing was sent.  Set the heater by hand.")
+        print("=" * 70)
+
+        self.remote_status = (
+            f"Remote setpoint {pending['setpoint']} K -- suggested values "
+            f"declined at "
+            f"{datetime.datetime.now().strftime('%H:%M:%S')}; set by hand")
+        return True
+
+    def cancel_intervention(self):
+        """
+        Made by Claude. Cancel the request outright, sending nothing to the instrument.
+
+        The third way out of the confirmation box, for when the setpoint is
+        not wanted at all -- as opposed to
+        :meth:`dismiss_intervention`, which declines the suggested values but
+        leaves the intention of going there.
+
+        Nothing is queued and the whole ladder is dropped, so the fridge
+        stays exactly as it is and no further step is offered.  The heater is
+        **not** switched off: cancelling means "do not make this change", not
+        "undo what is already running", and turning a running loop off would
+        be a change of its own.
+
+        Returns
+        -------
+        bool
+            ``True`` if a waiting setpoint was cancelled, ``False`` if there
+            was nothing waiting.
+        """
+        pending = self.pending_intervention
+        if pending is None:
+            return False
+
+        self.pending_intervention = None
+        self.abandon_ladder()
+
+        print("=" * 70)
+        print(f"[REMOTE] {pending['setpoint']} K cancelled; nothing was sent "
+              f"and the heater was left as it is.")
+        print("=" * 70)
+
+        self.remote_status = (
+            f"Remote setpoint {pending['setpoint']} K cancelled at "
+            f"{datetime.datetime.now().strftime('%H:%M:%S')}")
+        return True
+
+    def skip_to_next_step(self):
+        """
+        Made by Claude. Drop the step on offer and offer the one after it instead.
+
+        For when a rung is not worth stopping at: the box is showing a step
+        to, say, 0.3 K on the way to 0.8 K, and what is wanted is to go
+        straight to 0.5 K.  The skipped rung is passed over entirely -- its
+        settings are never sent -- and the next rung is parked in its place,
+        now starting from wherever the fridge actually is.
+
+        Nothing reaches the instrument here.  The step that replaces this one
+        still has to be confirmed, so skipping widens the jump but does not
+        make it happen.
+
+        Skipping the last rung is refused, because that rung is the
+        temperature that was asked for; passing over it would abandon the
+        request rather than shorten it.  Use "Cancel" for that.
+
+        Returns
+        -------
+        bool
+            ``True`` if the next step is now on offer, ``False`` if there was
+            nothing to skip to.
+        """
+        pending = self.pending_intervention
+        if pending is None:
+            return False
+        if self.remote_step_index + 1 >= len(self.remote_steps):
+            return False
+
+        skipped = self.remote_steps[self.remote_step_index]
+        self.pending_intervention = None
+        self.remote_step_index += 1
+        self.skipped_last_step = True
+
+        print(f"[REMOTE] skipping the {skipped} K step; going straight to "
+              f"{self.remote_steps[self.remote_step_index]} K instead.")
+
+        return self.park_current_step()
+
+    def abandon_ladder(self):
+        """
+        Made by Claude. Forget the remaining steps of a stepped setpoint change.
+
+        Shared by the two ways of refusing a step.  Only this program's plan
+        is dropped; nothing is sent to the instrument, so whatever the heater
+        is doing carries on unchanged.
+
+        Returns
+        -------
+        None
+        """
+        self.remote_steps = []
+        self.remote_step_index = 0
+        self.remote_final_setpoint = None
+        self.running_step = None
+        self.step_settled_since = None
+        self.step_started_at = None
+        self.step_timed_out = False
 
     def trim_history(self):
         """
@@ -2610,18 +3337,28 @@ class Worker(QObject):
             return False
         try:
             for channel in THERMOMETERS:
-                self.instrument.SetScanDwell(channel, self.scan_dwell)
+                self.instrument.SetScanDwell(
+                    channel, self.scan_dwell.get(channel,
+                                                 SCAN_DWELL_SECONDS))
             self.instrument.SetAutoscan(min(THERMOMETERS), autoscan=True)
-            print(f"Autoscan on, {self.scan_dwell} s per channel.")
+            summary = ", ".join(
+                f"ch{c} {self.scan_dwell.get(c, SCAN_DWELL_SECONDS)} s"
+                for c in sorted(THERMOMETERS))
+            print(f"Autoscan on: {summary}.")
             return True
         except Exception as e:
             print(f"[WRITE FAIL] starting the scanner: {e}")
             print(traceback.format_exc())
             return False
 
-    def apply_scan_dwell(self, dwell):
+    def apply_scan_dwell(self, dwells):
         """
-        Made by Claude. Set the scanner dwell time on every measurement channel.
+        Made by Claude. Set the scanner dwell time, per measurement channel.
+
+        Each thermometer gets its own dwell time, so the scanner can linger
+        on the ones that matter and pass quickly over the ones that do not.
+        The reading interval is separate and unchanged: this is how long the
+        instrument sits on a channel, not how often this program asks.
 
         Unlike the heater settings this is written even while
         :data:`SAFE_MODE` is on -- it changes measurement timing, not heater
@@ -2629,34 +3366,40 @@ class Worker(QObject):
 
         Parameters
         ----------
-        dwell : int
-            Dwell time in seconds, within :data:`SCAN_DWELL_LIMITS`.
+        dwells : dict
+            Dwell time in seconds for each channel, keyed by channel number.
+            Every value must be within :data:`SCAN_DWELL_LIMITS`.
 
         Returns
         -------
         bool
-            ``True`` if the command was sent.
+            ``True`` if the commands were queued, ``False`` if any dwell time
+            was out of range -- in which case none of them is sent, rather
+            than leaving the channels on a mixture of old and new settings.
         """
         low, high = SCAN_DWELL_LIMITS
-        if not low <= dwell <= high:
-            print(f"Dwell time {dwell} s is outside the instrument's "
-                  f"{low}-{high} s range; not sent.")
-            return False
+        for channel, dwell in dwells.items():
+            if not low <= dwell <= high:
+                print(f"Dwell time {dwell} s for channel {channel} is "
+                      f"outside the instrument's {low}-{high} s range; "
+                      f"nothing was sent.")
+                return False
 
-        # Remember it, so a later reconnect brings the same setting back.
-        self.scan_dwell = dwell
+        # Remember them, so a later reconnect brings the same settings back.
+        self.scan_dwell = dict(dwells)
 
         def set_dwell(instrument):
             sent = True
-            for channel in THERMOMETERS:
+            for channel, dwell in dwells.items():
                 sent &= bool(instrument.SetScanDwell(channel, dwell))
             # Autoscan has to be on, or the instrument sits on one channel
-            # and the dwell time never comes into play at all.
+            # and the dwell times never come into play at all.
             sent &= bool(instrument.SetAutoscan(
                 min(THERMOMETERS), autoscan=True))
             return sent
 
-        self.queue_command(f"set scanner dwell to {dwell} s", set_dwell)
+        summary = ", ".join(f"ch{c} {dwells[c]} s" for c in sorted(dwells))
+        self.queue_command(f"set scanner dwell ({summary})", set_dwell)
         return True
 
     def set_heater_range(self, output, heater_range):
@@ -2944,6 +3687,10 @@ class Worker(QObject):
                         # for the next cycle rather than sent from here.
                         self.check_remote_control(readings)
 
+                        # Has the step being regulated towards been reached?
+                        # If so the next rung of the ladder is offered.
+                        self.check_step_reached(readings)
+
                         # Tell the user whether the instrument is actually
                         # answering, so a blank plot is never a mystery.
                         live = sum(1 for channel in THERMOMETERS
@@ -3061,15 +3808,163 @@ def date_formatter(val, pos):
 #: becomes unusably slow well before that.  The history is always kept in
 #: full; only what is drawn is thinned, so zooming with the toolbar still
 #: shows real samples rather than an approximation of them.
-MAX_PLOTTED_POINTS = 2000
+MAX_PLOTTED_POINTS = 12000
+
+#: Fewest raw samples averaged into each plotted point.
+#:
+#: Averaging always happens, even on a short window: five half-second
+#: samples per point is 2.5 s of data, which is far finer than the fridge
+#: moves and about five times cheaper to redraw than plotting every sample.
+#: Longer windows average harder still -- see averaging_seconds -- so this
+#: is the floor rather than the usual figure.
+MIN_SAMPLES_PER_POINT = 5
+
+#: Size the plot canvas is drawn at, in pixels, unless there is more room.
+#:
+#: Chosen against a full-screen window on this machine, where the space left
+#: for the plots is about 1020 x 930 once the two control columns have taken
+#: their share.
+#:
+#: The width is a little more than that, so full screen leaves a short
+#: left-to-right scroll -- enough that the traces are not compressed, without
+#: making the plots something that has to be dragged around to read.
+#:
+#: The height deliberately fits inside the viewport, so there is no
+#: up-and-down scroll at full screen at all: the three panels are shown
+#: complete, one above the other.  Raising this past roughly 930 brings the
+#: vertical bar back.
+MIN_PLOT_WIDTH = 1250
+MIN_PLOT_HEIGHT = 900
+
+#: Width of the settings column while no page is open, in pixels.
+#:
+#: With both pages closed the column holds nothing but the two buttons that
+#: open them, so it only needs to be wide enough for the longer of the two
+#: labels.  Every pixel beyond that is taken from the plots for no benefit,
+#: and the column is closed almost all of the time.
+SETTINGS_COLUMN_CLOSED_WIDTH = 200
+
+#: Width the settings column widens to while one of its pages is open.
+#:
+#: The pages hold forms -- file paths, one dwell box per thermometer -- that
+#: are cramped at the column's usual width.  They are only open for a moment
+#: at a time, so the plots giving up the room while they are is a good
+#: trade.  The column goes back to SETTINGS_COLUMN_CLOSED_WIDTH when the
+#: page is closed.
+SETTINGS_COLUMN_OPEN_WIDTH = 520
+
+#: Width of the middle control column, in pixels, before its scrollbar.
+#:
+#: Wide enough for the thermometer table and the heater panels at their
+#: natural size.  The word-wrapping labels in the column would otherwise
+#: report a much wider hint -- wide enough to hold their text unwrapped --
+#: and take the width the plots need.
+CONTROL_COLUMN_WIDTH = 560
+
+#: Roughly how many points to draw per trace once averaging starts.
+#:
+#: Sets how wide a bucket :func:`averaging_seconds` chooses: the wider the
+#: window, the more samples go into each point, so the count drawn stays
+#: about this whatever span is on screen.  10,800 is what an hour and a half
+#: of half-second samples comes to, so the trace does not visibly change
+#: density as the window grows.
+TARGET_PLOTTED_POINTS = 10800
+
+
+def averaging_seconds(span_hours, sample_interval=SAMPLE_INTERVAL):
+    """
+    Made by Claude. Choose how long a bucket of samples to average into one plotted point.
+
+    Never less than :data:`MIN_SAMPLES_PER_POINT` samples' worth, so even a
+    short window is smoothed and cheap to redraw.  Above that the width
+    grows in proportion to the span, so a longer view averages harder and
+    the number of points drawn stays roughly constant however far back the
+    plot reaches.
+
+    Parameters
+    ----------
+    span_hours : float
+        Length of the window being drawn, in hours.
+    sample_interval : float, optional
+        Seconds between readings, used for the minimum bucket width.
+
+    Returns
+    -------
+    float
+        Bucket width in seconds.
+    """
+    proportional = span_hours * 3600.0 / TARGET_PLOTTED_POINTS
+    return max(proportional, MIN_SAMPLES_PER_POINT * sample_interval)
+
+
+def average_into_buckets(values, seconds):
+    """
+    Made by Claude. Average samples into fixed time buckets, one plotted point each.
+
+    This is what keeps the trace steady.  Thinning by taking every n-th
+    sample makes the drawn line jump about, because which samples survive
+    changes every time a new reading arrives and shifts the sequence.  Here
+    each bucket is a fixed window of wall-clock time: a sample can only ever
+    fall in one of them, so a bucket's value is settled as soon as its window
+    has passed and never moves again.  New readings extend the trace on the
+    right instead of rearranging it.
+
+    The buckets are anchored to absolute time (multiples of ``seconds`` since
+    the epoch) rather than to the start of the window, which matters because
+    the window start slides forward continuously as the fridge runs.  Anchor
+    them to the first sample and every bucket boundary would creep with it,
+    reintroducing exactly the shifting this is meant to remove.
+
+    Each bucket carries the mean of its samples, and is placed at the mean of
+    their timestamps, so a partly-filled bucket at the live end sits at the
+    time of the data it actually holds.  NaNs are ignored within a bucket, so
+    one unreadable channel does not blank the others.
+
+    Parameters
+    ----------
+    values : numpy.ndarray
+        ``(rows, samples)`` array whose first row is the timestamp.
+    seconds : float
+        Bucket width in seconds.  ``0`` or less returns the input unchanged.
+
+    Returns
+    -------
+    numpy.ndarray
+        ``(rows, buckets)`` array of averaged points, oldest first.
+    """
+    if seconds <= 0 or values.shape[-1] == 0:
+        return values
+
+    times = values[0]
+    bucket_index = np.floor(times / seconds)
+
+    # Sample order is chronological, so a change of bucket index marks a
+    # boundary; this finds them without sorting or grouping.
+    starts = np.flatnonzero(np.diff(bucket_index)) + 1
+    groups = np.split(np.arange(times.shape[0]), starts)
+
+    averaged = np.empty((values.shape[0], len(groups)), dtype=float)
+    for column, group in enumerate(groups):
+        block = values[:, group]
+        with warnings.catch_warnings():
+            # A bucket in which one channel is entirely NaN is normal -- the
+            # scanner only measures one thermometer at a time -- and means
+            # "no reading here", which is what nanmean returns anyway.
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            averaged[:, column] = np.nanmean(block, axis=1)
+        # Timestamps are never NaN, so the plain mean is right and cheaper.
+        averaged[0, column] = block[0].mean()
+
+    return averaged
 
 
 def downsample(values, limit=MAX_PLOTTED_POINTS):
     """
     Made by Claude. Thin an array down to at most ``limit`` points for display.
 
-    Takes evenly spaced samples rather than averaging, so every drawn point
-    is a real measurement and a spike is never smeared into its neighbours.
+    A last-resort guard behind :func:`average_into_buckets`, which does the
+    ordinary work.  Takes evenly spaced samples rather than averaging, so
+    every drawn point is a real measurement.
 
     Parameters
     ----------
@@ -3089,6 +3984,67 @@ def downsample(values, limit=MAX_PLOTTED_POINTS):
     return values[..., ::step]
 
 
+#: Smallest y-axis span a thermometer panel is drawn with, as a fraction of
+#: the temperature being shown.
+#:
+#: Matplotlib scales an axis to fit its data, so a trace that has been flat
+#: for hours is drawn zoomed right into its own measurement noise: a few
+#: microkelvin of scatter fills the whole panel and looks like the fridge is
+#: swinging about.  Holding the axis at least this wide keeps that noise the
+#: size it really is relative to the temperature.
+#:
+#: Proportional rather than absolute because the panels span 20 mK to 7 K --
+#: 2% is 0.4 mK at base temperature and 140 mK at the top, which is about
+#: right at both ends.
+MIN_Y_SPAN_FRACTION = 0.02
+
+#: Smallest y-axis span in kelvin, whatever the proportional one works out
+#: to.  Stops the window closing to nothing if a channel reads near zero.
+MIN_Y_SPAN_KELVIN = 1e-4
+
+
+def widen_y_axis(axis, values):
+    """
+    Made by Claude. Widen a panel's y-axis if its data covers too narrow a range.
+
+    Called after ``autoscale_view`` has fitted the axis to the data.  If
+    that fit is narrower than :data:`MIN_Y_SPAN_FRACTION` of the values
+    being shown, the limits are opened out symmetrically about the middle of
+    the data until they are that wide.
+
+    A wider fit is left exactly as it is, so this never hides a real
+    excursion -- it only stops a flat trace being magnified into apparent
+    turmoil.
+
+    Parameters
+    ----------
+    axis : matplotlib.axes.Axes
+        The panel to adjust.
+    values : numpy.ndarray
+        The values just plotted on it, which may contain NaNs.
+
+    Returns
+    -------
+    None
+    """
+    try:
+        finite = values[np.isfinite(values)]
+        if finite.size == 0:
+            return
+
+        middle = float((finite.min() + finite.max()) / 2.0)
+        wanted = max(abs(middle) * MIN_Y_SPAN_FRACTION, MIN_Y_SPAN_KELVIN)
+
+        low, high = axis.get_ylim()
+        if high - low >= wanted:
+            return
+
+        axis.set_ylim(middle - wanted / 2.0, middle + wanted / 2.0)
+
+    except Exception as e:
+        print(f"Could not widen the y axis: {e}")
+
+
 class MplCanvas(FigureCanvas):
     """
     Made by Claude. Matplotlib canvas showing one temperature-versus-time panel per thermometer.
@@ -3106,7 +4062,8 @@ class MplCanvas(FigureCanvas):
 
     def __init__(self, parent=None, width=20, height=10, dpi=100):
         try:
-            channels = sorted(THERMOMETERS.keys())
+            # Panels are laid out in display order, not channel order.
+            channels = display_channels()
             fig, axes = plt.subplots(len(channels), figsize=(width, height), sharex=True)
             super(MplCanvas, self).__init__(fig)
             self.setParent(parent)
@@ -3120,6 +4077,12 @@ class MplCanvas(FigureCanvas):
             self.heater_lines = {}
             #: Channel whose panel currently carries the heater axis.
             self.heater_channel = None
+            #: Set once the view has been zoomed or panned by hand.  While it
+            #: is set the axes are left exactly where they were put and new
+            #: readings only extend the traces, so a plot being examined does
+            #: not jump back to the live view twice a second.  Cleared by the
+            #: toolbar's home button; see follow_live_data.
+            self.user_has_zoomed = False
 
             colours = {2: 'g', 3: 'b', 4: 'r'}
 
@@ -3147,6 +4110,42 @@ class MplCanvas(FigureCanvas):
             print("Failed to build the plot canvas.")
             print(e)
             print(traceback.format_exc())
+
+    def follow_live_data(self):
+        """
+        Made by Claude. Go back to following the live data, as the home button does.
+
+        Returns
+        -------
+        None
+        """
+        self.user_has_zoomed = False
+
+    def relayout(self):
+        """
+        Made by Claude. Fit the figure to the canvas's current size.
+
+        ``tight_layout`` measures the axis labels, tick labels and legends
+        and works out margins wide enough to hold them.  Those margins are
+        stored as fractions of the figure, so they only fit the size they
+        were computed at: after the canvas is resized the old fractions are
+        wrong, and if they are too small the y-axis labels end up drawn
+        outside the figure and clipped away.
+
+        Called whenever the canvas is resized.  Failures are swallowed --
+        ``tight_layout`` can raise when the canvas is momentarily too small
+        for the labels to fit at all, and a plot with awkward margins is a
+        great deal better than a window that has fallen over.
+
+        Returns
+        -------
+        None
+        """
+        try:
+            self.figure_handle.tight_layout()
+            self.draw_idle()
+        except Exception as e:
+            print(f"Could not re-fit the plot layout: {e}")
 
     def set_heater_panel(self, channel):
         """
@@ -3230,16 +4229,47 @@ class MplCanvas(FigureCanvas):
             if len(data) == 0:
                 return
 
-        plotable_data = downsample(np.array(data, dtype=float).T)
+        plotable_data = np.array(data, dtype=float).T
+
+        # Draw every sample over a short span.  Over a longer one, average
+        # into fixed time buckets: that keeps the line steady as readings
+        # arrive, where thinning made it jump about.  The span asked for is
+        # used rather than the span the data happens to cover, so the bucket
+        # width does not change while the history is still filling up.
+        # See average_into_buckets.
+        span_hours = last_n_hours or (
+            (plotable_data[0][-1] - plotable_data[0][0]) / 3600.0)
+        seconds = averaging_seconds(span_hours)
+        if seconds > 0:
+            plotable_data = average_into_buckets(plotable_data, seconds)
+
+        # Last-resort guard: averaging already holds the count near
+        # TARGET_PLOTTED_POINTS, so this only bites on an unexpectedly dense
+        # history.
+        plotable_data = downsample(plotable_data)
+
         time_data = plotable_data[0]
 
-        channels = sorted(THERMOMETERS.keys())
         keys = plot_column_keys()
 
-        for index, channel in enumerate(channels):
-            self.lines[channel].set_data(time_data, plotable_data[index + 1])
-            self.axes[channel].relim()
-            self.axes[channel].autoscale_view()
+        # Look the row up by its column key rather than by panel position:
+        # the panels are ordered for display (PLOT_CHANNEL_ORDER) and the
+        # data columns are not, so the two must not be indexed together.
+        for channel in self.lines:
+            key = f"T_ch{channel}"
+            if key not in keys:
+                continue
+            values = plotable_data[keys.index(key) + 1]
+            self.lines[channel].set_data(time_data, values)
+            # Autoscaling has to be switched back on before relim: a previous
+            # call to widen_y_axis set the limits by hand, which turns it off,
+            # and the axis would then keep those old limits for ever and hide
+            # a real temperature move.
+            if not self.user_has_zoomed:
+                self.axes[channel].set_autoscaley_on(True)
+                self.axes[channel].relim()
+                self.axes[channel].autoscale_view()
+                widen_y_axis(self.axes[channel], values)
 
         # Heater output, on the PID reference panel only.
         channel = self.heater_channel
@@ -3247,8 +4277,10 @@ class MplCanvas(FigureCanvas):
             heater_row = keys.index("HTR_out0") + 1
             self.heater_lines[channel].set_data(
                 time_data, plotable_data[heater_row])
-            self.heater_axes[channel].relim()
-            self.heater_axes[channel].autoscale_view()
+            if not self.user_has_zoomed:
+                self.heater_axes[channel].set_autoscaley_on(True)
+                self.heater_axes[channel].relim()
+                self.heater_axes[channel].autoscale_view()
 
         self.draw()
 
@@ -3391,19 +4423,11 @@ class HeaterControlGroup(QGroupBox):
         readback_box.setLayout(readback_layout)
         layout.addWidget(readback_box)
 
-        # The still's level and what the output is actually delivering are
-        # two different numbers, and they disagree whenever the range is off.
-        # Showing only the level would make a switched-off still look as
-        # though it were running.
+        # The still's delivered level is not shown in a box of its own: the
+        # level box below already says what the still is set to, and the
+        # on/off control says whether it is running.  Kept as None so that
+        # update_readbacks knows there is no label to fill in.
         self.analog_readback = None
-        if not info["closed_loop"]:
-            delivered_layout = QFormLayout()
-            self.analog_readback = QLabel("N/A")
-            delivered_layout.addRow("Analog output now [%]:",
-                                    self.analog_readback)
-            delivered_box = QGroupBox("Being delivered (AOUT?)")
-            delivered_box.setLayout(delivered_layout)
-            layout.addWidget(delivered_box)
 
         # --- editable settings ---------------------------------------------
         # Kept as an attribute so that the level row can be relabelled once
@@ -3431,19 +4455,32 @@ class HeaterControlGroup(QGroupBox):
             self.p_input = PlaceholderInput(self)
             self.i_input = PlaceholderInput(self)
             self.d_input = PlaceholderInput(self)
-            self.range_input = PlaceholderInput(self)
             settings_layout.addRow("P:", self.p_input)
             settings_layout.addRow("I:", self.i_input)
             settings_layout.addRow("D:", self.d_input)
-            settings_layout.addRow("Range (0-8):", self.range_input)
+
+            # A list rather than a typed box: the range is one of nine fixed
+            # settings, and what matters when choosing is the power each one
+            # delivers, not its index.  The first entry keeps the box's old
+            # meaning of "leave this as it is", so a form filled in only
+            # partly still changes only what was filled in.
+            self.range_input = QComboBox(self)
+            self.range_input.addItem("leave as it is", None)
+            for index in sorted(SAMPLE_HEATER_RANGE_CURRENTS):
+                if index == 0:
+                    self.range_input.addItem("0  --  off", 0)
+                else:
+                    self.range_input.addItem(
+                        f"{index}  --  {heater_range_power(index, output)}",
+                        index)
+            settings_layout.addRow("Range:", self.range_input)
 
             # In closed loop the manual output is not the output: the
             # instrument adds it to whatever the PID computes (manual
             # p.162).  Changing it here would bias the loop rather than set
-            # its level, so it is shown but not editable.
+            # its level, so it is not shown as a settable box.  The level
+            # itself appears on the plot's right-hand axis.
             self.output_readback = QLabel("N/A")
-            settings_layout.addRow(f"Level, set by the PID [{self.units}]:",
-                                   self.output_readback)
 
             # Typing a setpoint fills the tuning below it from the defaults
             # table, so there is one number to think about rather than five.
@@ -3463,18 +4500,10 @@ class HeaterControlGroup(QGroupBox):
         settings_box.setLayout(settings_layout)
         layout.addWidget(settings_box)
 
-        hint_text = ("Grey shows what the Lakeshore is set to now.  Type "
-                     "over a box to change it; leave it empty to keep it.")
-        if self.closed_loop:
-            hint_text += ("\n\nThe level is set by the PID loop, so it is "
-                          "shown but cannot be typed into.  The voltage is "
-                          "worked out from the level, the range and the "
-                          "heater resistance; the Lakeshore does not measure "
-                          "it.")
-        else:
-            hint_text += ("\n\nThe voltage is worked out from the level and "
-                          "the heater resistance; the Lakeshore does not "
-                          "measure it.")
+        hint_text = ("Grey shows what the Lakeshore is set to now.  "
+                     "Change a box to set it; leave it to keep it."
+                     "\n\nThe voltage is calculated, not measured.")
+
         hint = QLabel(hint_text)
         hint.setWordWrap(True)
         hint.setStyleSheet("color: grey; font-size: 10px;")
@@ -3559,15 +4588,30 @@ class HeaterControlGroup(QGroupBox):
         if not self.closed_loop:
             # No range box: for the analog output the range is only on or
             # off, which the control above already shows.
+            #
+            # The grey value is what the output is actually delivering
+            # (``AOUT?``), not the level it is configured at (``STILL?``).
+            # The two differ whenever the range is off -- the instrument
+            # keeps the level stored while delivering nothing -- and grey
+            # here means "what the Lakeshore is doing now", so a switched-off
+            # still reads 0 rather than the level it would jump to.
             self.output_input.show_instrument_value(
-                readings.get(f"HTR_out{output}"), 3)
+                readings.get(f"AOUT_out{output}"), 3)
             if self.analog_readback is not None:
                 self.analog_readback.setText(show(f"AOUT_out{output}", 3))
             return
 
         # Grey placeholders track the instrument, so a box the user has not
         # typed in always shows what is really set.
-        self.range_input.show_instrument_value(heater_range, 0)
+        # The list has no placeholder, so the instrument's present range is
+        # shown by naming it on the "leave as it is" entry.  Selecting a real
+        # range still means "change to this one".
+        if heater_range is None or np.isnan(heater_range):
+            self.range_input.setItemText(0, "leave as it is")
+        else:
+            self.range_input.setItemText(
+                0, f"leave as it is  ({int(heater_range)}  --  "
+                   f"{heater_range_power(int(heater_range), output)})")
 
         # Closed loop: the level is the PID's doing, so it is shown but not
         # editable.  See the note in __init__.
@@ -3642,7 +4686,9 @@ class HeaterControlGroup(QGroupBox):
         self.p_input.setText(str(p))
         self.i_input.setText(str(i))
         self.d_input.setText(str(d))
-        self.range_input.setText(str(heater_range))
+        index = self.range_input.findData(int(heater_range))
+        if index >= 0:
+            self.range_input.setCurrentIndex(index)
 
         print(f"{HEATERS[self.output]['name']}: loaded defaults for "
               f"{setpoint} K -- P={p}, I={i}, D={d}, range={heater_range}. "
@@ -3658,7 +4704,7 @@ class HeaterControlGroup(QGroupBox):
         """
         if self.closed_loop:
             boxes = [self.setpoint_input, self.p_input, self.i_input,
-                     self.d_input, self.range_input]
+                     self.d_input]
         else:
             boxes = [self.output_input]
 
@@ -3695,7 +4741,7 @@ class HeaterControlGroup(QGroupBox):
                 # always sent; it is only ever changed deliberately.
                 settings["control_channel"] = self.reference_input.currentData()
 
-                heater_range = self.range_input.entered_value()
+                heater_range = self.range_input.currentData()
                 if heater_range is not None:
                     settings["range"] = int(heater_range)
             else:
@@ -3809,12 +4855,7 @@ class HeaterControlGroup(QGroupBox):
         name = HEATERS[self.output]['name']
 
         if self.closed_loop:
-            try:
-                heater_range = self.range_input.entered_value()
-            except ValueError:
-                self.report(f"{name}: the range box does not hold a number.",
-                            healthy=False)
-                return
+            heater_range = self.range_input.currentData()
 
             if heater_range is None:
                 # The grey placeholder is the instrument's current range,
@@ -3955,7 +4996,7 @@ class SettingsPanel(QGroupBox):
         # Stacked rather than side by side: this column is narrow, and two
         # buttons in a row squeeze their labels and the panel's width.
         self.log_button = QPushButton("Log file", self)
-        self.thermometer_button = QPushButton("Thermometers", self)
+        self.thermometer_button = QPushButton("Timing", self)
         for button in (self.log_button, self.thermometer_button):
             button.setCheckable(True)
             layout.addWidget(button)
@@ -4027,10 +5068,62 @@ class SettingsPanel(QGroupBox):
 
         if already_open:
             self.pages.hide()
+            self.set_column_width(open_page=False)
             return
 
         self.pages.setCurrentIndex(index)
         self.pages.show()
+        self.set_column_width(open_page=True)
+
+    def set_column_width(self, open_page):
+        """
+        Made by Claude. Widen the settings column while a page is open, and narrow it after.
+
+        The pages are forms and are cramped at the width the column sits at
+        the rest of the time.  They are only open for a moment, so taking the
+        room from the plots while they are is worth it.
+
+        Does nothing if the panel is not inside a scroll area yet, which is
+        the case while the window is still being built.
+
+        Parameters
+        ----------
+        open_page : bool
+            ``True`` while a page is showing, ``False`` once it is closed.
+
+        Returns
+        -------
+        None
+        """
+        window = self.window()
+        scroll = getattr(window, "settings_scroll", None)
+        if scroll is None:
+            return
+
+        width = (SETTINGS_COLUMN_OPEN_WIDTH if open_page
+                 else SETTINGS_COLUMN_CLOSED_WIDTH)
+        bar = scroll.verticalScrollBar().sizeHint().width()
+        scroll.setFixedWidth(width + bar)
+        self.settings_column_inner_width(width)
+
+    def settings_column_inner_width(self, width):
+        """
+        Made by Claude. Hold the settings column's contents to a width.
+
+        Parameters
+        ----------
+        width : int
+            Width in pixels.
+
+        Returns
+        -------
+        None
+        """
+        window = self.window()
+        inner = getattr(window, "settings_column_widget", None)
+        if inner is not None:
+            inner.setMaximumWidth(width)
+        self.setMaximumWidth(width)
 
     # --- pages --------------------------------------------------------------
 
@@ -4068,10 +5161,10 @@ class SettingsPanel(QGroupBox):
         button_layout.addWidget(self.apply_path_button)
         layout.addLayout(button_layout)
 
-        note = QLabel("A dated folder (year / month / day) is made inside "
-                      "this one, and a new file is started each day.\n"
-                      "Changing the folder starts a new file there; data "
-                      "already written stays where it is.")
+        note = QLabel("A year / month / day folder is made inside this "
+                      "one, with a new file each day.\n\n"
+                      "Changing the folder starts a new file; data already "
+                      "written stays put.")
         note.setWordWrap(True)
         note.setStyleSheet("color: grey; font-size: 10px;")
         layout.addWidget(note)
@@ -4106,25 +5199,32 @@ class SettingsPanel(QGroupBox):
         self.sample_interval_input.setValue(self.worker.sample_interval)
         form.addRow("Read every:", self.sample_interval_input)
 
+        # One dwell box per thermometer.  The scanner visits the channels in
+        # turn and spends this long on each, so a thermometer that matters
+        # can be given more of the cycle than one that is only being watched
+        # -- while the reading interval above stays the same for all of them.
         low, high = SCAN_DWELL_LIMITS
-        self.dwell_input = QSpinBox(self)
-        self.dwell_input.setRange(low, high)
-        self.dwell_input.setSuffix(" s")
-        self.dwell_input.setValue(SCAN_DWELL_SECONDS)
-        form.addRow("Change channel every:", self.dwell_input)
+        self.dwell_inputs = {}
+        for channel in display_channels():
+            box = QSpinBox(self)
+            box.setRange(low, high)
+            box.setSuffix(" s")
+            box.setValue(self.worker.scan_dwell.get(channel,
+                                                    SCAN_DWELL_SECONDS))
+            form.addRow(f"{THERMOMETERS[channel]['name']} (ch{channel}):",
+                        box)
+            self.dwell_inputs[channel] = box
 
         layout.addLayout(form)
 
         self.apply_timing_button = QPushButton("Apply timing", self)
         layout.addWidget(self.apply_timing_button)
 
-        note = QLabel("'Read every' is how often this program asks the "
-                      "Lakeshore for a reading, and so how often a row is "
-                      "written.\n\n'Change channel every' is the scanner "
-                      "dwell time, which is a setting held on the "
-                      "instrument itself.\n\nNote: the dwell time is written "
-                      "to the Lakeshore even in safe mode -- it changes "
-                      "measurement timing, never heater power.")
+        note = QLabel("'Read every' is how often a row is written.\n\n"
+                      "The others are how long the scanner stays on each "
+                      "thermometer before moving on.\n\n"
+                      "Both are measurement timing, so they are written "
+                      "even in safe mode.")
         note.setWordWrap(True)
         note.setStyleSheet("color: grey; font-size: 10px;")
         layout.addWidget(note)
@@ -4203,7 +5303,7 @@ class MainWindow(QMainWindow):
 
         # --- settings column --------------------------------------------------
         self.settings_panel = SettingsPanel(self.worker, self)
-        self.settings_panel.setMaximumWidth(360)
+        self.settings_panel.setMaximumWidth(SETTINGS_COLUMN_OPEN_WIDTH)
         self.settings_panel.apply_path_button.clicked.connect(self.apply_base_path)
         self.settings_panel.apply_timing_button.clicked.connect(self.apply_timing)
 
@@ -4212,13 +5312,44 @@ class MainWindow(QMainWindow):
         settings_column.addStretch()
         self.settings_column_widget = QWidget()
         self.settings_column_widget.setLayout(settings_column)
-        main_layout.addWidget(self.settings_column_widget)
+
+        # Scrollable for the same reason as the middle column: the settings
+        # pages are taller than a short window, and the Apply buttons live at
+        # the bottom of them.
+        self.settings_scroll = QScrollArea()
+        self.settings_scroll.setWidget(self.settings_column_widget)
+        self.settings_scroll.setWidgetResizable(True)
+        self.settings_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.settings_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.settings_scroll.setFrameShape(QScrollArea.NoFrame)
+        main_layout.addWidget(self.settings_scroll)
 
         # --- middle column ----------------------------------------------------
         self.left_layout = QVBoxLayout()
         self.left_layout_widget = QWidget()
         self.left_layout_widget.setLayout(self.left_layout)
-        main_layout.addWidget(self.left_layout_widget)
+
+        # Scrollable, because this column grows: the confirmation box appears
+        # in the middle of it when a setpoint is requested, and on a short
+        # window that can push the heater panels below the bottom edge.  A
+        # button that cannot be reached is worse here than anywhere else in
+        # the program, since it is what holds the fridge.
+        #
+        # Only the vertical bar is enabled.  The column wraps its text to
+        # whatever width it is given, so there is never anything to scroll
+        # sideways to.
+        self.left_scroll = QScrollArea()
+        self.left_scroll.setWidget(self.left_layout_widget)
+        self.left_scroll.setWidgetResizable(True)
+        self.left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.left_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.left_scroll.setFrameShape(QScrollArea.NoFrame)
+
+        # The bar sits beside the column rather than over it: the width is
+        # fixed at the column's own width plus the bar's, so the controls
+        # keep the room they had.  Set in showEvent, where the column has
+        # actually been laid out and its width is known.
+        main_layout.addWidget(self.left_scroll)
 
         if SAFE_MODE:
             safe_label = QLabel("SAFE MODE -- nothing is written to the Lakeshore")
@@ -4256,6 +5387,8 @@ class MainWindow(QMainWindow):
         self.setup_label.hide()
         self.left_layout.addWidget(self.setup_label)
 
+        self.left_layout.addWidget(self.build_intervention_box())
+
         self.left_layout.addWidget(self.build_thermometer_box())
 
         self.heater_groups = {}
@@ -4281,7 +5414,30 @@ class MainWindow(QMainWindow):
         # button costs nothing, and hiding the controls gives all of the
         # freed width to the plots.
         toolbar_row = QHBoxLayout()
-        toolbar_row.addWidget(NavigationToolbar(self.canvas, self))
+        # The toolbar tells the canvas when the view has been moved by hand,
+        # so that live readings stop dragging it back; see
+        # MplCanvas.user_has_zoomed.  Wrapping the toolbar's own methods is
+        # the way to hear about it -- matplotlib emits no signal for a zoom.
+        toolbar = NavigationToolbar(self.canvas, self)
+        canvas = self.canvas
+
+        def wrap(name, zoomed):
+            original = getattr(toolbar, name)
+
+            def wrapped(*args, **kwargs):
+                result = original(*args, **kwargs)
+                canvas.user_has_zoomed = zoomed
+                return result
+            setattr(toolbar, name, wrapped)
+
+        # release_zoom and release_pan fire when a drag finishes; home and
+        # back to the start return to following the data.
+        for method in ("release_zoom", "release_pan"):
+            wrap(method, True)
+        for method in ("home",):
+            wrap(method, False)
+
+        toolbar_row.addWidget(toolbar)
         toolbar_row.addStretch()
         self.expand_button = QPushButton("Hide controls", self)
         self.expand_button.setToolTip(
@@ -4291,7 +5447,22 @@ class MainWindow(QMainWindow):
         toolbar_row.addWidget(self.expand_button)
         self.right_layout.addLayout(toolbar_row)
 
-        self.right_layout.addWidget(self.canvas)
+        # The plots get their own scroll area, with a bar down the right and
+        # another along the bottom.
+        #
+        # widgetResizable is deliberately OFF here, unlike the two control
+        # columns.  With it on the canvas is stretched to exactly fit the
+        # viewport, so it can never be larger than the space it is shown in
+        # and the bars have nothing to scroll to -- which is why the bottom
+        # bar did not work before.  With it off the canvas keeps whatever
+        # size it is given, and resize_canvas below is what sets that size.
+        self.plot_scroll = QScrollArea()
+        self.plot_scroll.setWidget(self.canvas)
+        self.plot_scroll.setWidgetResizable(False)
+        self.plot_scroll.setFrameShape(QScrollArea.NoFrame)
+        self.plot_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.plot_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.right_layout.addWidget(self.plot_scroll, stretch=1)
 
         self.right_layout.addLayout(self.build_history_controls())
 
@@ -4376,6 +5547,196 @@ class MainWindow(QMainWindow):
         self.update_history_label()
         return layout
 
+    def build_intervention_box(self):
+        """
+        Made by Claude. Build the box that holds a remote setpoint until it is confirmed.
+
+        Hidden whenever nothing is waiting, so an ordinary run looks
+        ordinary.  It appears when the S21 computer asks for a setpoint,
+        showing the P, I, D and range that would be applied and -- for the
+        bands in :data:`MANUAL_INTERVENTION` -- what has to be done to the
+        fridge first.  Nothing reaches the instrument until "Done" is
+        pressed.
+
+        Returns
+        -------
+        QGroupBox
+            The box, already hidden.
+        """
+        self.intervention_box = QGroupBox("Waiting for you")
+        self.intervention_box.setStyleSheet(
+            "QGroupBox { border: 2px solid #b06000; border-radius: 4px; "
+            "margin-top: 8px; font-weight: bold; } "
+            "QGroupBox::title { subcontrol-origin: margin; left: 8px; "
+            "padding: 0 4px; color: #b06000; }")
+
+        layout = QVBoxLayout()
+
+        self.intervention_label = QLabel("")
+        self.intervention_label.setWordWrap(True)
+        self.intervention_label.setStyleSheet("color: #202020; padding: 4px;")
+        layout.addWidget(self.intervention_label)
+
+        # Two ways out of the box, because there are two things the person
+        # reading it may want: take the table's values, or overrule them.
+        buttons = QHBoxLayout()
+
+        self.intervention_button = QPushButton("Apply these values")
+        self.intervention_button.setStyleSheet(
+            "font-weight: bold; padding: 6px;")
+        self.intervention_button.clicked.connect(self.confirm_intervention)
+        buttons.addWidget(self.intervention_button)
+
+        self.intervention_manual_button = QPushButton(
+            "Choose values manually")
+        self.intervention_manual_button.setStyleSheet("padding: 6px;")
+        self.intervention_manual_button.clicked.connect(
+            self.dismiss_intervention)
+        buttons.addWidget(self.intervention_manual_button)
+
+        self.intervention_skip_button = QPushButton("Jump to next step")
+        self.intervention_skip_button.setStyleSheet("padding: 6px;")
+        self.intervention_skip_button.setToolTip(
+            "Pass over this step and offer the next one instead, so the "
+            "fridge goes straight there.  Nothing is sent.")
+        self.intervention_skip_button.clicked.connect(self.skip_to_next_step)
+        buttons.addWidget(self.intervention_skip_button)
+
+        self.intervention_cancel_button = QPushButton("Cancel")
+        self.intervention_cancel_button.setStyleSheet("padding: 6px;")
+        self.intervention_cancel_button.setToolTip(
+            "Do not go to this setpoint at all.  Nothing is sent and the "
+            "heater is left exactly as it is.")
+        self.intervention_cancel_button.clicked.connect(
+            self.cancel_intervention)
+        buttons.addWidget(self.intervention_cancel_button)
+
+        layout.addLayout(buttons)
+
+        self.intervention_box.setLayout(layout)
+        self.intervention_box.hide()
+        return self.intervention_box
+
+    def confirm_intervention(self):
+        """
+        Made by Claude. Apply the waiting setpoint, after the "Done" button is pressed.
+
+        Returns
+        -------
+        None
+        """
+        if self.worker.confirm_intervention():
+            self.intervention_box.hide()
+
+    def dismiss_intervention(self):
+        """
+        Made by Claude. Drop the suggested values and leave the setpoint to be set by hand.
+
+        The box disappears and **nothing at all is sent** -- the fridge is
+        left exactly as it was.  Whoever pressed this then types their own
+        setpoint, P, I, D and range into the sample heater panel and presses
+        its own On button, which is the ordinary manual path this program
+        already had.
+
+        The requested setpoint is still reported back to the S21 computer,
+        because this only declines the suggested tuning; it does not decline
+        the request.
+
+        Returns
+        -------
+        None
+        """
+        if self.worker.dismiss_intervention():
+            self.intervention_box.hide()
+
+    def cancel_intervention(self):
+        """
+        Made by Claude. Cancel the request entirely, leaving the heater as it is.
+
+        Returns
+        -------
+        None
+        """
+        if self.worker.cancel_intervention():
+            self.intervention_box.hide()
+
+    def skip_to_next_step(self):
+        """
+        Made by Claude. Pass over the step on offer and show the one after it.
+
+        The box stays up, now showing the wider jump.  Nothing is sent.
+
+        Returns
+        -------
+        None
+        """
+        if self.worker.skip_to_next_step():
+            self.show_intervention(self.worker.pending_intervention)
+
+    def show_intervention(self, pending):
+        """
+        Made by Claude. Show or hide the confirmation box for a waiting setpoint.
+
+        Parameters
+        ----------
+        pending : dict or None
+            The waiting setpoint as held in
+            :attr:`Worker.pending_intervention`, or ``None`` if nothing is
+            waiting.
+
+        Returns
+        -------
+        None
+        """
+        if not pending:
+            self.intervention_box.hide()
+            return
+
+        final = pending.get("final_setpoint", pending["setpoint"])
+        count = pending.get("step_count", 1)
+        number = pending.get("step_number", 1)
+        start = pending.get("from_temperature")
+
+        where = "?" if start is None or np.isnan(start) else f"{start:g} K"
+        lines = [f"<b>Temp change from {where} to "
+                 f"{pending['setpoint']:g} K</b>"]
+
+        if count > 1:
+            lines.append(f"Step {number} of {count}, on the way to "
+                         f"{final:g} K.")
+
+        if pending.get("instruction"):
+            lines.append(
+                f"<span style='color:#b00000;'><b>Needs doing by hand "
+                f"first:</b> {pending['instruction']}</span>")
+
+        lines.append(f"Sample heater: {pending['described']}")
+
+        still = pending.get("still_percent")
+        if still is not None:
+            lines.append(f"Still heater: {still}% of full scale")
+
+        lines.append("<i>Nothing has been sent to the Lakeshore yet.  Check "
+                     "the values, do whatever the fridge needs, then press "
+                     "Apply -- or choose your own values by hand.</i>")
+
+        # Only offer the jump when there is a further rung to jump to.  On
+        # the last step the only thing beyond it is the target itself.
+        self.intervention_skip_button.setVisible(
+            bool(pending.get("can_skip")))
+
+        already_showing = not self.intervention_box.isHidden()
+
+        self.intervention_label.setText("<br>".join(lines))
+        self.intervention_box.show()
+
+        # Bring it into view the first time it appears, since it can arrive
+        # from the other machine while the column is scrolled somewhere else.
+        # Only on first appearance: doing it on every refresh would drag the
+        # column back and fight anyone scrolling while deciding.
+        if not already_showing:
+            self.left_scroll.ensureWidgetVisible(self.intervention_box)
+
     def build_thermometer_box(self):
         """
         Made by Claude. Build the group box showing the live thermometer readings.
@@ -4396,15 +5757,17 @@ class MainWindow(QMainWindow):
         grid.addWidget(QLabel("<b>Status</b>"), 0, 4)
 
         self.thermometer_labels = {}
-        for row, channel in enumerate(sorted(THERMOMETERS.keys()), start=1):
+        # Same top-to-bottom order as the plot panels, so a row here and the
+        # panel it belongs to are always in the same place on screen.
+        for row, channel in enumerate(display_channels(), start=1):
             info = THERMOMETERS[channel]
             name = info["label"]
             if not info["calibrated"]:
                 name += "  [UNCALIBRATED]"
 
+            # Black like the others.  The "[UNCALIBRATED]" in the name is
+            # what carries the warning, so the colour is not needed as well.
             name_label = QLabel(name)
-            if not info["calibrated"]:
-                name_label.setStyleSheet("color: #b06000;")
 
             t_label = QLabel("N/A")
             r_label = QLabel("N/A")
@@ -4420,9 +5783,9 @@ class MainWindow(QMainWindow):
             self.thermometer_labels[channel] = (t_label, r_label, p_label,
                                                 live_label)
 
-        note = QLabel("The Lakeshore measures one channel at a time.  "
-                      "'held' means that row is the last value seen, not a "
-                      "new measurement.")
+        note = QLabel("One channel is measured at a time; 'held' means "
+                      "that row is the last value seen, not a new "
+                      "measurement.")
         note.setWordWrap(True)
         note.setStyleSheet("color: grey; font-size: 10px;")
         grid.addWidget(note, len(THERMOMETERS) + 1, 0, 1, 5)
@@ -4461,8 +5824,11 @@ class MainWindow(QMainWindow):
             message, healthy = state["status"]
             self.update_status(message, healthy, state["log_file_path"])
 
+            # Empty is a real value here -- it is how the remote channel says
+            # "the confirmation box is speaking for me", so an empty string
+            # has to clear the label rather than leave the last one showing.
             remote = state.get("remote_status", "")
-            if remote and self.remote_label.text() != remote:
+            if self.remote_label.text() != remote:
                 self.remote_label.setText(remote)
 
             problems = state.get("setup_problems", [])
@@ -4475,6 +5841,11 @@ class MainWindow(QMainWindow):
                     self.setup_label.show()
             elif self.setup_label.isVisible():
                 self.setup_label.hide()
+
+            # Before the revision check below: a setpoint can arrive without
+            # any new reading, and this box is what holds the fridge, so it
+            # must never wait for the next measurement to appear.
+            self.show_intervention(state.get("pending_intervention"))
 
             # Nothing new since the last look, so there is nothing to redraw.
             if state["revision"] == self.last_revision:
@@ -4549,10 +5920,11 @@ class MainWindow(QMainWindow):
         None
         """
         interval = self.settings_panel.sample_interval_input.value()
-        dwell = self.settings_panel.dwell_input.value()
+        dwells = {channel: box.value() for channel, box
+                  in self.settings_panel.dwell_inputs.items()}
 
         self.worker.sample_interval = interval
-        queued = self.worker.apply_scan_dwell(dwell)
+        queued = self.worker.apply_scan_dwell(dwells)
 
         # Deliberately not a dialog.  A modal dialog runs its own event loop
         # on the main thread, and on this machine that overlapping GPIB
@@ -4560,14 +5932,17 @@ class MainWindow(QMainWindow):
         # confirmations like this one are reported in the panel instead,
         # where they are just as visible and cost nothing.  See pause_polling.
         if queued:
+            summary = ", ".join(
+                f"{THERMOMETERS[c]['name']} {dwells[c]} s"
+                for c in display_channels() if c in dwells)
             self.settings_panel.report(
-                f"Reading every {interval:g} s; scanner changing channel "
-                f"every {dwell} s.  The dwell time reaches the Lakeshore on "
-                f"the next reading.", healthy=True)
+                f"Reading every {interval:g} s; scanner staying on "
+                f"{summary}.  The dwell times reach the Lakeshore on the "
+                f"next reading.", healthy=True)
         else:
             low, high = SCAN_DWELL_LIMITS
             self.settings_panel.report(
-                f"Reading every {interval:g} s.  The dwell time was NOT "
+                f"Reading every {interval:g} s.  The dwell times were NOT "
                 f"changed: the Lakeshore only accepts {low} to {high} s.",
                 healthy=False)
 
@@ -4722,6 +6097,118 @@ class MainWindow(QMainWindow):
         """
         self.canvas.update_plot(data, last_n_hours=self.worker.history_hours)
 
+    def showEvent(self, event):
+        """
+        Made by Claude. Fix the two side columns' widths once the layout is real.
+
+        A column's natural width is only known after Qt has laid it out, so
+        it cannot be asked for in ``__init__``.  Each scroll area is fixed at
+        its column's width plus the scrollbar's, which is what keeps the bar
+        beside the controls rather than taking space from them.
+
+        Runs once.  Re-running would fight the user every time the window is
+        restored from the taskbar.
+
+        Parameters
+        ----------
+        event : QShowEvent
+            The show event, passed to the base class.
+
+        Returns
+        -------
+        None
+        """
+        super().showEvent(event)
+
+        if getattr(self, "_column_widths_set", False):
+            return
+        self._column_widths_set = True
+
+        for scroll, inner, cap in (
+                (self.settings_scroll, self.settings_column_widget,
+                 SETTINGS_COLUMN_CLOSED_WIDTH),
+                (self.left_scroll, self.left_layout_widget,
+                 CONTROL_COLUMN_WIDTH)):
+            bar = scroll.verticalScrollBar().sizeHint().width()
+            # The settings column is held at its full width rather than its
+            # natural one, so that opening a page and closing it again
+            # returns it to the same size it started at.  The middle column
+            # is capped: its word-wrapping labels report a hint wide enough
+            # to hold their text unwrapped, far wider than it should be.
+            if scroll is self.settings_scroll:
+                # Starts with no page open, so it starts at the narrow width.
+                width = SETTINGS_COLUMN_CLOSED_WIDTH
+            else:
+                width = min(inner.sizeHint().width(), cap)
+            scroll.setFixedWidth(width + bar)
+            # Hold the column to the same width, or those labels keep it at
+            # their unwrapped hint and the text is clipped rather than
+            # wrapped, the horizontal bar being switched off.
+            inner.setMaximumWidth(width)
+
+        # The columns have just taken their real widths, so the space left
+        # for the plots has changed.
+        self.resize_canvas()
+
+    def resize_canvas(self):
+        """
+        Made by Claude. Size the plot canvas to its viewport, or to a readable minimum.
+
+        With ``widgetResizable`` off the canvas does not follow the scroll
+        area on its own, so this gives it a size whenever the window changes.
+
+        The canvas fills the viewport while there is room for it, and holds
+        :data:`MIN_PLOT_WIDTH` or :data:`MIN_PLOT_HEIGHT` once there is not,
+        the scroll area growing the matching bar -- so squeezing the window
+        means scrolling the plots rather than flattening them into strips
+        too thin to read.
+
+        The height is measured against the viewport the scroll area would
+        have with no horizontal bar, so that the two bars cannot set each
+        other off: a canvas sized to the full viewport height needs a
+        vertical bar as soon as a horizontal one appears and takes 14 px from
+        it, and that vertical bar then narrows the viewport again.  Leaving
+        room for the bar up front settles it in one pass.
+
+        Returns
+        -------
+        None
+        """
+        viewport = self.plot_scroll.viewport().size()
+        bar = self.plot_scroll.horizontalScrollBar().sizeHint().height()
+
+        width = max(viewport.width(), MIN_PLOT_WIDTH)
+        # Room for a horizontal bar is always reserved, whether or not one is
+        # showing at this instant; see above.
+        height = max(viewport.height() - bar, MIN_PLOT_HEIGHT)
+
+        self.canvas.setFixedSize(width, height)
+
+        # Lay the figure out again at the new size.  The margins tight_layout
+        # works out are fractions of the figure, so the ones computed for the
+        # size the canvas was built at do not fit any other size -- and when
+        # they are too small the y-axis labels are drawn at negative
+        # coordinates and matplotlib clips them off the left edge.  That is
+        # the "ends of the plots cut off" that no amount of scrolling could
+        # reach: the labels were never drawn inside the canvas to begin with.
+        self.canvas.relayout()
+
+    def resizeEvent(self, event):
+        """
+        Made by Claude. Keep the plot canvas sized to the window.
+
+        Parameters
+        ----------
+        event : QResizeEvent
+            The resize event, passed to the base class.
+
+        Returns
+        -------
+        None
+        """
+        super().resizeEvent(event)
+        self.resize_canvas()
+
     def toggle_expand(self):
         """
         Made by Claude. Show or hide the settings and control columns.
@@ -4734,14 +6221,20 @@ class MainWindow(QMainWindow):
         -------
         None
         """
-        if self.left_layout_widget.isHidden():
-            self.left_layout_widget.show()
-            self.settings_column_widget.show()
+        # The scroll areas are what sit in the layout, so they are what must
+        # be hidden.  Hiding the widgets inside them would leave empty frames
+        # holding the width the plots are meant to gain.
+        if self.left_scroll.isHidden():
+            self.left_scroll.show()
+            self.settings_scroll.show()
             self.expand_button.setText("Hide controls")
         else:
-            self.left_layout_widget.hide()
-            self.settings_column_widget.hide()
+            self.left_scroll.hide()
+            self.settings_scroll.hide()
             self.expand_button.setText("Show controls")
+
+        # The plots have just gained or lost the columns' width.
+        self.resize_canvas()
 
     def closeEvent(self, event):
         """

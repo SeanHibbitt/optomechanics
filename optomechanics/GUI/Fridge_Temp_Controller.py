@@ -1780,10 +1780,17 @@ class Fridge_Controller(Temp_Controller):
 
         The still heater is run at a constant level rather than by a control
         loop, so its setting is simply a percentage of full scale.  ``STILL``
-        is the command for it (manual p.168), and is the right one because
-        this output is configured in still mode (``OUTMODE`` mode 4) -- which
-        is how the instrument was found set up on this fridge.  ``MOUT``
-        would be the command for an output in open-loop mode instead.
+        is the command for it, and is the right one because this output is
+        configured in still mode (``OUTMODE`` mode 4) -- which is how the
+        instrument was found set up on this fridge.  ``MOUT`` would be the
+        command for an output in open-loop mode instead.
+
+        ``STILL`` takes the level and nothing else (manual p.176:
+        ``STILL <value>``, example ``STILL 22.45``).  It is **not** given an
+        output number, unlike most of the other output commands.  Sending
+        one -- ``STILL 2,10`` -- makes the instrument read the level as 2
+        and quietly ignore the rest, which is why a level typed into the GUI
+        appeared to have no effect and the still stayed at 2%.
 
         Parameters
         ----------
@@ -1795,7 +1802,7 @@ class Fridge_Controller(Temp_Controller):
         bool
             ``True`` if sent, ``False`` if blocked by safe mode.
         """
-        return self.safe_write(f"STILL 2,{percent}")
+        return self.safe_write(f"STILL {percent}")
 
     # --- writes (all safe-mode protected) ----------------------------------
 

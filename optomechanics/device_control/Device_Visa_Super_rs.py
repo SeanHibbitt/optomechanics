@@ -70,7 +70,7 @@ class Device(mainDevice):
             Intended VISA timeout (ms).  Currently ignored — parent is always
             called with ``25000`` ms.  Default is ``10000``.
         """
-        Device.__init__(self, address, baud_rate, timeout = 25000)
+        mainDevice.__init__(self, address, baud_rate, timeout = 25000)
 
     def open(self):
         """

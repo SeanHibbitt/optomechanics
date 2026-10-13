@@ -563,7 +563,7 @@ class VNA(Device):
     
     def sweep(self, channel, Result, TraceName, freq_start, freq_stop,\
               number_of_points, probe_power, band_width, calibration = "ON",\
-              load_state = "C:\\Users\\Instrument\\Documents\\User_States\\Cal_2025_01_16.sta", \
+              load_state = "C:\\Users\\Instrument\\Documents\\User_States\\Cal_2026_10_13.sta", \
               sense_average_state = "OFF",\
               sense_average_count_factor = 1,\
               sense_average_point_count_factor = 1,\

@@ -36,7 +36,7 @@ for _mod in _MOCKED_MODULES:
 sys.modules["PyQt5.QtCore"].pyqtSignal = MagicMock(return_value=MagicMock())
 sys.modules["PyQt5.QtCore"].Qt = MagicMock()
 
-from optomechanics.GUI.Temp_Controller import temperature, R_0, alpha  # noqa: E402
+from Optomechanics.optomechanics.GUI.old.Temp_Controller import temperature, R_0, alpha  # noqa: E402
 
 
 # ---------------------------------------------------------------------------

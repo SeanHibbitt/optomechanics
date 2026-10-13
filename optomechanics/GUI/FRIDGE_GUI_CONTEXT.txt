@@ -1,0 +1,36 @@
+CONTEXT FOR Fridge_Temp_Controller.py
+
+This is PhD research work in a cryogenics and optomechanics group.  We are
+developing a GUI, optomechanics/GUI/Fridge_Temp_Controller.py, to control,
+measure and save the temperature data of our dilution refrigerator through a
+Lakeshore Model 372 AC resistance bridge and temperature controller.  The
+cryostat has a mixing chamber holding two thermometers side by side: the old,
+calibrated one, and a new one mounted next to it that has no calibration curve
+yet.  Calibrating the new thermometer against the old one is the reason this
+program exists, so the new thermometer's resistance is the real measurement and
+every temperature it reports must be treated and labelled as uncalibrated.
+There is also a 1K pot with its own thermometer.  Two heaters are controlled:
+the sample heater on the mixing chamber, which regulates temperature through
+the Lakeshore's own closed-loop PID, and the still heater, which is run open
+loop at a constant level to set the circulation rate.  The GUI shows the live
+thermometer readings and heater state, plots the thermometers against time, and
+writes everything to a dated CSV on the group's data drive.
+
+How this code must be written.  Before changing anything, read what is already
+in D:\Python\optomechanics and reuse it: this is a shared research group
+codebase and everything is done a particular way, so follow the existing
+structure, naming and NumPy docstring style, and prefer the group's existing
+modules (the device_control drivers, data_management's dated_logger and
+file_management) over writing anything new.  Change as little as possible; if
+something already works, leave it alone.  Read the relevant pages of the
+Lakeshore 372 manual before using any instrument command, and be accurate
+rather than approximate about what each command does -- several of them set
+more than one thing at once, and several look like they do something they do
+not.  This code drives a real cryostat, so treat every write to the instrument
+as capable of doing harm: never add anything that could delete, overwrite or
+silently change a calibration curve or another instrument setting, and keep the
+safety interlock (SAFE_MODE) intact.  The measurement data is irreplaceable --
+never let anything delete, truncate, overwrite or mix up a data file, and make
+sure a crash, a restart or a change of settings cannot lose readings.  Verify
+against the real instrument and the real files instead of assuming, and ask
+before making any change that was not explicitly asked for.

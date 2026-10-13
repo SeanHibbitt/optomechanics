@@ -1,70 +1,82 @@
 """
-A Class to handle non-device specific Zurich Instruments, LabOne Communications.
-To be inheritted by indivdual device classes
+Base class for Zurich Instruments devices using zhinst.toolkit.
 
+Mirrors the Device_Visa_Super lifecycle pattern (context manager, open/close)
+while wrapping zhinst.toolkit.Session for Zurich-specific device control.
+
+The raw ``self.session`` and ``self.device`` attributes are exposed so users
+can access the full zhinst.toolkit API when the convenience methods are not
+enough.
 """
 
 from zhinst.toolkit import Session
-device_id = 'dev1374'
-apilevel = 6
 
-class zuirch():
 
+class ZurichDevice:
     """
-    useful links:
-    https://docs.zhinst.com/zhinst-toolkit/en/latest/examples/common_device.html
-    """
-    def __init__(self, address = "localhost",):
-        self.address   = address
+    Base class for Zurich Instruments device control via zhinst.toolkit.
 
-    def open_session(self):
-        self.session = Session(self.address)
-
-
-
-
-
-class device():
-    """
-    Make instances of this class to connect to specific devices via the device_id
-
-    useful commands:
-    list(device.child_nodes())
-    list(device.demods[0].child_nodes(recursive=True))
-    with device.set_transaction():
-    device.demods["*"].enable(1)
-    device.demods[1].harmonic(3)
-    device.demods[0].harmonic(2)
-    device.demods[0].rate(2000)
+    Parameters
+    ----------
+    device_id : str
+        Device serial string (e.g. ``'dev1374'``).
+    server_host : str, optional
+        LabOne Data Server hostname. Default is ``'localhost'``.
+    port : int, optional
+        LabOne Data Server port. Default is 8004.
     """
 
-    def __init__(self, session,device_id):
-        """
-        session:
-        Session argument created via the zurich class
-
-        device_id = 'devXXXX', e.g dev1374
-        """
-        self.session = session
+    def __init__(self, device_id, server_host="localhost", port=8004):
         self.device_id = device_id
+        self.server_host = server_host
+        self.port = port
+        self.session = None
+        self.device = None
 
-    def open_device(self):
+    def open(self):
         """
-        Open a specific device via the device id
+        Open a session to the LabOne Data Server and connect to the device.
+
+        Returns
+        -------
+        ZurichDevice
+            Returns ``self`` for chaining and ``with`` block usage.
         """
-        self.device = self._session.connect_device(self.device_id) 
-        print(self.device.serial)
-        print(self.device.device_type)
+        self.session = Session(self.server_host, self.port)
+        self.device = self.session.connect_device(self.device_id)
+        print(f"Connected to {self.device.device_type} — serial: {self.device.serial}")
+        return self
 
-    def close_device(self, device_id):
-        self.device.disconnect_device(device_id)
+    def close(self):
+        """Disconnect the device and clean up the session."""
+        if self.device is not None:
+            self.session.disconnect_device(self.device_id)
+            self.device = None
+        self.session = None
+        print("Device disconnected")
 
-    
+    def __enter__(self):
+        return self.open()
 
-    def scope():
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        self.close()
+
+    @staticmethod
+    def connected_devices(server_host="localhost", port=8004):
         """
-        https://docs.zhinst.com/labone_api_user_manual/modules/scope/index.html
-        
-        """
+        List device IDs visible to the LabOne Data Server.
 
-    
+        Parameters
+        ----------
+        server_host : str, optional
+            Data Server hostname. Default is ``'localhost'``.
+        port : int, optional
+            Data Server port. Default is 8004.
+
+        Returns
+        -------
+        list of str
+            Device ID strings visible to the server.
+        """
+        session = Session(server_host, port)
+        return session.devices.visible()

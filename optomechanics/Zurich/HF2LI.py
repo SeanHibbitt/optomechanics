@@ -342,7 +342,10 @@ class HF2LI(ZurichDevice):
         bandwidth_control : int, optional
             Bandwidth control mode (0=manual, 1=fixed, 2=auto). Default is 1.
         bandwidth_hz : float or None, optional
-            Demodulator bandwidth in Hz. Used when ``bandwidth_control=0`` (manual).
+            Demodulator 3 dB bandwidth in Hz, written to the sweeper's
+            ``bandwidth`` setting. Applied when ``bandwidth_control=1`` (fixed);
+            in manual mode (0) the demodulator's existing time constant is used
+            and in auto mode (2) the sweeper picks the bandwidth per point.
             If None, left unchanged.
         filter_order : int or None, optional
             Demodulator low-pass filter order (1–8). If None, left unchanged.
@@ -371,8 +374,10 @@ class HF2LI(ZurichDevice):
             If None, the amplitude is left unchanged. Default is None.
         output_range : float or None, optional
             Output voltage range in volts (0.01, 0.1, 1, or 10). Sets the
-            DAC headroom via ``sigouts/n/range``. If None, left unchanged.
-            Default is None.
+            DAC headroom via ``sigouts/n/range``. Choose a range close to
+            ``output_amplitude``: fractions below about 1e-5 of the range
+            round to 0 on the device and fail read-back verification.
+            If None, left unchanged. Default is None.
         output_enable : bool or None, optional
             Enable (True) or disable (False) the output before the sweep.
             Applied when ``output_channel`` is set. If None, left unchanged.
@@ -392,6 +397,13 @@ class HF2LI(ZurichDevice):
         metadata : dict or None, optional
             Extra attributes to store in the HDF5 file (e.g. sample name,
             temperature). Passed directly to ``save_sweep_to_hdf5``.
+        group_index : int, optional
+            Iteration group in the HDF5 file (``000``, ``001``, ...).
+            Default is 0.
+        append : bool, optional
+            If True, add this sweep as ``group_index`` to the file written by
+            the previous ``sweep(save=True)`` call on this instance, instead of
+            creating a new file. Default is False.
         prepend_datetime : bool, optional
             If True, prepend the current date and time to the filename in
             the format ``YYYY-MM-DD_HH_MM_SS_``.  Default is True.
@@ -399,13 +411,25 @@ class HF2LI(ZurichDevice):
         Returns
         -------
         dict
-            Keys: ``'frequency'``, ``'r'``, ``'phase'``, ``'x'``, ``'y'``
+            The sweeper's result for the demodulator, including
+            ``'frequency'``, ``'r'``, ``'phase'``, ``'x'``, ``'y'``
             — each a 1-D numpy array.
 
         Raises
         ------
         ValueError
-            If ``save=True`` but ``filepath`` is None.
+            If ``save=True`` but ``filepath`` is None, or ``filepath`` has a
+            suffix other than ``.h5``.
+        RuntimeError
+            If an output setting does not read back as written, or the sweep
+            returns no data.
+        TimeoutError
+            If ``progress=True`` and the sweep exceeds ``timeout``.
+
+        Notes
+        -----
+        When ``output_channel`` is set, the output is switched off
+        (``sigouts/n/on = 0``) after the sweep finishes.
         """
         if save and filepath is None:
             raise ValueError("filepath must be set when save=True")

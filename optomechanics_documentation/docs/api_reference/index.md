@@ -10,6 +10,7 @@ Auto-generated from source docstrings.
 | [`data_analysis`](data_analysis/index.md) | Fitting, unit conversions, membrane mechanics, error propagation |
 | [`device_control`](device_control/index.md) | VISA instrument drivers |
 | [`data_management`](data_management/index.md) | File I/O, data logging, attenuation accounting |
+| [`Zurich`](zurich/index.md) | Zurich Instruments lock-in control (HF2LI) and HDF5 saving |
 
 ---
 
@@ -59,3 +60,11 @@ Auto-generated from source docstrings.
 | [`data_management`](data_management/data_management.md) | module | File read/write, `attenuation_object` |
 | [`file_management`](data_management/file_management.md) | module | Dated directory and file path creation |
 | [`data_logger`](data_management/data_logger.md) | module | Continuous data logging (`logger`, `dated_logger`) |
+
+### Zurich
+
+| Item | Type | Description |
+|---|---|---|
+| [`Device_Zurich_Super`](zurich/device_zurich_super.md) | module | `ZurichDevice` base class — LabOne session lifecycle |
+| [`HF2LI`](zurich/hf2li.md) | module | HF2LI lock-in driver: sweeps, spectra, I/Q capture |
+| [`zurich_data_management`](zurich/zurich_data_management.md) | module | HDF5 writers for sweep, spectrum and I/Q results |

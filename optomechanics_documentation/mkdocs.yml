@@ -48,6 +48,7 @@ nav:
     - End-to-End Workflow: user_guide/end_to_end_workflow.md
     - Parameter Glossary: user_guide/glossary.md
     - Temperature Control GUI: user_guide/gui_temperature_control.md
+    - HF2LI Frequency Sweeps: user_guide/hf2li_sweeps.md
   - API Reference:
     - api_reference/index.md
     - data_analysis:
@@ -96,6 +97,8 @@ nav:
     - zurich:
       - Overview: api_reference/zurich/index.md
       - Device_Zurich_Super: api_reference/zurich/device_zurich_super.md
+      - HF2LI: api_reference/zurich/hf2li.md
+      - zurich_data_management: api_reference/zurich/zurich_data_management.md
   - Roadmap:
     - roadmap/index.md
     - Planned Physics: roadmap/planned_physics.md

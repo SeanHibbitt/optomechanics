@@ -33,6 +33,7 @@ End-to-end guides for common measurement and analysis tasks:
 | [Thermal Motion Measurement](thermal_motion_measurement.md) | DAQ workflow: VNA + SA + pump tone |
 | [Thermal Motion Analysis](thermal_motion_analysis.md) | Post-processing: normalise PSD, fit S_ww, extract g₀ |
 | [Spectrum Analyser (IQ/PSD)](spectrum_analyser.md) | IQ capture and PSD acquisition with the R&S FSW |
+| [HF2LI Frequency Sweeps](hf2li_sweeps.md) | Transfer-function sweeps with the Zurich HF2LI lock-in |
 
 See each section for details, or jump straight to the
 [API Reference](../api_reference/index.md) for full function documentation.

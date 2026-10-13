@@ -6,8 +6,8 @@
 python -m pytest optomechanics/tests/ -v
 ```
 
-All tests run without physical hardware. Device driver modules are not tested (they
-require connected instruments).
+All tests run without physical hardware. VISA device driver modules are not tested (they
+require connected instruments); the Zurich drivers are tested against a mocked `zhinst.toolkit`.
 
 ## Test Files
 
@@ -24,8 +24,9 @@ require connected instruments).
 | `test_omit.py` | `data_analysis/fitting/omit.py` | 16 | Good |
 | `test_square_membrane.py` | `data_analysis/square_membrane.py` | 6 | Limited |
 | `test_misc_equations.py` | `data_analysis/misc_equations.py` | 4 | Limited |
+| `test_zurich.py` | `Zurich/` (`ZurichDevice`, `HF2LI`, `zurich_data_management`) | 113 | Broad (mocked hardware) |
 
-**Total: 176 tests across 11 files.**
+**Total: 290 tests across 12 files.**
 
 ## Test Data
 
@@ -45,7 +46,6 @@ The following subpackages have **no unit tests**:
 | `device_control/` | Requires physical instruments connected via GPIB/VISA |
 | `GUI/` | Requires a display and PyQt5 event loop |
 | `Misc/` | Informal scripts folder, not part of the public API |
-| `Zurich/` | Skeleton only, not yet functional |
 
 Device driver tests would require mock VISA instruments or a hardware-in-the-loop
 test environment, which is not currently set up.

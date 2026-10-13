@@ -1,5 +1,22 @@
 # Release Notes
 
+## Unreleased
+
+### New features
+
+- **`Zurich`** — working Zurich Instruments support, replacing the previous skeleton:
+  `ZurichDevice` base class, `HF2LI` lock-in driver (frequency sweeps, FFT spectra,
+  raw I/Q capture, output/demodulator configuration with read-back verification)
+  and HDF5 writers (`zurich_data_management`). Brought in from the acoustic
+  isolation experiment with 113 mocked tests.
+- **`Scripts/DAQ_templates/Zurich/SweepZurich_V5.3.ipynb`** — reference notebook
+  for multi-iteration HF2LI sweeps with live plotting.
+
+### Fixes
+
+- `HF2LI` now reads the output range back as a double; `zhinst.toolkit` truncated the
+  0.01 V / 0.1 V ranges to 0, which made sweeps on those ranges fail verification.
+
 ## v1.0 (current)
 
 Initial public release of the `optomechanics` package.

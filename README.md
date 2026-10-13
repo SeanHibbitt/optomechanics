@@ -45,6 +45,9 @@ CMD: git clone "git@OptomechanicsGithub:SeanHibbitt/Optomechanics.git"
    - simple-pid
    - scipy
    - pandas?
+  Optional (Zurich lock-in control, optomechanics.Zurich):
+   - zhinst-toolkit
+   - h5py
   Extra General modules used in lab:
    - pyqt(6)
    - 

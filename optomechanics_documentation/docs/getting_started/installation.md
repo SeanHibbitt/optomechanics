@@ -41,6 +41,18 @@ pip install -e .
 The `-e` flag installs in *editable* mode so that any source changes are
 immediately visible without reinstalling.
 
+## Optional: Zurich Instruments support
+
+The `optomechanics.Zurich` subpackage (HF2LI lock-in control) needs two extra
+packages that `setup.py` does not install:
+
+```bash
+pip install zhinst-toolkit h5py
+```
+
+You also need the Zurich Instruments LabOne software (for the HF2, the HF2 Data
+Server). See [HF2LI Frequency Sweeps](../user_guide/hf2li_sweeps.md).
+
 ## Verify
 
 ```python

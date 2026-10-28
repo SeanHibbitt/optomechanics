@@ -173,6 +173,7 @@ dependencies:
   - pyparsing=3.3.2=pyhcf101f3_0
   - pyqt=6.9.1=py314hbb189eb_0
   - pyqt6-sip=13.10.2=py314h630b2a1_0
+  - pyserial
   - pysocks=1.7.1=pyh09c184e_7
   - python=3.14.4=h653fc63_100_cp314
   - python-dateutil=2.9.0.post0=pyhe01879c_2

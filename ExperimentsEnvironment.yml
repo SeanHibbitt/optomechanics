@@ -199,6 +199,7 @@ dependencies:
   - rfc3986-validator=0.1.1=pyh9f0ad1d_0
   - rfc3987-syntax=1.1.0=pyhe01879c_1
   - rpds-py=2026.5.1=py314hc980628_0
+  - scipy
   - send2trash=2.1.0=pyh6dadd2b_1
   - setuptools=82.0.1=py314haa95532_0
   - sip=6.12.0=py314h706e071_0

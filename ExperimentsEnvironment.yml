@@ -163,6 +163,7 @@ dependencies:
   - pip=26.1.1=pyh0d26453_0
   - pixman=0.46.4=h4043f72_0
   - platformdirs=4.10.0=pyhcf101f3_0
+  - plotly
   - prometheus_client=0.25.0=pyhd8ed1ab_0
   - prompt-toolkit=3.0.52=pyha770c72_0
   - prompt_toolkit=3.0.52=hd8ed1ab_0

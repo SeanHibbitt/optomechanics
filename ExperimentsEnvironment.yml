@@ -176,6 +176,7 @@ dependencies:
   - pyqt6-sip=13.10.2=py314h630b2a1_0
   - pyserial
   - pysocks=1.7.1=pyh09c184e_7
+  - pytest
   - python=3.14.4=h653fc63_100_cp314
   - python-dateutil=2.9.0.post0=pyhe01879c_2
   - python-fastjsonschema=2.21.2=pyhe01879c_0

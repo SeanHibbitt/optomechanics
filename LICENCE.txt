@@ -1,0 +1,8 @@
+Copyright (c) 2026 Sean Hibbitt, Royal Holloway, University of London.
+All rights reserved.
+
+This repository and its contents are published on GitHub. No permission is
+granted to modify, or distribute any part of it without prior written
+consent from the copyright holder.
+
+When/If a related paper or doi number is published, any users are expected to cite it when used.
